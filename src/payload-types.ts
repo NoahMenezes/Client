@@ -69,6 +69,13 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    leads: Lead;
+    employees: Employee;
+    storage: Storage;
+    services: Service;
+    'form-fields': FormField;
+    quotations: Quotation;
+    notes: Note;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,17 +85,28 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    leads: LeadsSelect<false> | LeadsSelect<true>;
+    employees: EmployeesSelect<false> | EmployeesSelect<true>;
+    storage: StorageSelect<false> | StorageSelect<true>;
+    services: ServicesSelect<false> | ServicesSelect<true>;
+    'form-fields': FormFieldsSelect<false> | FormFieldsSelect<true>;
+    quotations: QuotationsSelect<false> | QuotationsSelect<true>;
+    notes: NotesSelect<false> | NotesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    settings: Setting;
+  };
+  globalsSelect: {
+    settings: SettingsSelect<false> | SettingsSelect<true>;
+  };
   locale: null;
   user: User;
   jobs: {
@@ -119,7 +137,7 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -144,7 +162,7 @@ export interface User {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt: string;
   updatedAt: string;
   createdAt: string;
@@ -160,10 +178,210 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads".
+ */
+export interface Lead {
+  id: number;
+  fullName: string;
+  email: string;
+  phone?: string | null;
+  status: 'opportunity' | 'prospect' | 'won' | 'lost' | 'in-progress';
+  checkInDate?: string | null;
+  checkOutDate?: string | null;
+  servicesRequested?:
+    | ('venue-decoration' | 'catering' | 'photography' | 'dj-music' | 'mehendi' | 'florals' | 'lighting')[]
+    | null;
+  assignedEmployee?: (number | null) | Employee;
+  internalNotes?: string | null;
+  quotation?:
+    | {
+        service: string;
+        pricePerUnit: number;
+        units: number;
+        total?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Auto-calculated from quotation items
+   */
+  grandTotal?: number | null;
+  /**
+   * Auto-generated lead ID (e.g. PK1024)
+   */
+  leadId?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "employees".
+ */
+export interface Employee {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string | null;
+  role?: string | null;
+  status?: ('active' | 'inactive') | null;
+  department?: string | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "storage".
+ */
+export interface Storage {
+  id: number;
+  name: string;
+  type?: ('document' | 'image' | 'video' | 'audio' | 'other') | null;
+  /**
+   * File size in bytes
+   */
+  size?: number | null;
+  url?: string | null;
+  status?: ('active' | 'archived' | 'deleted') | null;
+  tags?:
+    | {
+        tag?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: number;
+  serviceName: string;
+  description?: string | null;
+  category?: ('photography' | 'coordination' | 'decor' | 'catering' | 'entertainment' | 'other') | null;
+  unit?: ('per-event' | 'per-plate' | 'per-hour' | 'package' | 'per-unit') | null;
+  price: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "form-fields".
+ */
+export interface FormField {
+  id: number;
+  label: string;
+  fieldType: 'text' | 'textarea' | 'number' | 'date' | 'email' | 'phone' | 'select' | 'multi-select' | 'checkbox';
+  required?: boolean | null;
+  /**
+   * Options for select/multi-select fields
+   */
+  options?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  sortOrder?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage quotations created for leads.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quotations".
+ */
+export interface Quotation {
+  id: number;
+  /**
+   * e.g. "Wedding Package – Priya & Rohan"
+   */
+  title: string;
+  /**
+   * The lead this quotation belongs to.
+   */
+  lead: number | Lead;
+  status: 'draft' | 'sent' | 'approved' | 'rejected';
+  quotationDate?: string | null;
+  /**
+   * Agency fee percentage (e.g. 12 for 12%)
+   */
+  agencyFeePercent?: number | null;
+  /**
+   * Group line items by category (e.g. Guest Hospitality, Artists & Entertainment)
+   */
+  categories?:
+    | {
+        categoryName: string;
+        items?:
+          | {
+              particulars: string;
+              amount: number;
+              quantity: number;
+              /**
+               * Auto-calculated: amount × quantity
+               */
+              total?: number | null;
+              remarks?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Auto-calculated sum of all line items.
+   */
+  subTotal?: number | null;
+  /**
+   * Auto-calculated: subTotal × agencyFeePercent / 100
+   */
+  agencyFees?: number | null;
+  /**
+   * Auto-calculated: subTotal + agencyFees
+   */
+  grandTotal?: number | null;
+  /**
+   * Internal notes about this quotation.
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Internal notes attached to leads.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notes".
+ */
+export interface Note {
+  id: number;
+  /**
+   * The lead this note belongs to.
+   */
+  lead: number | Lead;
+  content: string;
+  /**
+   * Name or identifier of the person who created this note.
+   */
+  createdBy?: string | null;
+  /**
+   * Pin this note to the top of the list.
+   */
+  pinned?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -180,20 +398,48 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'leads';
+        value: number | Lead;
+      } | null)
+    | ({
+        relationTo: 'employees';
+        value: number | Employee;
+      } | null)
+    | ({
+        relationTo: 'storage';
+        value: number | Storage;
+      } | null)
+    | ({
+        relationTo: 'services';
+        value: number | Service;
+      } | null)
+    | ({
+        relationTo: 'form-fields';
+        value: number | FormField;
+      } | null)
+    | ({
+        relationTo: 'quotations';
+        value: number | Quotation;
+      } | null)
+    | ({
+        relationTo: 'notes';
+        value: number | Note;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -203,10 +449,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -226,7 +472,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -274,6 +520,145 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads_select".
+ */
+export interface LeadsSelect<T extends boolean = true> {
+  fullName?: T;
+  email?: T;
+  phone?: T;
+  status?: T;
+  checkInDate?: T;
+  checkOutDate?: T;
+  servicesRequested?: T;
+  assignedEmployee?: T;
+  internalNotes?: T;
+  quotation?:
+    | T
+    | {
+        service?: T;
+        pricePerUnit?: T;
+        units?: T;
+        total?: T;
+        id?: T;
+      };
+  grandTotal?: T;
+  leadId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "employees_select".
+ */
+export interface EmployeesSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  phone?: T;
+  role?: T;
+  status?: T;
+  department?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "storage_select".
+ */
+export interface StorageSelect<T extends boolean = true> {
+  name?: T;
+  type?: T;
+  size?: T;
+  url?: T;
+  status?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services_select".
+ */
+export interface ServicesSelect<T extends boolean = true> {
+  serviceName?: T;
+  description?: T;
+  category?: T;
+  unit?: T;
+  price?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "form-fields_select".
+ */
+export interface FormFieldsSelect<T extends boolean = true> {
+  label?: T;
+  fieldType?: T;
+  required?: T;
+  options?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quotations_select".
+ */
+export interface QuotationsSelect<T extends boolean = true> {
+  title?: T;
+  lead?: T;
+  status?: T;
+  quotationDate?: T;
+  agencyFeePercent?: T;
+  categories?:
+    | T
+    | {
+        categoryName?: T;
+        items?:
+          | T
+          | {
+              particulars?: T;
+              amount?: T;
+              quantity?: T;
+              total?: T;
+              remarks?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  subTotal?: T;
+  agencyFees?: T;
+  grandTotal?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notes_select".
+ */
+export interface NotesSelect<T extends boolean = true> {
+  lead?: T;
+  content?: T;
+  createdBy?: T;
+  pinned?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -311,6 +696,40 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings".
+ */
+export interface Setting {
+  id: number;
+  companyName?: string | null;
+  companyTagline?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  address?: string | null;
+  currency?: ('INR' | 'USD' | 'EUR') | null;
+  timezone?: string | null;
+  maintenanceMode?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings_select".
+ */
+export interface SettingsSelect<T extends boolean = true> {
+  companyName?: T;
+  companyTagline?: T;
+  contactEmail?: T;
+  contactPhone?: T;
+  address?: T;
+  currency?: T;
+  timezone?: T;
+  maintenanceMode?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

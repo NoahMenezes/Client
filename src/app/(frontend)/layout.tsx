@@ -1,18 +1,17 @@
+import type { Metadata } from 'next'
 import React from 'react'
-import './styles.css'
+import { TooltipProvider } from '@/components/ui/tooltip'
 
-export const metadata = {
-  description: 'A blank template using Payload in a Next.js app.',
-  title: 'Payload Blank Template',
+export const metadata: Metadata = {
+  title: 'Perfect Knot CRM',
+  description: 'Perfect Knot CRM – Manage leads, employees, and operations.',
 }
 
-export default async function RootLayout(props: { children: React.ReactNode }) {
-  const { children } = props
-
+export default function FrontendLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
-        <main>{children}</main>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
+        <TooltipProvider>{children}</TooltipProvider>
       </body>
     </html>
   )
