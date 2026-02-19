@@ -1,48 +1,15 @@
+'use client'
+
 import React, { Suspense } from 'react'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
-import { SiteHeader } from '@/components/site-header'
 import CalendarView, { type CalendarEvent } from '@/components/calendar-view'
 
-export const metadata = {
-  title: 'Calendar – Perfect Knot CRM',
+interface Props {
+  events?: CalendarEvent[]
 }
 
-export default async function CalendarPage() {
-  const payload = await getPayload({ config: configPromise })
-
-  let events: CalendarEvent[] = []
-
-  try {
-    const res = await payload.find({
-      collection: 'leads',
-      limit: 500,
-      overrideAccess: true,
-      depth: 0,
-      where: {
-        or: [{ checkInDate: { exists: true } }, { checkOutDate: { exists: true } }],
-      },
-    })
-
-    events = res.docs
-      .filter((d: any) => d.checkInDate || d.checkOutDate)
-      .map((d: any) => ({
-        id: d.id,
-        leadId: d.leadId ?? null,
-        title: d.fullName ?? 'Unnamed Lead',
-        checkInDate: d.checkInDate ?? null,
-        checkOutDate: d.checkOutDate ?? null,
-        status: d.status ?? 'opportunity',
-      }))
-  } catch (e) {
-    console.error('Calendar fetch error:', e)
-  }
-
+export default function CalendarPage({ events = [] }: Props) {
   return (
     <>
-      <Suspense fallback={<div className="h-12 border-b bg-white" />}>
-        <SiteHeader />
-      </Suspense>
       <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 min-h-0">
         <div className="flex items-center justify-between">
           <div>
