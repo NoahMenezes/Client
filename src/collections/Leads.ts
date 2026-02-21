@@ -30,6 +30,9 @@ export const Leads: CollectionConfig = {
         { label: 'Won', value: 'won' },
         { label: 'Lost', value: 'lost' },
         { label: 'In Progress', value: 'in-progress' },
+        { label: 'No Response', value: 'no-response' },
+        { label: 'Disqualified', value: 'disqualified' },
+        { label: 'Lost Prospect', value: 'lost-prospect' },
       ],
       defaultValue: 'opportunity',
       required: true,
@@ -43,6 +46,41 @@ export const Leads: CollectionConfig = {
       type: 'date',
     },
     {
+      name: 'weddingDate',
+      type: 'date',
+      admin: {
+        description: 'The actual wedding/event date',
+      },
+    },
+    {
+      name: 'budget',
+      type: 'number',
+      admin: {
+        description: 'Client budget in ₹',
+      },
+    },
+    {
+      name: 'coupleName',
+      type: 'text',
+      admin: {
+        description: 'e.g. Eleanor & Mark Vance',
+      },
+    },
+    {
+      name: 'leadSource',
+      type: 'select',
+      options: [
+        { label: 'Website Enquiry', value: 'website' },
+        { label: 'Referral', value: 'referral' },
+        { label: 'Social Media', value: 'social-media' },
+        { label: 'Walk-in', value: 'walk-in' },
+        { label: 'Phone Call', value: 'phone-call' },
+        { label: 'Email', value: 'email' },
+        { label: 'Other', value: 'other' },
+      ],
+      defaultValue: 'website',
+    },
+    {
       name: 'servicesRequested',
       type: 'select',
       hasMany: true,
@@ -54,6 +92,9 @@ export const Leads: CollectionConfig = {
         { label: 'Mehendi', value: 'mehendi' },
         { label: 'Florals', value: 'florals' },
         { label: 'Lighting', value: 'lighting' },
+        { label: 'Hospitality', value: 'hospitality' },
+        { label: 'Baraat', value: 'baraat' },
+        { label: 'Special Effects', value: 'special-effects' },
       ],
     },
     {
@@ -65,11 +106,68 @@ export const Leads: CollectionConfig = {
     {
       name: 'internalNotes',
       type: 'textarea',
+      admin: {
+        description: 'Latest note / Google Form Enquiry response',
+      },
+    },
+    {
+      name: 'basicInformation',
+      type: 'textarea',
+      admin: {
+        description: 'e.g. Traditional Indian Wedding, approx. 300 guests, 3-day event.',
+      },
+    },
+    {
+      name: 'hospitalityServices',
+      type: 'textarea',
+      admin: {
+        description: 'Hospitality & Misc. Services details',
+      },
+    },
+    {
+      name: 'typesOfServiceRequired',
+      type: 'textarea',
+      admin: {
+        description: 'Free-form description of all services required',
+      },
+    },
+    {
+      name: 'artistsRequirement',
+      type: 'textarea',
+      admin: {
+        description: 'Artists & entertainment requirements',
+      },
+    },
+    {
+      name: 'googleFormEnquiry',
+      type: 'textarea',
+      admin: {
+        description: 'Raw response from the client intake Google Form',
+      },
+    },
+    {
+      name: 'firstCallDate',
+      type: 'date',
+    },
+    {
+      name: 'proposalSentDate',
+      type: 'date',
+    },
+    {
+      name: 'pocName',
+      type: 'text',
+      label: 'POC Name',
+      admin: {
+        description: 'Point of Contact name',
+      },
     },
     {
       name: 'quotation',
       type: 'array',
-      label: 'Quotation Items',
+      label: 'Quotation Items (Legacy)',
+      admin: {
+        description: 'Legacy simple quotation. Use the Quotations collection for full quotations.',
+      },
       fields: [
         {
           name: 'service',

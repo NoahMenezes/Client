@@ -16,21 +16,49 @@ export async function createLead(prev: ActionState, fd: FormData): Promise<Actio
   try {
     const payload = await getPayload({ config: configPromise })
     const services = fd.getAll('servicesRequested') as string[]
+
+    const budgetRaw = fd.get('budget') as string
+    const budget = budgetRaw && budgetRaw.trim() !== '' ? Number(budgetRaw) : undefined
+
+    const str = (key: string) => {
+      const val = fd.get(key) as string | null
+      return val && val.trim() !== '' ? val.trim() : undefined
+    }
+
     await payload.create({
       collection: 'leads',
       overrideAccess: true,
       data: {
         fullName,
         email,
-        phone: (fd.get('phone') as string) || undefined,
+        phone: str('phone'),
         status: ((fd.get('status') as string) || 'opportunity') as
           | 'opportunity'
           | 'prospect'
           | 'won'
           | 'lost'
-          | 'in-progress',
-        checkInDate: (fd.get('checkInDate') as string) || undefined,
-        checkOutDate: (fd.get('checkOutDate') as string) || undefined,
+          | 'in-progress'
+          | 'no-response'
+          | 'disqualified'
+          | 'lost-prospect',
+        coupleName: str('coupleName'),
+        leadSource:
+          (str('leadSource') as
+            | 'website'
+            | 'referral'
+            | 'social-media'
+            | 'walk-in'
+            | 'phone-call'
+            | 'email'
+            | 'other'
+            | undefined) ?? 'website',
+        budget,
+        pocName: str('pocName'),
+        checkInDate: str('checkInDate'),
+        checkOutDate: str('checkOutDate'),
+        weddingDate: str('weddingDate'),
+        firstCallDate: str('firstCallDate'),
+        proposalSentDate: str('proposalSentDate'),
         servicesRequested:
           services.length > 0
             ? (services as (
@@ -41,9 +69,17 @@ export async function createLead(prev: ActionState, fd: FormData): Promise<Actio
                 | 'mehendi'
                 | 'florals'
                 | 'lighting'
+                | 'hospitality'
+                | 'baraat'
+                | 'special-effects'
               )[])
             : undefined,
-        internalNotes: (fd.get('internalNotes') as string) || undefined,
+        basicInformation: str('basicInformation'),
+        hospitalityServices: str('hospitalityServices'),
+        typesOfServiceRequired: str('typesOfServiceRequired'),
+        artistsRequirement: str('artistsRequirement'),
+        internalNotes: str('internalNotes'),
+        googleFormEnquiry: str('googleFormEnquiry'),
       },
     })
     ok = true
@@ -52,6 +88,7 @@ export async function createLead(prev: ActionState, fd: FormData): Promise<Actio
   }
   if (ok) {
     revalidatePath('/dashboard')
+    revalidatePath('/dashboard/leads')
     redirect('/dashboard')
   }
   return { success: false, message: 'Unknown error.' }
@@ -67,6 +104,15 @@ export async function updateLead(prev: ActionState, fd: FormData): Promise<Actio
   try {
     const payload = await getPayload({ config: configPromise })
     const services = fd.getAll('servicesRequested') as string[]
+
+    const budgetRaw = fd.get('budget') as string
+    const budget = budgetRaw && budgetRaw.trim() !== '' ? Number(budgetRaw) : undefined
+
+    const str = (key: string) => {
+      const val = fd.get(key) as string | null
+      return val && val.trim() !== '' ? val.trim() : undefined
+    }
+
     await payload.update({
       collection: 'leads',
       id,
@@ -74,15 +120,34 @@ export async function updateLead(prev: ActionState, fd: FormData): Promise<Actio
       data: {
         fullName,
         email,
-        phone: (fd.get('phone') as string) || undefined,
+        phone: str('phone'),
         status: ((fd.get('status') as string) || 'opportunity') as
           | 'opportunity'
           | 'prospect'
           | 'won'
           | 'lost'
-          | 'in-progress',
-        checkInDate: (fd.get('checkInDate') as string) || undefined,
-        checkOutDate: (fd.get('checkOutDate') as string) || undefined,
+          | 'in-progress'
+          | 'no-response'
+          | 'disqualified'
+          | 'lost-prospect',
+        coupleName: str('coupleName'),
+        leadSource:
+          (str('leadSource') as
+            | 'website'
+            | 'referral'
+            | 'social-media'
+            | 'walk-in'
+            | 'phone-call'
+            | 'email'
+            | 'other'
+            | undefined) ?? 'website',
+        budget,
+        pocName: str('pocName'),
+        checkInDate: str('checkInDate'),
+        checkOutDate: str('checkOutDate'),
+        weddingDate: str('weddingDate'),
+        firstCallDate: str('firstCallDate'),
+        proposalSentDate: str('proposalSentDate'),
         servicesRequested:
           services.length > 0
             ? (services as (
@@ -93,9 +158,17 @@ export async function updateLead(prev: ActionState, fd: FormData): Promise<Actio
                 | 'mehendi'
                 | 'florals'
                 | 'lighting'
+                | 'hospitality'
+                | 'baraat'
+                | 'special-effects'
               )[])
-            : undefined,
-        internalNotes: (fd.get('internalNotes') as string) || undefined,
+            : [],
+        basicInformation: str('basicInformation'),
+        hospitalityServices: str('hospitalityServices'),
+        typesOfServiceRequired: str('typesOfServiceRequired'),
+        artistsRequirement: str('artistsRequirement'),
+        internalNotes: str('internalNotes'),
+        googleFormEnquiry: str('googleFormEnquiry'),
       },
     })
     ok = true
@@ -104,6 +177,7 @@ export async function updateLead(prev: ActionState, fd: FormData): Promise<Actio
   }
   if (ok) {
     revalidatePath('/dashboard')
+    revalidatePath(`/dashboard/leads/${id}`)
     redirect(`/dashboard/leads/${id}`)
   }
   return { success: false, message: 'Unknown error.' }

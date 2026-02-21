@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import Link from 'next/link'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { IconPlus, IconEye, IconPencil } from '@tabler/icons-react'
+import { SiteHeader } from '@/components/site-header'
 
 const statusStyles: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-600',
@@ -66,15 +66,14 @@ export default async function QuotationsPage({ searchParams }: Props) {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex h-14 items-center border-b px-6 gap-4 bg-white">
-        <h1 className="text-xl font-bold">Quotations</h1>
-        <div className="ml-auto flex items-center gap-3">
+      <Suspense fallback={<div className="h-12 border-b bg-white" />}>
+        <SiteHeader title="Quotations">
           <form method="get" className="flex items-center gap-2">
             <input
               name="q"
               defaultValue={q}
               placeholder="Search quotations or leads..."
-              className="rounded-md border bg-background px-3 py-1.5 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="rounded-md border bg-background px-3 py-1.5 text-sm w-56 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <select
               name="status"
@@ -97,8 +96,8 @@ export default async function QuotationsPage({ searchParams }: Props) {
               New Quotation
             </Button>
           </Link>
-        </div>
-      </header>
+        </SiteHeader>
+      </Suspense>
 
       <main className="flex-1 overflow-auto p-6">
         {quotations.length === 0 ? (
@@ -149,7 +148,7 @@ export default async function QuotationsPage({ searchParams }: Props) {
                       <td className="px-5 py-3 font-medium text-gray-400 text-xs">
                         Q{String(idx + 1).padStart(3, '0')}
                       </td>
-                      <td className="px-5 py-3 font-medium text-gray-800 max-w-[180px]">
+                      <td className="px-5 py-3 font-medium text-gray-800 max-w-45">
                         <p className="truncate">{q.title}</p>
                       </td>
                       <td className="px-5 py-3 text-gray-600">
@@ -167,7 +166,7 @@ export default async function QuotationsPage({ searchParams }: Props) {
                       <td className="px-5 py-3 font-semibold text-gray-900">
                         ₹{fmt(q.grandTotal)}
                       </td>
-                      <td className="px-5 py-3 text-gray-500 max-w-[200px]">
+                      <td className="px-5 py-3 text-gray-500 max-w-50">
                         <p className="truncate">{servicesSummary || '—'}</p>
                       </td>
                       <td className="px-5 py-3">
@@ -197,7 +196,11 @@ export default async function QuotationsPage({ searchParams }: Props) {
                             </Button>
                           </Link>
                           <Link href={`/dashboard/quotations/${q.id}/edit`}>
-                            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1 text-blue-600 hover:text-blue-700">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2 text-xs gap-1 text-blue-600 hover:text-blue-700"
+                            >
                               <IconPencil className="h-3.5 w-3.5" />
                               Edit
                             </Button>

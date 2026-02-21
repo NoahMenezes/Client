@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+
 import { createQuotation } from '@/app/actions/quotations'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -41,12 +41,9 @@ const DEFAULT_CATEGORIES: Category[] = [
 ]
 
 export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadName }: Props) {
-  const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
-  const [title, setTitle] = useState(
-    defaultLeadName ? `Wedding Package – ${defaultLeadName}` : '',
-  )
+  const [title, setTitle] = useState(defaultLeadName ? `Wedding Package – ${defaultLeadName}` : '')
   const [leadId, setLeadId] = useState(defaultLeadId || '')
   const [agencyFeePercent, setAgencyFeePercent] = useState(12)
   const [quotationDate, setQuotationDate] = useState('')
@@ -89,26 +86,17 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
 
   const removeItem = (ci: number, ii: number) => {
     setCategories((prev) =>
-      prev.map((c, i) =>
-        i === ci ? { ...c, items: c.items.filter((_, j) => j !== ii) } : c,
-      ),
+      prev.map((c, i) => (i === ci ? { ...c, items: c.items.filter((_, j) => j !== ii) } : c)),
     )
   }
 
-  const updateItem = (
-    ci: number,
-    ii: number,
-    field: keyof LineItem,
-    value: string | number,
-  ) => {
+  const updateItem = (ci: number, ii: number, field: keyof LineItem, value: string | number) => {
     setCategories((prev) =>
       prev.map((c, i) =>
         i === ci
           ? {
               ...c,
-              items: c.items.map((item, j) =>
-                j === ii ? { ...item, [field]: value } : item,
-              ),
+              items: c.items.map((item, j) => (j === ii ? { ...item, [field]: value } : item)),
             }
           : c,
       ),
@@ -118,8 +106,7 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
   // ─── Totals ──────────────────────────────────────────────────────────────────
   const subTotal = categories.reduce(
     (sum, cat) =>
-      sum +
-      cat.items.reduce((s, item) => s + (item.amount || 0) * (item.quantity || 1), 0),
+      sum + cat.items.reduce((s, item) => s + (item.amount || 0) * (item.quantity || 1), 0),
     0,
   )
   const agencyFees = Math.round(subTotal * agencyFeePercent) / 100
@@ -160,9 +147,7 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
     })
   }
 
-  const backHref = leadId
-    ? `/dashboard/leads/${leadId}?tab=quotations`
-    : '/dashboard/quotations'
+  const backHref = leadId ? `/dashboard/leads/${leadId}?tab=quotations` : '/dashboard/quotations'
 
   return (
     <div className="flex flex-1 flex-col min-h-screen bg-gray-50">
@@ -171,9 +156,7 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
           ← Back
         </Link>
         <h1 className="text-xl font-bold">Create Quotation</h1>
-        {isPending && (
-          <span className="text-xs text-gray-400 ml-2">Saving...</span>
-        )}
+        {isPending && <span className="text-xs text-gray-400 ml-2">Saving...</span>}
       </header>
 
       <form onSubmit={handleSubmit} className="flex-1 overflow-auto p-6 max-w-5xl mx-auto w-full">
@@ -342,9 +325,7 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
                   {cat.items.map((item, ii) => {
                     const rowTotal = (item.amount || 0) * (item.quantity || 1)
                     const globalIdx =
-                      categories
-                        .slice(0, ci)
-                        .reduce((s, c) => s + c.items.length, 0) + ii + 1
+                      categories.slice(0, ci).reduce((s, c) => s + c.items.length, 0) + ii + 1
 
                     return (
                       <tr key={ii} className="hover:bg-gray-50/50">
@@ -353,9 +334,7 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
                           <input
                             type="text"
                             value={item.particulars}
-                            onChange={(e) =>
-                              updateItem(ci, ii, 'particulars', e.target.value)
-                            }
+                            onChange={(e) => updateItem(ci, ii, 'particulars', e.target.value)}
                             placeholder="Item description"
                             className="w-full bg-transparent text-sm focus:outline-none placeholder:text-gray-300"
                             disabled={isPending}

@@ -185,14 +185,78 @@ export interface Lead {
   fullName: string;
   email: string;
   phone?: string | null;
-  status: 'opportunity' | 'prospect' | 'won' | 'lost' | 'in-progress';
+  status:
+    | 'opportunity'
+    | 'prospect'
+    | 'won'
+    | 'lost'
+    | 'in-progress'
+    | 'no-response'
+    | 'disqualified'
+    | 'lost-prospect';
   checkInDate?: string | null;
   checkOutDate?: string | null;
+  /**
+   * The actual wedding/event date
+   */
+  weddingDate?: string | null;
+  /**
+   * Client budget in ₹
+   */
+  budget?: number | null;
+  /**
+   * e.g. Eleanor & Mark Vance
+   */
+  coupleName?: string | null;
+  leadSource?: ('website' | 'referral' | 'social-media' | 'walk-in' | 'phone-call' | 'email' | 'other') | null;
   servicesRequested?:
-    | ('venue-decoration' | 'catering' | 'photography' | 'dj-music' | 'mehendi' | 'florals' | 'lighting')[]
+    | (
+        | 'venue-decoration'
+        | 'catering'
+        | 'photography'
+        | 'dj-music'
+        | 'mehendi'
+        | 'florals'
+        | 'lighting'
+        | 'hospitality'
+        | 'baraat'
+        | 'special-effects'
+      )[]
     | null;
   assignedEmployee?: (number | null) | Employee;
+  /**
+   * Latest note / Google Form Enquiry response
+   */
   internalNotes?: string | null;
+  /**
+   * e.g. Traditional Indian Wedding, approx. 300 guests, 3-day event.
+   */
+  basicInformation?: string | null;
+  /**
+   * Hospitality & Misc. Services details
+   */
+  hospitalityServices?: string | null;
+  /**
+   * Free-form description of all services required
+   */
+  typesOfServiceRequired?: string | null;
+  /**
+   * Artists & entertainment requirements
+   */
+  artistsRequirement?: string | null;
+  /**
+   * Raw response from the client intake Google Form
+   */
+  googleFormEnquiry?: string | null;
+  firstCallDate?: string | null;
+  proposalSentDate?: string | null;
+  /**
+   * Point of Contact name
+   */
+  pocName?: string | null;
+  /**
+   * Legacy simple quotation. Use the Quotations collection for full quotations.
+   */
   quotation?:
     | {
         service: string;
@@ -529,9 +593,21 @@ export interface LeadsSelect<T extends boolean = true> {
   status?: T;
   checkInDate?: T;
   checkOutDate?: T;
+  weddingDate?: T;
+  budget?: T;
+  coupleName?: T;
+  leadSource?: T;
   servicesRequested?: T;
   assignedEmployee?: T;
   internalNotes?: T;
+  basicInformation?: T;
+  hospitalityServices?: T;
+  typesOfServiceRequired?: T;
+  artistsRequirement?: T;
+  googleFormEnquiry?: T;
+  firstCallDate?: T;
+  proposalSentDate?: T;
+  pocName?: T;
   quotation?:
     | T
     | {

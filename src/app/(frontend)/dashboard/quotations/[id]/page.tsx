@@ -32,8 +32,7 @@ export default async function QuotationViewPage({ params }: PageProps) {
   }
   if (!quotation) notFound()
 
-  const lead =
-    typeof quotation.lead === 'object' && quotation.lead !== null ? quotation.lead : null
+  const lead = typeof quotation.lead === 'object' && quotation.lead !== null ? quotation.lead : null
 
   const categories: Array<{
     categoryName: string
@@ -82,9 +81,7 @@ export default async function QuotationViewPage({ params }: PageProps) {
           </Link>
           <div>
             <h1 className="text-lg font-bold text-gray-900">{quotation.title}</h1>
-            {quotationDate && (
-              <p className="text-xs text-gray-400">{quotationDate}</p>
-            )}
+            {quotationDate && <p className="text-xs text-gray-400">{quotationDate}</p>}
           </div>
           {quotation.status && (
             <span
@@ -97,20 +94,14 @@ export default async function QuotationViewPage({ params }: PageProps) {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5 text-gray-600"
-            onClick={undefined}
-          >
-            <IconDownload className="h-4 w-4" />
-            Download PDF
-          </Button>
+          <Link href={`/dashboard/quotations/${id}/print`} target="_blank">
+            <Button variant="outline" size="sm" className="gap-1.5 text-gray-600">
+              <IconDownload className="h-4 w-4" />
+              Download PDF
+            </Button>
+          </Link>
           <Link href={`/dashboard/quotations/${id}/edit`}>
-            <Button
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white gap-1.5"
-            >
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white gap-1.5">
               <IconPencil className="h-4 w-4" />
               Edit Quotation
             </Button>
@@ -133,9 +124,7 @@ export default async function QuotationViewPage({ params }: PageProps) {
                   >
                     {lead.fullName}
                   </Link>
-                  {lead.email && (
-                    <p className="text-xs text-gray-500 mt-0.5">{lead.email}</p>
-                  )}
+                  {lead.email && <p className="text-xs text-gray-500 mt-0.5">{lead.email}</p>}
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-gray-400 mb-0.5">Grand Total</p>
@@ -161,12 +150,18 @@ export default async function QuotationViewPage({ params }: PageProps) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-gray-50">
-                    <th className="px-5 py-3 text-left font-semibold text-gray-600 w-12">Sr.<br />No.</th>
+                    <th className="px-5 py-3 text-left font-semibold text-gray-600 w-12">
+                      Sr.
+                      <br />
+                      No.
+                    </th>
                     <th className="px-5 py-3 text-left font-semibold text-gray-600">Particulars</th>
                     <th className="px-5 py-3 text-right font-semibold text-gray-600 w-32">Cost</th>
                     <th className="px-5 py-3 text-right font-semibold text-gray-600 w-24">Qty</th>
                     <th className="px-5 py-3 text-right font-semibold text-gray-600 w-36">Total</th>
-                    <th className="px-5 py-3 text-left font-semibold text-gray-600 w-40">Remarks</th>
+                    <th className="px-5 py-3 text-left font-semibold text-gray-600 w-40">
+                      Remarks
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -174,10 +169,7 @@ export default async function QuotationViewPage({ params }: PageProps) {
                     <React.Fragment key={ci}>
                       {/* Category header row */}
                       <tr className="bg-gray-50 border-b border-t">
-                        <td
-                          colSpan={6}
-                          className="px-5 py-2.5 font-bold text-gray-800 text-sm"
-                        >
+                        <td colSpan={6} className="px-5 py-2.5 font-bold text-gray-800 text-sm">
                           {cat.categoryName}
                         </td>
                       </tr>
@@ -220,9 +212,7 @@ export default async function QuotationViewPage({ params }: PageProps) {
                     <span className="font-semibold text-gray-800 text-right">₹{fmt(subTotal)}</span>
                   </div>
                   <div className="flex items-center gap-8 w-72">
-                    <span className="text-gray-500 flex-1">
-                      Agency Fees ({agencyFeePercent}%)
-                    </span>
+                    <span className="text-gray-500 flex-1">Agency Fees ({agencyFeePercent}%)</span>
                     <span className="font-semibold text-gray-800 text-right">
                       ₹{fmt(agencyFees)}
                     </span>

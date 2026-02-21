@@ -1,11 +1,11 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import Link from 'next/link'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { IconPencil, IconSearch } from '@tabler/icons-react'
+import { IconPencil } from '@tabler/icons-react'
 import { deleteEmployee } from '@/app/actions/employees'
+import { SiteHeader } from '@/components/site-header'
 
 export default async function EmployeesPage() {
   let employees: any[] = []
@@ -41,18 +41,13 @@ export default async function EmployeesPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex h-14 items-center border-b px-6 gap-4">
-        <h1 className="text-xl font-bold">Employees</h1>
-        <div className="ml-auto flex items-center gap-3">
-          <div className="relative w-64">
-            <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search by name or email" className="pl-9" />
-          </div>
+      <Suspense fallback={<div className="h-12 border-b bg-white" />}>
+        <SiteHeader title="Employees">
           <Link href="/dashboard/employees/add">
             <Button className="bg-blue-600 text-white hover:bg-blue-700">+ Add Employee</Button>
           </Link>
-        </div>
-      </header>
+        </SiteHeader>
+      </Suspense>
       <main className="flex-1 overflow-auto p-6">
         <div className="rounded-lg border bg-card shadow-sm overflow-hidden">
           {employees.length === 0 ? (

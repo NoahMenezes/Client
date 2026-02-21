@@ -7,13 +7,21 @@ import { updateQuotation, type ActionState } from '@/app/actions/leads'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { IconTrash, IconPlus } from '@tabler/icons-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 
-interface QuotationItem { service: string; pricePerUnit: number; units: number }
+interface QuotationItem {
+  service: string
+  pricePerUnit: number
+  units: number
+}
 
 export default function EditQuotationClient({ lead }: { lead: any }) {
   const [items, setItems] = useState<QuotationItem[]>(
-    (lead.quotation || []).map((q: any) => ({ service: q.service, pricePerUnit: q.pricePerUnit, units: q.units }))
+    (lead.quotation || []).map((q: any) => ({
+      service: q.service,
+      pricePerUnit: q.pricePerUnit,
+      units: q.units,
+    })),
   )
   const [state, action, isPending] = useActionState<ActionState, FormData>(updateQuotation, null)
 
@@ -35,7 +43,9 @@ export default function EditQuotationClient({ lead }: { lead: any }) {
       </div>
 
       {state && !state.success && (
-        <div className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 ring-1 ring-red-200">{state.message}</div>
+        <div className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 ring-1 ring-red-200">
+          {state.message}
+        </div>
       )}
 
       <Card className="border-none shadow-sm bg-white">
@@ -44,10 +54,18 @@ export default function EditQuotationClient({ lead }: { lead: any }) {
             <table className="w-full text-sm">
               <thead className="bg-[#f9fafb]">
                 <tr className="border-b">
-                  <th className="px-6 py-4 text-left font-semibold text-gray-500 w-[40%]">Service Name</th>
-                  <th className="px-6 py-4 text-right font-semibold text-gray-500 w-[20%]">Price per unit (₹)</th>
-                  <th className="px-6 py-4 text-right font-semibold text-gray-500 w-[15%]">Units</th>
-                  <th className="px-6 py-4 text-right font-semibold text-gray-500 w-[20%]">Total</th>
+                  <th className="px-6 py-4 text-left font-semibold text-gray-500 w-[40%]">
+                    Service Name
+                  </th>
+                  <th className="px-6 py-4 text-right font-semibold text-gray-500 w-[20%]">
+                    Price per unit (₹)
+                  </th>
+                  <th className="px-6 py-4 text-right font-semibold text-gray-500 w-[15%]">
+                    Units
+                  </th>
+                  <th className="px-6 py-4 text-right font-semibold text-gray-500 w-[20%]">
+                    Total
+                  </th>
                   <th className="px-4 py-4 w-[5%]"></th>
                 </tr>
               </thead>
@@ -109,7 +127,9 @@ export default function EditQuotationClient({ lead }: { lead: any }) {
             </Button>
             <div className="flex items-center gap-4">
               <span className="text-gray-500 font-medium">Grand Total</span>
-              <span className="text-2xl font-bold text-gray-900">₹{grandTotal.toLocaleString('en-IN')}</span>
+              <span className="text-2xl font-bold text-gray-900">
+                ₹{grandTotal.toLocaleString('en-IN')}
+              </span>
             </div>
           </div>
         </CardContent>
@@ -117,12 +137,18 @@ export default function EditQuotationClient({ lead }: { lead: any }) {
 
       <div className="flex gap-4 justify-end mt-8">
         <Link href={`/dashboard/leads/${lead.id}`}>
-          <Button variant="ghost" className="px-6 text-gray-600 hover:text-gray-900">Cancel</Button>
+          <Button variant="ghost" className="px-6 text-gray-600 hover:text-gray-900">
+            Cancel
+          </Button>
         </Link>
         <form action={action}>
           <input type="hidden" name="id" value={String(lead.id)} />
           <input type="hidden" name="quotation" value={JSON.stringify(items)} />
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-8 shadow-sm" disabled={isPending}>
+          <Button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 shadow-sm"
+            disabled={isPending}
+          >
             {isPending ? 'Saving...' : 'Save Changes'}
           </Button>
         </form>

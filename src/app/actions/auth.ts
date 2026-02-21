@@ -4,6 +4,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 
 export type AuthState = {
   success: boolean
@@ -11,10 +12,7 @@ export type AuthState = {
   isExisting?: boolean
 } | null
 
-export async function registerUser(
-  prevState: AuthState,
-  formData: FormData,
-): Promise<AuthState> {
+export async function registerUser(prevState: AuthState, formData: FormData): Promise<AuthState> {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
@@ -111,4 +109,15 @@ export async function registerUser(
   }
 
   return { success: false, message: 'Login failed. Please try again.' }
+}
+
+export async function logout() {
+  try {
+    const cookieStore = await cookies()
+    cookieStore.delete('payload-token')
+  } catch (e) {
+    console.error('[logout] error:', e)
+  }
+  revalidatePath('/')
+  redirect('/')
 }

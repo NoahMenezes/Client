@@ -1,10 +1,11 @@
 import React, { Suspense } from 'react'
+import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { SiteHeader } from '@/components/site-header'
 import CalendarView, { type CalendarEvent } from '@/components/calendar-view'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Calendar – Perfect Knot CRM',
 }
 
@@ -41,7 +42,7 @@ export default async function CalendarPage() {
   return (
     <>
       <Suspense fallback={<div className="h-12 border-b bg-white" />}>
-        <SiteHeader />
+        <SiteHeader title="Calendar" />
       </Suspense>
       <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 min-h-0">
         <div className="flex items-center justify-between">
