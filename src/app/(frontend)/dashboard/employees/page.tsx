@@ -1,58 +1,64 @@
-import React, { Suspense } from 'react'
+'use client'
+
+import React, { useState, Suspense } from 'react'
 import Link from 'next/link'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
 import { Button } from '@/components/ui/button'
 import { IconPencil } from '@tabler/icons-react'
 import { deleteEmployee } from '@/app/actions/employees'
-import { SiteHeader } from '@/components/site-header'
+import { SiteHeader } from '@/components/site-header'     
 
-export default async function EmployeesPage() {
-  let employees: any[] = []
-  let totalDocs = 0
+interface Employee {
+  id: string | number
+  name: string
+  email: string
+  phone?: string | null
+  assignedLeads?: number
+}
 
-  try {
-    const payload = await getPayload({ config: configPromise })
-    const res = await payload.find({
-      collection: 'employees',
-      limit: 50,
-      sort: '-createdAt',
-      overrideAccess: true,
-    })
-    employees = res.docs
-    totalDocs = res.totalDocs
-  } catch (e) {
-    console.error('Failed to fetch employees:', e)
-  }
+// Replace with real data fetched via API when backend is ready
+const MOCK_EMPLOYEES: Employee[] = []
 
-  // Get assigned lead counts for each employee
-  const assignedCounts: Record<string, number> = {}
-  try {
-    const payload = await getPayload({ config: configPromise })
-    for (const emp of employees) {
-      const count = await payload.count({
-        collection: 'leads',
-        where: { assignedEmployee: { equals: emp.id } },
-        overrideAccess: true,
-      })
-      assignedCounts[String(emp.id)] = count.totalDocs
-    }
-  } catch {}
+interface Props {
+  employees?: Employee[]
+  totalDocs?: number
+}
+
+export default function EmployeesPage({ employees = [], totalDocs = 0 }: Props) {
+  const [search, setSearch] = useState('')
+
+  const filtered = employees.filter(
+    (e) =>
+      e.name.toLowerCase().includes(search.toLowerCase()) ||
+      e.email.toLowerCase().includes(search.toLowerCase()),
+  )
 
   return (
     <div className="flex flex-1 flex-col">
       <Suspense fallback={<div className="h-12 border-b bg-white" />}>
         <SiteHeader title="Employees">
+          <div className="flex items-center gap-2">
+            <input
+              placeholder="Search by name or email"
+              className="rounded-md border bg-background px-3 py-1.5 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
           <Link href="/dashboard/employees/add">
-            <Button className="bg-blue-600 text-white hover:bg-blue-700">+ Add Employee</Button>
+            <Button className="bg-blue-600 text-white hover:bg-blue-700">
+              + Add Employee
+            </Button>
           </Link>
         </SiteHeader>
       </Suspense>
+
       <main className="flex-1 overflow-auto p-6">
         <div className="rounded-lg border bg-card shadow-sm overflow-hidden">
-          {employees.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
-              No employees yet. Click &quot;+ Add Employee&quot; to create one.
+          {filtered.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground text-sm">
+              {search
+                ? 'No employees match your search.'
+                : 'No employees yet. Click "+ Add Employee" to create one.'}
             </div>
           ) : (
             <table className="w-full text-sm">
@@ -67,13 +73,15 @@ export default async function EmployeesPage() {
                 </tr>
               </thead>
               <tbody>
-                {employees.map((emp) => (
+                {filtered.map((emp) => (
                   <tr key={emp.id} className="border-b hover:bg-muted/30">
-                    <td className="px-4 py-3 font-medium">PK-{String(emp.id).padStart(3, '0')}</td>
+                    <td className="px-4 py-3 font-medium">
+                      PK-{String(emp.id).padStart(3, '0')}
+                    </td>
                     <td className="px-4 py-3 font-semibold">{emp.name}</td>
                     <td className="px-4 py-3">{emp.email}</td>
                     <td className="px-4 py-3">{emp.phone || '—'}</td>
-                    <td className="px-4 py-3">{assignedCounts[String(emp.id)] || 0}</td>
+                    <td className="px-4 py-3">{emp.assignedLeads ?? 0}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <Link href={`/dashboard/employees/${emp.id}/edit`}>
@@ -82,11 +90,11 @@ export default async function EmployeesPage() {
                             size="icon"
                             className="h-8 w-8 text-blue-600 hover:text-blue-700"
                           >
-                            <IconPencil className="size-4" />
+                            <IconPencil className="h-4 w-4" />
                           </Button>
                         </Link>
                         <form action={deleteEmployee}>
-                          <input type="hidden" name="id" value={String(emp.id)} />
+                          <input type="hidden" name="id" value={emp.id} />
                           <Button
                             type="submit"
                             variant="ghost"
@@ -105,7 +113,7 @@ export default async function EmployeesPage() {
           )}
           <div className="flex items-center justify-between px-4 py-3 border-t text-sm text-muted-foreground">
             <span>
-              Showing <strong>{employees.length}</strong> of <strong>{totalDocs}</strong> results
+              Showing <strong>{filtered.length}</strong> of <strong>{totalDocs}</strong> results
             </span>
           </div>
         </div>

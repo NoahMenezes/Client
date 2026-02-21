@@ -3,87 +3,75 @@ import configPromise from '@payload-config'
 import { SectionCards } from '@/components/section-cards'
 import { SiteHeader } from '@/components/site-header'
 import { LeadsTable } from '@/components/leads-table'
-import { Suspense } from 'react'
+import React, { Suspense } from 'react'
 
-interface Props {
-  searchParams: Promise<{ q?: string }>
+export interface Lead {
+  id: string | number
+  leadId?: string | null
+  fullName: string
+  email: string
+  phone?: string | null
+  status: string
+  checkInDate?: string | null
+  checkOutDate?: string | null
 }
 
-export default async function DashboardPage({ searchParams }: Props) {
-  const { q = '' } = await searchParams
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>
+}) {
+  const { q } = await searchParams
+  const payload = await getPayload({ config: configPromise })
 
-  let totalLeads = 0,
-    opportunityCount = 0,
-    prospectCount = 0,
-    wonCount = 0
-  let leads: any[] = []
-  let totalDocs = 0
+  // Build search filter
+  const where: Record<string, any> = q
+    ? {
+        or: [
+          { fullName: { contains: q } },
+          { email: { contains: q } },
+          { leadId: { contains: q } },
+        ],
+      }
+    : {}
 
-  try {
-    const payload = await getPayload({ config: configPromise })
+  // Get counts and recent leads
+  const [allResult, oppResult, prosResult, wonResult, recentLeads] = await Promise.all([
+    payload.find({ collection: 'leads', limit: 0, overrideAccess: true }),
+    payload.find({
+      collection: 'leads',
+      limit: 0,
+      where: { status: { equals: 'opportunity' } },
+      overrideAccess: true,
+    }),
+    payload.find({
+      collection: 'leads',
+      limit: 0,
+      where: { status: { equals: 'prospect' } },
+      overrideAccess: true,
+    }),
+    payload.find({
+      collection: 'leads',
+      limit: 0,
+      where: { status: { equals: 'won' } },
+      overrideAccess: true,
+    }),
+    payload.find({
+      collection: 'leads',
+      limit: 10,
+      sort: '-createdAt',
+      overrideAccess: true,
+      depth: 0,
+      where,
+    }),
+  ])
 
-    // Build search filter
-    const where: Record<string, any> = q
-      ? {
-          or: [
-            { fullName: { contains: q } },
-            { email: { contains: q } },
-            { leadId: { contains: q } },
-          ],
-        }
-      : {}
-
-    // Get counts using find with limit:0
-    const [allResult, oppResult, prosResult, wonResult, recentLeads] = await Promise.all([
-      payload.find({ collection: 'leads', limit: 0, overrideAccess: true }),
-      payload.find({
-        collection: 'leads',
-        limit: 0,
-        where: { status: { equals: 'opportunity' } },
-        overrideAccess: true,
-      }),
-      payload.find({
-        collection: 'leads',
-        limit: 0,
-        where: { status: { equals: 'prospect' } },
-        overrideAccess: true,
-      }),
-      payload.find({
-        collection: 'leads',
-        limit: 0,
-        where: { status: { equals: 'won' } },
-        overrideAccess: true,
-      }),
-      payload.find({
-        collection: 'leads',
-        limit: 10,
-        sort: '-createdAt',
-        overrideAccess: true,
-        depth: 0,
-        where,
-      }),
-    ])
-
-    totalLeads = allResult.totalDocs
-    opportunityCount = oppResult.totalDocs
-    prospectCount = prosResult.totalDocs
-    wonCount = wonResult.totalDocs
-    totalDocs = recentLeads.totalDocs
-
-    // Serialize leads — strip non-serializable Payload internals
-    leads = recentLeads.docs.map((d: any) => ({
-      id: d.id,
-      leadId: d.leadId ?? null,
-      fullName: d.fullName ?? '',
-      email: d.email ?? '',
-      phone: d.phone ?? null,
-      status: d.status ?? 'opportunity',
-      checkInDate: d.checkInDate ?? null,
-      checkOutDate: d.checkOutDate ?? null,
-    }))
-  } catch (e) {
-    console.error('Dashboard fetch error:', e)
-  }
+  const totalLeads = allResult.totalDocs
+  const opportunityCount = oppResult.totalDocs
+  const prospectCount = prosResult.totalDocs
+  const wonCount = wonResult.totalDocs
+  const leads = recentLeads.docs
+  const totalDocs = recentLeads.totalDocs
 
   return (
     <>
@@ -100,7 +88,7 @@ export default async function DashboardPage({ searchParams }: Props) {
               wonCount={wonCount}
             />
             <div className="px-4 lg:px-6">
-              <LeadsTable leads={leads} totalDocs={totalDocs} />
+              <LeadsTable leads={leads as any} totalDocs={totalDocs} />
             </div>
           </div>
         </div>

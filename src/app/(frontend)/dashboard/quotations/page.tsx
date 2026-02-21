@@ -1,12 +1,31 @@
-import React, { Suspense } from 'react'
+'use client'
+
+import React, { useState, Suspense } from 'react'
 import Link from 'next/link'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
 import { Button } from '@/components/ui/button'
 import { IconPlus, IconEye, IconPencil } from '@tabler/icons-react'
 import { SiteHeader } from '@/components/site-header'
 
-const statusStyles: Record<string, string> = {
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+export interface Quotation {
+  id: string | number
+  title: string
+  lead?: { id: string | number; fullName: string } | null
+  grandTotal: number
+  status: string
+  quotationDate?: string | null
+  categories?: Array<{ categoryName: string }>
+}
+
+interface Props {
+  quotations?: Quotation[]
+  totalDocs?: number
+}
+
+// ─── Status config ───────────────────────────────────────────────────────────
+
+const STATUS_STYLES: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-600',
   sent: 'bg-blue-100 text-blue-700',
   approved: 'bg-green-100 text-green-700',
@@ -17,67 +36,35 @@ function fmt(n: number) {
   return n.toLocaleString('en-IN', { minimumFractionDigits: 0 })
 }
 
-interface Props {
-  searchParams: Promise<{ q?: string; status?: string }>
-}
+// ─── Component ───────────────────────────────────────────────────────────────
 
-export default async function QuotationsPage({ searchParams }: Props) {
-  const { q = '', status = '' } = await searchParams
+export default function QuotationsPage({ quotations = [], totalDocs = 0 }: Props) {
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
 
-  let quotations: any[] = []
-  let totalDocs = 0
-
-  try {
-    const payload = await getPayload({ config: configPromise })
-
-    const where: Record<string, any> = {}
-    if (q) {
-      where.title = { contains: q }
-    }
-    if (status) {
-      where.status = { equals: status }
-    }
-
-    const res = await payload.find({
-      collection: 'quotations',
-      where: Object.keys(where).length > 0 ? where : undefined,
-      sort: '-createdAt',
-      limit: 50,
-      depth: 1,
-      overrideAccess: true,
-    })
-
-    quotations = res.docs.map((q: any) => ({
-      id: q.id,
-      title: q.title,
-      lead:
-        typeof q.lead === 'object' && q.lead !== null
-          ? { id: q.lead.id, fullName: q.lead.fullName }
-          : null,
-      grandTotal: q.grandTotal || 0,
-      status: q.status || 'draft',
-      quotationDate: q.quotationDate || null,
-      categories: q.categories || [],
-    }))
-    totalDocs = res.totalDocs
-  } catch (e) {
-    console.error('Failed to fetch quotations:', e)
-  }
+  const filtered = quotations.filter((q) => {
+    const matchesSearch =
+      !search ||
+      q.title.toLowerCase().includes(search.toLowerCase()) ||
+      (q.lead?.fullName ?? '').toLowerCase().includes(search.toLowerCase())
+    const matchesStatus = !statusFilter || q.status === statusFilter
+    return matchesSearch && matchesStatus
+  })
 
   return (
     <div className="flex flex-1 flex-col">
       <Suspense fallback={<div className="h-12 border-b bg-white" />}>
         <SiteHeader title="Quotations">
-          <form method="get" className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <input
-              name="q"
-              defaultValue={q}
               placeholder="Search quotations or leads..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="rounded-md border bg-background px-3 py-1.5 text-sm w-56 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <select
-              name="status"
-              defaultValue={status}
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
               className="rounded-md border bg-background px-3 py-1.5 text-sm focus:outline-none"
             >
               <option value="">All Statuses</option>
@@ -86,10 +73,7 @@ export default async function QuotationsPage({ searchParams }: Props) {
               <option value="approved">Approved</option>
               <option value="rejected">Rejected</option>
             </select>
-            <Button type="submit" variant="outline" size="sm">
-              Filter
-            </Button>
-          </form>
+          </div>
           <Link href="/dashboard/quotations/new">
             <Button className="bg-blue-600 text-white hover:bg-blue-700" size="sm">
               <IconPlus className="h-4 w-4 mr-1.5" />
@@ -100,14 +84,15 @@ export default async function QuotationsPage({ searchParams }: Props) {
       </Suspense>
 
       <main className="flex-1 overflow-auto p-6">
-        {quotations.length === 0 ? (
+        {filtered.length === 0 ? (
           <div className="rounded-xl border bg-white shadow-sm p-12 text-center">
             <p className="text-gray-400 text-sm mb-4">
-              {q || status ? 'No quotations match your filter.' : 'No quotations yet.'}
+              {search || statusFilter
+                ? 'No quotations match your filter.'
+                : 'No quotations yet.'}
             </p>
             <Link href="/dashboard/quotations/new">
               <Button className="bg-blue-600 text-white hover:bg-blue-700" size="sm">
-                <IconPlus className="h-4 w-4 mr-1.5" />
                 Create First Quotation
               </Button>
             </Link>
@@ -116,8 +101,7 @@ export default async function QuotationsPage({ searchParams }: Props) {
           <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
             <div className="px-5 py-4 border-b flex items-center justify-between">
               <p className="text-sm text-gray-500">
-                Showing <strong>{quotations.length}</strong> of <strong>{totalDocs}</strong>{' '}
-                quotations
+                Showing <strong>{filtered.length}</strong> of <strong>{totalDocs}</strong> quotations
               </p>
             </div>
             <table className="w-full text-sm">
@@ -134,9 +118,9 @@ export default async function QuotationsPage({ searchParams }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {quotations.map((q, idx) => {
-                  const servicesSummary = q.categories
-                    .map((c: any) => c.categoryName)
+                {filtered.map((q, idx) => {
+                  const servicesSummary = (q.categories ?? [])
+                    .map((c) => c.categoryName)
                     .slice(0, 3)
                     .join(', ')
 
@@ -172,7 +156,7 @@ export default async function QuotationsPage({ searchParams }: Props) {
                       <td className="px-5 py-3">
                         <span
                           className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                            statusStyles[q.status] || 'bg-gray-100 text-gray-500'
+                            STATUS_STYLES[q.status] || 'bg-gray-100 text-gray-500'
                           }`}
                         >
                           {q.status.charAt(0).toUpperCase() + q.status.slice(1)}

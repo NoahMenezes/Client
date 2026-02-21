@@ -1,44 +1,12 @@
 import React, { Suspense } from 'react'
-import type { Metadata } from 'next'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
 import { SiteHeader } from '@/components/site-header'
 import CalendarView, { type CalendarEvent } from '@/components/calendar-view'
 
-export const metadata: Metadata = {
-  title: 'Calendar – Perfect Knot CRM',
+interface Props {
+  events?: CalendarEvent[]
 }
 
-export default async function CalendarPage() {
-  const payload = await getPayload({ config: configPromise })
-
-  let events: CalendarEvent[] = []
-
-  try {
-    const res = await payload.find({
-      collection: 'leads',
-      limit: 500,
-      overrideAccess: true,
-      depth: 0,
-      where: {
-        or: [{ checkInDate: { exists: true } }, { checkOutDate: { exists: true } }],
-      },
-    })
-
-    events = res.docs
-      .filter((d: any) => d.checkInDate || d.checkOutDate)
-      .map((d: any) => ({
-        id: d.id,
-        leadId: d.leadId ?? null,
-        title: d.fullName ?? 'Unnamed Lead',
-        checkInDate: d.checkInDate ?? null,
-        checkOutDate: d.checkOutDate ?? null,
-        status: d.status ?? 'opportunity',
-      }))
-  } catch (e) {
-    console.error('Calendar fetch error:', e)
-  }
-
+export default function CalendarPage({ events = [] }: Props) {
   return (
     <>
       <Suspense fallback={<div className="h-12 border-b bg-white" />}>

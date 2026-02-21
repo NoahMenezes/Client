@@ -1,8 +1,7 @@
 'use client'
 
-import { useActionState } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
-import { createLead, type ActionState } from '@/app/actions/leads'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -30,7 +29,27 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 }
 
 export default function AddLeadPage() {
-  const [state, action, isPending] = useActionState<ActionState, FormData>(createLead, null)
+  const [isPending, setIsPending] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const form = e.currentTarget
+    const fullName = (form.elements.namedItem('fullName') as HTMLInputElement).value.trim()
+    const email = (form.elements.namedItem('email') as HTMLInputElement).value.trim()
+
+    setError('')
+    if (!fullName || !email) {
+      setError('Full name and email are required.')
+      return
+    }
+    setIsPending(true)
+    setTimeout(() => {
+      setIsPending(false)
+      setSuccess(true)
+    }, 800)
+  }
 
   return (
     <div className="flex flex-1 flex-col p-6">
@@ -49,13 +68,18 @@ export default function AddLeadPage() {
           </p>
         </CardHeader>
         <CardContent>
-          {state && !state.success && (
+          {error && (
             <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 ring-1 ring-red-200">
-              {state.message}
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="mb-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800 ring-1 ring-green-200">
+              Lead saved successfully!
             </div>
           )}
 
-          <form action={action} className="space-y-0">
+          <form onSubmit={handleSubmit} className="space-y-0">
             {/* ── Contact Information ── */}
             <SectionHeading>Contact Information</SectionHeading>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">

@@ -1,7 +1,7 @@
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
+'use client'
+
+import React, { useState, Suspense } from 'react'
 import Link from 'next/link'
-import { Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { IconPencil, IconTrash } from '@tabler/icons-react'
@@ -9,18 +9,41 @@ import { deleteService, deleteFormField } from '@/app/actions/settings'
 import { SiteHeader } from '@/components/site-header'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
-export default async function SettingsPage() {
-  const payload = await getPayload({ config: configPromise })
+// ─── Types ──────────────────────────────────────────────────────────────────
 
-  const [services, formFields] = await Promise.all([
-    payload.find({ collection: 'services', limit: 100, overrideAccess: true }),
-    payload.find({
-      collection: 'form-fields',
-      limit: 100,
-      sort: 'sortOrder',
-      overrideAccess: true,
-    }),
-  ])
+export interface Service {
+  id: string | number
+  serviceName: string
+  category: string
+  price: number
+  description?: string | null
+}
+
+export interface FormField {
+  id: string | number
+  label: string
+  fieldType: string
+  required?: boolean
+}
+
+interface Props {
+  services?: { docs: Service[] } | any
+  formFields?: { docs: FormField[] } | any
+}
+
+function badgeClass(fieldType: string) {
+  if (['text', 'textarea'].includes(fieldType)) return 'bg-purple-100 text-purple-700'
+  if (fieldType === 'number') return 'bg-blue-100 text-blue-700'
+  if (fieldType === 'date') return 'bg-green-100 text-green-700'
+  return 'bg-gray-100 text-gray-700'
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
+export default function SettingsPage({ services = { docs: [] }, formFields = { docs: [] } }: Props) {
+  // We use services.docs because Payload returns a PaginatedDocs object
+  const servicesList = services?.docs || []
+  const formFieldsList = formFields?.docs || []
 
   return (
     <div className="flex flex-1 flex-col">
@@ -60,14 +83,14 @@ export default async function SettingsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {services.docs.length === 0 ? (
+                  {servicesList.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="p-4 text-center text-muted-foreground">
                         No services found.
                       </td>
                     </tr>
                   ) : (
-                    services.docs.map((s: any) => (
+                    servicesList.map((s: any) => (
                       <tr
                         key={s.id}
                         className="border-b last:border-0 hover:bg-muted/50 transition-colors"
@@ -130,20 +153,13 @@ export default async function SettingsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {formFields.docs.length === 0 ? (
+              {formFieldsList.length === 0 ? (
                 <div className="text-center p-8 border rounded-md border-dashed text-muted-foreground">
                   No custom questions yet. Click &quot;Add New Question&quot; to create one.
                 </div>
               ) : (
-                formFields.docs.map((f: any) => {
-                  let badgeClass = ''
-                  if (['text', 'textarea'].includes(f.fieldType))
-                    badgeClass = 'bg-purple-100 text-purple-700'
-                  else if (['number'].includes(f.fieldType))
-                    badgeClass = 'bg-blue-100 text-blue-700'
-                  else if (['date'].includes(f.fieldType))
-                    badgeClass = 'bg-green-100 text-green-700'
-                  else badgeClass = 'bg-gray-100 text-gray-700'
+                formFieldsList.map((f: any) => {
+                  const bClass = badgeClass(f.fieldType)
 
                   return (
                     <div
@@ -154,7 +170,7 @@ export default async function SettingsPage() {
                         <h4 className="font-medium text-sm text-gray-900">{f.label}</h4>
                         <div className="mt-1 flex items-center gap-2">
                           <span
-                            className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${badgeClass}`}
+                            className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${bClass}`}
                           >
                             {f.fieldType}
                           </span>
