@@ -1,21 +1,11 @@
-import React, { Suspense } from 'react'
+import React from 'react'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
-import { Badge } from '@/components/ui/badge'
+
 import { notFound } from 'next/navigation'
 import { IconPhone, IconMessage, IconCalendar, IconMail } from '@tabler/icons-react'
 import LeadProfileTabs from '@/components/lead-profile-tabs'
 
-const statusStyles: Record<string, string> = {
-  opportunity: 'bg-orange-100 text-orange-700',
-  prospect: 'bg-yellow-100 text-yellow-700',
-  won: 'bg-green-100 text-green-700',
-  lost: 'bg-red-100 text-red-700',
-  'in-progress': 'bg-blue-100 text-blue-700',
-  'no-response': 'bg-gray-100 text-gray-600',
-  disqualified: 'bg-red-100 text-red-700',
-  'lost-prospect': 'bg-red-50 text-red-500',
-}
 const statusLabels: Record<string, string> = {
   opportunity: 'Opportunity',
   prospect: 'Prospect',

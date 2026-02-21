@@ -15,15 +15,9 @@ interface Employee {
   assignedLeads?: number
 }
 
-// Replace with real data fetched via API when backend is ready
-const MOCK_EMPLOYEES: Employee[] = []
-
-interface Props {
-  employees?: Employee[]
-  totalDocs?: number
-}
-
-export default function EmployeesPage({ employees = [], totalDocs = 0 }: Props) {
+export default function EmployeesPage() {
+  const employees: Employee[] = []
+  const totalDocs = 0
   const [search, setSearch] = useState('')
 
   const filtered = employees.filter(

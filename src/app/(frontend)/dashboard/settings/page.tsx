@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useState, Suspense } from 'react'
+import React, { Suspense } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { IconPencil, IconTrash } from '@tabler/icons-react'
 import { deleteService, deleteFormField } from '@/app/actions/settings'
 import { SiteHeader } from '@/components/site-header'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -26,10 +26,7 @@ export interface FormField {
   required?: boolean
 }
 
-interface Props {
-  services?: { docs: Service[] } | any
-  formFields?: { docs: FormField[] } | any
-}
+
 
 function badgeClass(fieldType: string) {
   if (['text', 'textarea'].includes(fieldType)) return 'bg-purple-100 text-purple-700'
@@ -40,10 +37,9 @@ function badgeClass(fieldType: string) {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function SettingsPage({ services = { docs: [] }, formFields = { docs: [] } }: Props) {
-  // We use services.docs because Payload returns a PaginatedDocs object
-  const servicesList = services?.docs || []
-  const formFieldsList = formFields?.docs || []
+export default function SettingsPage() {
+  const servicesList: Service[] = []
+  const formFieldsList: FormField[] = []
 
   return (
     <div className="flex flex-1 flex-col">

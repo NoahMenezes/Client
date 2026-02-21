@@ -2,11 +2,8 @@ import React, { Suspense } from 'react'
 import { SiteHeader } from '@/components/site-header'
 import CalendarView, { type CalendarEvent } from '@/components/calendar-view'
 
-interface Props {
-  events?: CalendarEvent[]
-}
-
-export default function CalendarPage({ events = [] }: Props) {
+export default function CalendarPage() {
+  const events: CalendarEvent[] = []
   return (
     <>
       <Suspense fallback={<div className="h-12 border-b bg-white" />}>

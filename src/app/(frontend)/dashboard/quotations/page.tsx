@@ -17,12 +17,6 @@ export interface Quotation {
   quotationDate?: string | null
   categories?: Array<{ categoryName: string }>
 }
-
-interface Props {
-  quotations?: Quotation[]
-  totalDocs?: number
-}
-
 // ─── Status config ───────────────────────────────────────────────────────────
 
 const STATUS_STYLES: Record<string, string> = {
@@ -38,7 +32,9 @@ function fmt(n: number) {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function QuotationsPage({ quotations = [], totalDocs = 0 }: Props) {
+export default function QuotationsPage() {
+  const quotations: Quotation[] = []
+  const totalDocs = 0
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
 
