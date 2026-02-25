@@ -5,12 +5,17 @@ import configPromise from '@payload-config'
 import Login from '@/components/login-1'
 
 export default async function HomePage() {
-  const headers = await getHeaders()
-  const payload = await getPayload({ config: configPromise })
-  const { user } = await payload.auth({ headers })
+  try {
+    const headers = await getHeaders()
+    const payload = await getPayload({ config: configPromise })
+    const { user } = await payload.auth({ headers })
 
-  if (user) {
-    redirect('/dashboard')
+    if (user) {
+      redirect('/dashboard')
+    }
+  } catch (e) {
+    console.error('[HomePage] Auth check failed:', e)
+    // Show login page even if DB check fails
   }
 
   return <Login />
