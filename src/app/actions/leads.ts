@@ -15,75 +15,73 @@ export async function createLead(prev: ActionState, fd: FormData): Promise<Actio
   let ok = false
   try {
     const payload = await getPayload({ config: configPromise })
-    const services = fd.getAll('servicesRequested') as string[]
-
-    const budgetRaw = fd.get('budget') as string
-    const budget = budgetRaw && budgetRaw.trim() !== '' ? Number(budgetRaw) : undefined
 
     const str = (key: string) => {
       const val = fd.get(key) as string | null
       return val && val.trim() !== '' ? val.trim() : undefined
     }
 
+    const budgetRaw = fd.get('budget') as string
+    const budget = budgetRaw && budgetRaw.trim() !== '' ? Number(budgetRaw) : undefined
+
+    const guestCountRaw = fd.get('guestCount') as string
+    const guestCount = guestCountRaw && guestCountRaw.trim() !== '' ? Number(guestCountRaw) : undefined
+
+    // 1. Create or find Contact
+    let contactId: number
+    const existing = await payload.find({
+      collection: 'contacts',
+      where: { email: { equals: email.toLowerCase().trim() } },
+      limit: 1,
+      overrideAccess: true,
+    })
+
+    if (existing.totalDocs > 0) {
+      contactId = existing.docs[0].id
+      // Update the contact with latest info
+      await payload.update({
+        collection: 'contacts',
+        id: contactId,
+        overrideAccess: true,
+        data: {
+          name: fullName,
+          phone: str('phone') || undefined,
+          source: str('leadSource') || undefined,
+        },
+      })
+    } else {
+      const contact = await payload.create({
+        collection: 'contacts',
+        overrideAccess: true,
+        data: {
+          name: fullName,
+          email: email.toLowerCase().trim(),
+          phone: str('phone'),
+          source: str('leadSource'),
+        },
+      })
+      contactId = contact.id
+    }
+
+    // 2. Create Lead linked to the contact
     await payload.create({
       collection: 'leads',
       overrideAccess: true,
       data: {
-        fullName,
-        email,
-        phone: str('phone'),
-        status: ((fd.get('status') as string) || 'opportunity') as
-          | 'opportunity'
-          | 'prospect'
-          | 'won'
-          | 'lost'
-          | 'in-progress'
-          | 'no-response'
-          | 'disqualified'
-          | 'lost-prospect',
-        coupleName: str('coupleName'),
-        leadSource:
-          (str('leadSource') as
-            | 'website'
-            | 'referral'
-            | 'social-media'
-            | 'walk-in'
-            | 'phone-call'
-            | 'email'
-            | 'other'
-            | undefined) ?? 'website',
+        contact: contactId,
+        status: ((fd.get('status') as string) || 'new') as any,
         budget,
-        pocName: str('pocName'),
+        guestCount,
         checkInDate: str('checkInDate'),
         checkOutDate: str('checkOutDate'),
         weddingDate: str('weddingDate'),
-        firstCallDate: str('firstCallDate'),
-        proposalSentDate: str('proposalSentDate'),
-        servicesRequested:
-          services.length > 0
-            ? (services as (
-                | 'venue-decoration'
-                | 'catering'
-                | 'photography'
-                | 'dj-music'
-                | 'mehendi'
-                | 'florals'
-                | 'lighting'
-                | 'hospitality'
-                | 'baraat'
-                | 'special-effects'
-              )[])
-            : undefined,
-        basicInformation: str('basicInformation'),
-        hospitalityServices: str('hospitalityServices'),
-        typesOfServiceRequired: str('typesOfServiceRequired'),
-        artistsRequirement: str('artistsRequirement'),
-        internalNotes: str('internalNotes'),
-        googleFormEnquiry: str('googleFormEnquiry'),
+        weddingStyle: str('weddingStyle'),
+        isDestination: fd.get('isDestination') === 'on',
       },
     })
     ok = true
   } catch (e: unknown) {
+    console.error('[createLead] error:', e)
     return { success: false, message: e instanceof Error ? e.message : 'Failed to create lead.' }
   }
   if (ok) {
@@ -103,76 +101,61 @@ export async function updateLead(prev: ActionState, fd: FormData): Promise<Actio
   let ok = false
   try {
     const payload = await getPayload({ config: configPromise })
-    const services = fd.getAll('servicesRequested') as string[]
-
-    const budgetRaw = fd.get('budget') as string
-    const budget = budgetRaw && budgetRaw.trim() !== '' ? Number(budgetRaw) : undefined
 
     const str = (key: string) => {
       const val = fd.get(key) as string | null
       return val && val.trim() !== '' ? val.trim() : undefined
     }
 
+    const budgetRaw = fd.get('budget') as string
+    const budget = budgetRaw && budgetRaw.trim() !== '' ? Number(budgetRaw) : undefined
+
+    const guestCountRaw = fd.get('guestCount') as string
+    const guestCount = guestCountRaw && guestCountRaw.trim() !== '' ? Number(guestCountRaw) : undefined
+
+    // Get current lead to find contact
+    const currentLead = await payload.findByID({
+      collection: 'leads',
+      id,
+      overrideAccess: true,
+      depth: 0,
+    })
+
+    // Update contact if linked
+    if (currentLead.contact) {
+      const contactId = typeof currentLead.contact === 'object' ? currentLead.contact.id : currentLead.contact
+      await payload.update({
+        collection: 'contacts',
+        id: contactId,
+        overrideAccess: true,
+        data: {
+          name: fullName,
+          email: email.toLowerCase().trim(),
+          phone: str('phone') || undefined,
+          source: str('leadSource') || undefined,
+        },
+      })
+    }
+
+    // Update lead
     await payload.update({
       collection: 'leads',
       id,
       overrideAccess: true,
       data: {
-        fullName,
-        email,
-        phone: str('phone'),
-        status: ((fd.get('status') as string) || 'opportunity') as
-          | 'opportunity'
-          | 'prospect'
-          | 'won'
-          | 'lost'
-          | 'in-progress'
-          | 'no-response'
-          | 'disqualified'
-          | 'lost-prospect',
-        coupleName: str('coupleName'),
-        leadSource:
-          (str('leadSource') as
-            | 'website'
-            | 'referral'
-            | 'social-media'
-            | 'walk-in'
-            | 'phone-call'
-            | 'email'
-            | 'other'
-            | undefined) ?? 'website',
+        status: ((fd.get('status') as string) || 'new') as any,
         budget,
-        pocName: str('pocName'),
+        guestCount,
         checkInDate: str('checkInDate'),
         checkOutDate: str('checkOutDate'),
         weddingDate: str('weddingDate'),
-        firstCallDate: str('firstCallDate'),
-        proposalSentDate: str('proposalSentDate'),
-        servicesRequested:
-          services.length > 0
-            ? (services as (
-                | 'venue-decoration'
-                | 'catering'
-                | 'photography'
-                | 'dj-music'
-                | 'mehendi'
-                | 'florals'
-                | 'lighting'
-                | 'hospitality'
-                | 'baraat'
-                | 'special-effects'
-              )[])
-            : [],
-        basicInformation: str('basicInformation'),
-        hospitalityServices: str('hospitalityServices'),
-        typesOfServiceRequired: str('typesOfServiceRequired'),
-        artistsRequirement: str('artistsRequirement'),
-        internalNotes: str('internalNotes'),
-        googleFormEnquiry: str('googleFormEnquiry'),
+        weddingStyle: str('weddingStyle'),
+        isDestination: fd.get('isDestination') === 'on',
       },
     })
     ok = true
   } catch (e: unknown) {
+    console.error('[updateLead] error:', e)
     return { success: false, message: e instanceof Error ? e.message : 'Failed to update lead.' }
   }
   if (ok) {
@@ -208,7 +191,7 @@ export async function updateQuotation(prev: ActionState, fd: FormData): Promise<
       collection: 'leads',
       id,
       overrideAccess: true,
-      data: { quotation: items },
+      data: { quotation: items } as any,
     })
     ok = true
   } catch (e: unknown) {
@@ -223,15 +206,15 @@ export async function updateQuotation(prev: ActionState, fd: FormData): Promise<
 
 export async function assignEmployee(fd: FormData) {
   const leadId = fd.get('leadId') as string
-  const employeeId = fd.get('employeeId') as string
-  if (!leadId || !employeeId) return
+  const userId = fd.get('employeeId') as string
+  if (!leadId || !userId) return
   try {
     const payload = await getPayload({ config: configPromise })
     await payload.update({
       collection: 'leads',
       id: leadId,
       overrideAccess: true,
-      data: { assignedEmployee: Number(employeeId) },
+      data: { assignedTo: Number(userId) },
     })
   } catch (e) {
     console.error(e)

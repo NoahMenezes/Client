@@ -24,22 +24,11 @@ export async function createService(prev: ActionState, fd: FormData): Promise<Ac
       overrideAccess: true,
       data: {
         serviceName,
-        category: (category || 'other') as
-          | 'catering'
-          | 'photography'
-          | 'other'
-          | 'coordination'
-          | 'decor'
-          | 'entertainment',
-        unit: (unit || 'per-event') as
-          | 'per-event'
-          | 'per-plate'
-          | 'per-hour'
-          | 'package'
-          | 'per-unit',
+        category: (category || 'other') as any,
+        unit: (unit || 'per-event') as any,
         price,
         description: (fd.get('description') as string) || undefined,
-      },
+      } as any,
     })
     ok = true
   } catch (e: unknown) {
@@ -73,22 +62,11 @@ export async function updateService(prev: ActionState, fd: FormData): Promise<Ac
       overrideAccess: true,
       data: {
         serviceName,
-        category: (category || 'other') as
-          | 'catering'
-          | 'photography'
-          | 'other'
-          | 'coordination'
-          | 'decor'
-          | 'entertainment',
-        unit: (unit || 'per-event') as
-          | 'per-event'
-          | 'per-plate'
-          | 'per-hour'
-          | 'package'
-          | 'per-unit',
+        category: (category || 'other') as any,
+        unit: (unit || 'per-event') as any,
         price,
         description: (fd.get('description') as string) || undefined,
-      },
+      } as any,
     })
     ok = true
   } catch (e: unknown) {

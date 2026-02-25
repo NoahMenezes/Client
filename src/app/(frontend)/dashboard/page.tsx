@@ -28,32 +28,32 @@ export default async function DashboardPage({
   const where: Record<string, any> = q
     ? {
         or: [
-          { fullName: { contains: q } },
-          { email: { contains: q } },
+          { 'contact.name': { contains: q } },
+          { 'contact.email': { contains: q } },
           { leadId: { contains: q } },
         ],
       }
     : {}
 
   // Get counts and recent leads
-  const [allResult, oppResult, prosResult, wonResult, recentLeads] = await Promise.all([
+  const [allResult, newResult, contactedResult, confirmedResult, recentLeads] = await Promise.all([
     payload.find({ collection: 'leads', limit: 0, overrideAccess: true }),
     payload.find({
       collection: 'leads',
       limit: 0,
-      where: { status: { equals: 'opportunity' } },
+      where: { status: { equals: 'new' } },
       overrideAccess: true,
     }),
     payload.find({
       collection: 'leads',
       limit: 0,
-      where: { status: { equals: 'prospect' } },
+      where: { status: { equals: 'contacted' } },
       overrideAccess: true,
     }),
     payload.find({
       collection: 'leads',
       limit: 0,
-      where: { status: { equals: 'won' } },
+      where: { status: { equals: 'confirmed' } },
       overrideAccess: true,
     }),
     payload.find({
@@ -61,16 +61,28 @@ export default async function DashboardPage({
       limit: 10,
       sort: '-createdAt',
       overrideAccess: true,
-      depth: 0,
+      depth: 1,
       where,
     }),
   ])
 
   const totalLeads = allResult.totalDocs
-  const opportunityCount = oppResult.totalDocs
-  const prospectCount = prosResult.totalDocs
-  const wonCount = wonResult.totalDocs
-  const leads = recentLeads.docs
+  const opportunityCount = newResult.totalDocs
+  const prospectCount = contactedResult.totalDocs
+  const wonCount = confirmedResult.totalDocs
+
+  // Map leads for the table, pulling contact info from the relationship
+  const leads: Lead[] = recentLeads.docs.map((d: any) => ({
+    id: d.id,
+    leadId: d.leadId ?? null,
+    fullName: typeof d.contact === 'object' && d.contact ? d.contact.name : 'Unknown',
+    email: typeof d.contact === 'object' && d.contact ? d.contact.email : '',
+    phone: typeof d.contact === 'object' && d.contact ? d.contact.phone : null,
+    status: d.status ?? 'new',
+    checkInDate: d.checkInDate ?? null,
+    checkOutDate: d.checkOutDate ?? null,
+  }))
+
   const totalDocs = recentLeads.totalDocs
 
   return (
@@ -88,7 +100,7 @@ export default async function DashboardPage({
               wonCount={wonCount}
             />
             <div className="px-4 lg:px-6">
-              <LeadsTable leads={leads as any} totalDocs={totalDocs} />
+              <LeadsTable leads={leads} totalDocs={totalDocs} />
             </div>
           </div>
         </div>

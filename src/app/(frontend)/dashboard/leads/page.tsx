@@ -189,14 +189,13 @@ export default async function LeadsPage({ searchParams }: Props) {
                 className="rounded-md border bg-background px-3 py-1.5 text-sm focus:outline-none"
               >
                 <option value="">All Active</option>
-                <option value="opportunity">Opportunity</option>
-                <option value="prospect">Prospect</option>
-                <option value="in-progress">In Progress</option>
-                <option value="won">Won</option>
-                <option value="lost">Lost</option>
-                <option value="no-response">No Response</option>
-                <option value="disqualified">Disqualified</option>
-                <option value="lost-prospect">Lost Prospect</option>
+                <option value="new">New</option>
+                <option value="contacted">Contacted</option>
+                <option value="proposal_sent">Proposal Sent</option>
+                <option value="negotiation">Negotiation</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="closed">Closed</option>
+                <option value="cancelled">Cancelled</option>
               </select>
             </div>
             <div className="flex flex-col gap-1">

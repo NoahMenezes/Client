@@ -38,12 +38,17 @@ export async function registerUser(prevState: AuthState, formData: FormData): Pr
     })
 
     if (existing.totalDocs === 0) {
+      // Derive a display name from the email (e.g. "noah" from "noah@example.com")
+      const name = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+
       // Create the new user — Payload hashes the password automatically
       await payload.create({
         collection: 'users',
         data: {
           email: email.toLowerCase().trim(),
           password,
+          name,
+          role: 'admin',
         },
         overrideAccess: true,
       })

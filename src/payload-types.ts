@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     leads: Lead;
     contacts: Contact;
+    employees: Employee;
     services: Service;
     'service-categories': ServiceCategory;
     'lead-services': LeadService;
@@ -92,6 +93,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     contacts: ContactsSelect<false> | ContactsSelect<true>;
+    employees: EmployeesSelect<false> | EmployeesSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     'service-categories': ServiceCategoriesSelect<false> | ServiceCategoriesSelect<true>;
     'lead-services': LeadServicesSelect<false> | LeadServicesSelect<true>;
@@ -245,6 +247,22 @@ export interface Contact {
    * Lead source (e.g. Google Form, Instagram)
    */
   source?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "employees".
+ */
+export interface Employee {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string | null;
+  role?: string | null;
+  status?: ('active' | 'inactive') | null;
+  department?: string | null;
+  notes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -453,6 +471,10 @@ export interface PayloadLockedDocument {
         value: number | Contact;
       } | null)
     | ({
+        relationTo: 'employees';
+        value: number | Employee;
+      } | null)
+    | ({
         relationTo: 'services';
         value: number | Service;
       } | null)
@@ -605,6 +627,21 @@ export interface ContactsSelect<T extends boolean = true> {
   email?: T;
   phone?: T;
   source?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "employees_select".
+ */
+export interface EmployeesSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  phone?: T;
+  role?: T;
+  status?: T;
+  department?: T;
+  notes?: T;
   updatedAt?: T;
   createdAt?: T;
 }

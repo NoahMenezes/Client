@@ -9,6 +9,7 @@ import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Leads } from './collections/Leads'
 import { Contacts } from './collections/Contacts'
+import { Employees } from './collections/Employees'
 import { Services } from './collections/Services'
 import { ServiceCategories } from './collections/ServiceCategories'
 import { LeadServices } from './collections/LeadServices'
@@ -36,6 +37,7 @@ export default buildConfig({
     Media,
     Leads,
     Contacts,
+    Employees,
     Services,
     ServiceCategories,
     LeadServices,

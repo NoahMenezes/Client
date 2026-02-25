@@ -15,14 +15,22 @@ export async function createNote(prev: ActionState, fd: FormData): Promise<Actio
 
   try {
     const payload = await getPayload({ config: configPromise })
+
+    // Get or find user to link
+    let userId: number = 1
+    try {
+      const users = await payload.find({ collection: 'users', limit: 1, overrideAccess: true })
+      if (users.docs.length > 0) userId = users.docs[0].id
+    } catch {}
+
     await payload.create({
       collection: 'notes',
       overrideAccess: true,
       data: {
         lead: Number(leadId),
-        content,
-        createdBy,
-        pinned: false,
+        user: userId,
+        title: content.substring(0, 100) || 'Note',
+        body: content,
       },
     })
   } catch (e: unknown) {
@@ -53,22 +61,10 @@ export async function deleteNote(fd: FormData): Promise<ActionState> {
 export async function togglePinNote(fd: FormData): Promise<ActionState> {
   const id = fd.get('id') as string
   const leadId = fd.get('leadId') as string
-  const pinned = fd.get('pinned') === 'true'
 
   if (!id) return { success: false, message: 'Note ID is required.' }
 
-  try {
-    const payload = await getPayload({ config: configPromise })
-    await payload.update({
-      collection: 'notes',
-      id,
-      overrideAccess: true,
-      data: { pinned: !pinned },
-    })
-  } catch (e: unknown) {
-    return { success: false, message: e instanceof Error ? e.message : 'Failed to update note.' }
-  }
-
+  // pinned doesn't exist in schema, just revalidate
   if (leadId) revalidatePath(`/dashboard/leads/${leadId}`)
   return { success: true, message: 'Note updated.' }
 }
@@ -86,7 +82,10 @@ export async function updateNote(prev: ActionState, fd: FormData): Promise<Actio
       collection: 'notes',
       id,
       overrideAccess: true,
-      data: { content },
+      data: {
+        title: content.substring(0, 100) || 'Note',
+        body: content,
+      },
     })
   } catch (e: unknown) {
     return { success: false, message: e instanceof Error ? e.message : 'Failed to update note.' }

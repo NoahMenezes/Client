@@ -18,25 +18,23 @@ interface Lead {
 }
 
 const statusStyles: Record<string, string> = {
-  opportunity: 'bg-orange-100 text-orange-700 hover:bg-orange-100',
-  prospect: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100',
-  won: 'bg-green-100 text-green-700 hover:bg-green-100',
-  lost: 'bg-red-100 text-red-700 hover:bg-red-100',
-  'in-progress': 'bg-blue-100 text-blue-700 hover:bg-blue-100',
-  'no-response': 'bg-gray-100 text-gray-600 hover:bg-gray-100',
-  disqualified: 'bg-red-100 text-red-700 hover:bg-red-100',
-  'lost-prospect': 'bg-red-50 text-red-500 hover:bg-red-50',
+  new: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
+  contacted: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100',
+  proposal_sent: 'bg-orange-100 text-orange-700 hover:bg-orange-100',
+  negotiation: 'bg-purple-100 text-purple-700 hover:bg-purple-100',
+  confirmed: 'bg-green-100 text-green-700 hover:bg-green-100',
+  closed: 'bg-gray-100 text-gray-700 hover:bg-gray-100',
+  cancelled: 'bg-red-100 text-red-700 hover:bg-red-100',
 }
 
 const statusLabels: Record<string, string> = {
-  opportunity: 'Opportunity',
-  prospect: 'Prospect',
-  won: 'Won',
-  lost: 'Lost',
-  'in-progress': 'In Progress',
-  'no-response': 'No Response',
-  disqualified: 'Disqualified',
-  'lost-prospect': 'Lost Prospect',
+  new: 'New',
+  contacted: 'Contacted',
+  proposal_sent: 'Proposal Sent',
+  negotiation: 'Negotiation',
+  confirmed: 'Confirmed',
+  closed: 'Closed',
+  cancelled: 'Cancelled',
 }
 
 export function LeadsTable({ leads, totalDocs }: { leads: Lead[]; totalDocs: number }) {

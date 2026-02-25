@@ -1,24 +1,13 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import Link from 'next/link'
+import { useActionState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
-const SERVICES = [
-  { label: 'Venue Decoration', value: 'venue-decoration' },
-  { label: 'Catering', value: 'catering' },
-  { label: 'Photography', value: 'photography' },
-  { label: 'DJ & Music', value: 'dj-music' },
-  { label: 'Mehendi', value: 'mehendi' },
-  { label: 'Florals', value: 'florals' },
-  { label: 'Lighting', value: 'lighting' },
-  { label: 'Hospitality', value: 'hospitality' },
-  { label: 'Baraat', value: 'baraat' },
-  { label: 'Special Effects', value: 'special-effects' },
-]
+import { createLead, type ActionState } from '@/app/actions/leads'
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
@@ -29,27 +18,7 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 }
 
 export default function AddLeadPage() {
-  const [isPending, setIsPending] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const form = e.currentTarget
-    const fullName = (form.elements.namedItem('fullName') as HTMLInputElement).value.trim()
-    const email = (form.elements.namedItem('email') as HTMLInputElement).value.trim()
-
-    setError('')
-    if (!fullName || !email) {
-      setError('Full name and email are required.')
-      return
-    }
-    setIsPending(true)
-    setTimeout(() => {
-      setIsPending(false)
-      setSuccess(true)
-    }, 800)
-  }
+  const [state, action, isPending] = useActionState<ActionState, FormData>(createLead, null)
 
   return (
     <div className="flex flex-1 flex-col p-6">
@@ -68,18 +37,13 @@ export default function AddLeadPage() {
           </p>
         </CardHeader>
         <CardContent>
-          {error && (
+          {state !== null && !state.success && (
             <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 ring-1 ring-red-200">
-              {error}
-            </div>
-          )}
-          {success && (
-            <div className="mb-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800 ring-1 ring-green-200">
-              Lead saved successfully!
+              {state.message}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-0">
+          <form action={action} className="space-y-0">
             {/* ── Contact Information ── */}
             <SectionHeading>Contact Information</SectionHeading>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -96,20 +60,6 @@ export default function AddLeadPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="coupleName" className="text-blue-600">
-                  Couple Name
-                </Label>
-                <Input
-                  id="coupleName"
-                  name="coupleName"
-                  placeholder="e.g. Eleanor & Mark Vance"
-                  disabled={isPending}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div className="space-y-2">
                 <Label htmlFor="email" className="text-blue-600">
                   Email *
                 </Label>
@@ -122,11 +72,25 @@ export default function AddLeadPage() {
                   disabled={isPending}
                 />
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div className="space-y-2">
                 <Label htmlFor="phone" className="text-blue-600">
                   Phone
                 </Label>
                 <Input id="phone" name="phone" placeholder="+91 98765 43210" disabled={isPending} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="leadSource" className="text-blue-600">
+                  Lead Source
+                </Label>
+                <Input
+                  id="leadSource"
+                  name="leadSource"
+                  placeholder="e.g. Google Form, Instagram"
+                  disabled={isPending}
+                />
               </div>
             </div>
 
@@ -140,38 +104,17 @@ export default function AddLeadPage() {
                 <select
                   id="status"
                   name="status"
-                  defaultValue="opportunity"
+                  defaultValue="new"
                   className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600"
                   disabled={isPending}
                 >
-                  <option value="opportunity">Opportunity</option>
-                  <option value="prospect">Prospect</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="won">Won</option>
-                  <option value="lost">Lost</option>
-                  <option value="no-response">No Response</option>
-                  <option value="disqualified">Disqualified</option>
-                  <option value="lost-prospect">Lost Prospect</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="leadSource" className="text-blue-600">
-                  Lead Source
-                </Label>
-                <select
-                  id="leadSource"
-                  name="leadSource"
-                  defaultValue="website"
-                  className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600"
-                  disabled={isPending}
-                >
-                  <option value="website">Website Enquiry</option>
-                  <option value="referral">Referral</option>
-                  <option value="social-media">Social Media</option>
-                  <option value="walk-in">Walk-in</option>
-                  <option value="phone-call">Phone Call</option>
-                  <option value="email">Email</option>
-                  <option value="other">Other</option>
+                  <option value="new">New</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="proposal_sent">Proposal Sent</option>
+                  <option value="negotiation">Negotiation</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="closed">Closed</option>
+                  <option value="cancelled">Cancelled</option>
                 </select>
               </div>
               <div className="space-y-2">
@@ -186,18 +129,44 @@ export default function AddLeadPage() {
                   disabled={isPending}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="guestCount" className="text-blue-600">
+                  Guest Count
+                </Label>
+                <Input
+                  id="guestCount"
+                  name="guestCount"
+                  type="number"
+                  placeholder="e.g. 200"
+                  disabled={isPending}
+                />
+              </div>
             </div>
 
-            <div className="space-y-2 mb-4">
-              <Label htmlFor="pocName" className="text-blue-600">
-                POC Name
-              </Label>
-              <Input
-                id="pocName"
-                name="pocName"
-                placeholder="Point of Contact name"
-                disabled={isPending}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="space-y-2">
+                <Label htmlFor="weddingStyle" className="text-blue-600">
+                  Wedding Style
+                </Label>
+                <Input
+                  id="weddingStyle"
+                  name="weddingStyle"
+                  placeholder="e.g. Traditional, Modern, etc."
+                  disabled={isPending}
+                />
+              </div>
+              <div className="space-y-2 flex items-end gap-2 pb-1">
+                <input
+                  type="checkbox"
+                  id="isDestination"
+                  name="isDestination"
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  disabled={isPending}
+                />
+                <Label htmlFor="isDestination" className="text-blue-600 cursor-pointer">
+                  Destination Wedding?
+                </Label>
+              </div>
             </div>
 
             {/* ── Event Dates ── */}
@@ -221,136 +190,6 @@ export default function AddLeadPage() {
                 </Label>
                 <Input id="weddingDate" name="weddingDate" type="date" disabled={isPending} />
               </div>
-            </div>
-
-            {/* ── Sales Timeline ── */}
-            <SectionHeading>Sales Timeline</SectionHeading>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstCallDate" className="text-blue-600">
-                  First Call Date
-                </Label>
-                <Input id="firstCallDate" name="firstCallDate" type="date" disabled={isPending} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="proposalSentDate" className="text-blue-600">
-                  Proposal Sent Date
-                </Label>
-                <Input
-                  id="proposalSentDate"
-                  name="proposalSentDate"
-                  type="date"
-                  disabled={isPending}
-                />
-              </div>
-            </div>
-
-            {/* ── Services Requested ── */}
-            <SectionHeading>Services Requested</SectionHeading>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-4">
-              {SERVICES.map((s) => (
-                <label
-                  key={s.value}
-                  className="flex items-center gap-2 text-sm rounded-md border px-3 py-2 cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors has-checked:bg-blue-50 has-checked:border-blue-400"
-                >
-                  <input
-                    type="checkbox"
-                    name="servicesRequested"
-                    value={s.value}
-                    disabled={isPending}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span>{s.label}</span>
-                </label>
-              ))}
-            </div>
-
-            {/* ── Event Details ── */}
-            <SectionHeading>Event Details</SectionHeading>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div className="space-y-2">
-                <Label htmlFor="basicInformation" className="text-blue-600">
-                  Basic Information
-                </Label>
-                <textarea
-                  id="basicInformation"
-                  name="basicInformation"
-                  rows={4}
-                  placeholder="e.g. Traditional Indian Wedding, approx. 300 guests, 3-day event."
-                  className="w-full rounded-md border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-600"
-                  disabled={isPending}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="hospitalityServices" className="text-blue-600">
-                  Hospitality &amp; Misc. Services
-                </Label>
-                <textarea
-                  id="hospitalityServices"
-                  name="hospitalityServices"
-                  rows={4}
-                  placeholder="e.g. Guest accommodation for 100 people, local transport for VIPs."
-                  className="w-full rounded-md border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-600"
-                  disabled={isPending}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="typesOfServiceRequired" className="text-blue-600">
-                  Types of Service Required
-                </Label>
-                <textarea
-                  id="typesOfServiceRequired"
-                  name="typesOfServiceRequired"
-                  rows={4}
-                  placeholder="e.g. Venue Decor, Catering, Photography, DJ & Music, Hospitality."
-                  className="w-full rounded-md border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-600"
-                  disabled={isPending}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2 mb-4">
-              <Label htmlFor="artistsRequirement" className="text-blue-600">
-                Artists Requirement
-              </Label>
-              <textarea
-                id="artistsRequirement"
-                name="artistsRequirement"
-                rows={3}
-                placeholder="e.g. Live band for Sangeet, DJ for reception, traditional dancers for ceremony."
-                className="w-full rounded-md border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-600"
-                disabled={isPending}
-              />
-            </div>
-
-            {/* ── Notes & Enquiry ── */}
-            <SectionHeading>Notes &amp; Enquiry</SectionHeading>
-            <div className="space-y-2 mb-4">
-              <Label htmlFor="internalNotes" className="text-blue-600">
-                Internal Notes
-              </Label>
-              <textarea
-                id="internalNotes"
-                name="internalNotes"
-                rows={3}
-                placeholder="Internal team notes about this lead..."
-                className="w-full rounded-md border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-600"
-                disabled={isPending}
-              />
-            </div>
-
-            <div className="space-y-2 mb-6">
-              <Label htmlFor="googleFormEnquiry" className="text-blue-600">
-                Google Form Enquiry
-              </Label>
-              <textarea
-                id="googleFormEnquiry"
-                name="googleFormEnquiry"
-                rows={5}
-                placeholder="Paste the raw response from the client intake Google Form here..."
-                className="w-full rounded-md border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-600"
-                disabled={isPending}
-              />
             </div>
 
             {/* ── Actions ── */}

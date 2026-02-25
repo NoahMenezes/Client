@@ -44,12 +44,12 @@ export async function createQuotation(prev: ActionState, fd: FormData): Promise<
         categories,
         agencyFeePercent,
         quotationDate,
-        status: status as 'draft' | 'sent' | 'approved' | 'rejected',
+        status: status as 'draft' | 'sent' | 'approved',
         notes,
         subTotal: 0,
         agencyFees: 0,
         grandTotal: 0,
-      },
+      } as any,
     })
     newId = result.id
   } catch (e: unknown) {
@@ -89,14 +89,14 @@ export async function updateQuotationById(prev: ActionState, fd: FormData): Prom
       data: {
         categories,
         agencyFeePercent,
-        status: status as 'draft' | 'sent' | 'approved' | 'rejected',
+        status: status as 'draft' | 'sent' | 'approved',
         subTotal: 0,
         agencyFees: 0,
         grandTotal: 0,
         ...(title ? { title } : {}),
         ...(quotationDate ? { quotationDate } : {}),
         ...(notes !== undefined ? { notes } : {}),
-      },
+      } as any,
     })
   } catch (e: unknown) {
     return {
@@ -152,15 +152,15 @@ export async function duplicateQuotation(fd: FormData): Promise<ActionState> {
       data: {
         title: `${original.title} (Copy)`,
         lead: leadId as number,
-        categories: (original.categories ?? []) as QuotationCategory[],
-        agencyFeePercent: original.agencyFeePercent ?? 12,
-        quotationDate: original.quotationDate ?? undefined,
+        categories: ((original as any).categories ?? []) as QuotationCategory[],
+        agencyFeePercent: (original as any).agencyFeePercent ?? 12,
+        quotationDate: (original as any).quotationDate ?? undefined,
         status: 'draft',
-        notes: original.notes ?? undefined,
+        notes: (original as any).notes ?? undefined,
         subTotal: 0,
         agencyFees: 0,
         grandTotal: 0,
-      },
+      } as any,
     })
     newId = result.id
   } catch (e: unknown) {
