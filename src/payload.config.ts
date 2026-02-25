@@ -8,12 +8,17 @@ import sharp from 'sharp'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Leads } from './collections/Leads'
-import { Employees } from './collections/Employees'
-import { Storage } from './collections/Storage'
+import { Contacts } from './collections/Contacts'
 import { Services } from './collections/Services'
-import { FormFields } from './collections/FormFields'
+import { ServiceCategories } from './collections/ServiceCategories'
+import { LeadServices } from './collections/LeadServices'
 import { Quotations } from './collections/Quotations'
+import { QuotationItems } from './collections/QuotationItems'
 import { Notes } from './collections/Notes'
+import { Documents } from './collections/Documents'
+import { LeadAssignments } from './collections/LeadAssignments'
+import { FormFields } from './collections/FormFields'
+import { Storage } from './collections/Storage'
 import { Settings } from './globals/Settings'
 
 const filename = fileURLToPath(import.meta.url)
@@ -26,7 +31,22 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Leads, Employees, Storage, Services, FormFields, Quotations, Notes],
+  collections: [
+    Users,
+    Media,
+    Leads,
+    Contacts,
+    Services,
+    ServiceCategories,
+    LeadServices,
+    Quotations,
+    QuotationItems,
+    Notes,
+    Documents,
+    LeadAssignments,
+    FormFields,
+    Storage,
+  ],
   globals: [Settings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

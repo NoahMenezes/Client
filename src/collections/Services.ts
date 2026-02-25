@@ -3,38 +3,45 @@ import type { CollectionConfig } from 'payload'
 export const Services: CollectionConfig = {
   slug: 'services',
   admin: {
-    useAsTitle: 'serviceName',
-    defaultColumns: ['serviceName', 'category', 'unit', 'price', 'createdAt'],
+    useAsTitle: 'name',
+    defaultColumns: ['name', 'category', 'base_price', 'is_active', 'createdAt'],
   },
   fields: [
-    { name: 'serviceName', type: 'text', required: true },
-    { name: 'description', type: 'textarea' },
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'description',
+      type: 'textarea',
+    },
     {
       name: 'category',
-      type: 'select',
-      options: [
-        { label: 'Photography', value: 'photography' },
-        { label: 'Coordination', value: 'coordination' },
-        { label: 'Decor', value: 'decor' },
-        { label: 'Catering', value: 'catering' },
-        { label: 'Entertainment', value: 'entertainment' },
-        { label: 'Other', value: 'other' },
-      ],
-      defaultValue: 'other',
+      type: 'relationship',
+      relationTo: 'service-categories',
+      required: true,
     },
     {
-      name: 'unit',
-      type: 'select',
-      options: [
-        { label: 'Per Event', value: 'per-event' },
-        { label: 'Per Plate', value: 'per-plate' },
-        { label: 'Per Hour', value: 'per-hour' },
-        { label: 'Package', value: 'package' },
-        { label: 'Per Unit', value: 'per-unit' },
-      ],
-      defaultValue: 'per-event',
+      name: 'base_price',
+      type: 'number',
+      required: true,
+      admin: {
+        description: 'Default price for this service',
+      },
     },
-    { name: 'price', type: 'number', required: true },
+    {
+      name: 'religion_type',
+      type: 'text',
+      admin: {
+        description: 'e.g. Hindu, Christian (optional)',
+      },
+    },
+    {
+      name: 'is_active',
+      type: 'checkbox',
+      defaultValue: true,
+    },
   ],
   timestamps: true,
 }

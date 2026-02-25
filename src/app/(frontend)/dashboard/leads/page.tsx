@@ -7,89 +7,55 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 const statusStyles: Record<string, string> = {
-  opportunity: 'bg-orange-100 text-orange-700 hover:bg-orange-100',
-  prospect: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100',
-  won: 'bg-green-100 text-green-700 hover:bg-green-100',
-  lost: 'bg-red-100 text-red-700 hover:bg-red-100',
-  'in-progress': 'bg-blue-100 text-blue-700 hover:bg-blue-100',
-  'no-response': 'bg-gray-100 text-gray-600 hover:bg-gray-100',
-  disqualified: 'bg-red-100 text-red-700 hover:bg-red-100',
-  'lost-prospect': 'bg-red-50 text-red-500 hover:bg-red-50',
+  new: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
+  contacted: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100',
+  proposal_sent: 'bg-orange-100 text-orange-700 hover:bg-orange-100',
+  negotiation: 'bg-purple-100 text-purple-700 hover:bg-purple-100',
+  confirmed: 'bg-green-100 text-green-700 hover:bg-green-100',
+  closed: 'bg-gray-100 text-gray-700 hover:bg-gray-100',
+  cancelled: 'bg-red-100 text-red-700 hover:bg-red-100',
 }
 
 const statusLabels: Record<string, string> = {
-  opportunity: 'Opportunity',
-  prospect: 'Prospect',
-  won: 'Won',
-  lost: 'Lost',
-  'in-progress': 'In Progress',
-  'no-response': 'No Response',
-  disqualified: 'Disqualified',
-  'lost-prospect': 'Lost Prospect',
+  new: 'New',
+  contacted: 'Contacted',
+  proposal_sent: 'Proposal Sent',
+  negotiation: 'Negotiation',
+  confirmed: 'Confirmed',
+  closed: 'Closed',
+  cancelled: 'Cancelled',
 }
 
 const statusCategories = [
   {
-    value: 'opportunity',
-    label: 'Opportunity',
-    description:
-      'Leads currently in processing. Added to both Active Leads and the Calendar for scheduling follow-ups.',
-    visibility: 'Shown in Active Leads & Calendar',
-    visibilityClass: 'text-green-600',
+    value: 'new',
+    label: 'New',
+    description: 'Fresh leads from Google Form or manual entry.',
+    visibility: 'Visible in Pipeline',
+    visibilityClass: 'text-blue-600',
     iconBg: 'bg-blue-100',
     iconColor: 'text-blue-600',
-    icon: '↗',
+    icon: '★',
   },
   {
-    value: 'prospect',
-    label: 'Prospect',
-    description: 'Potential customers being nurtured. Requires follow-up activities.',
-    visibility: 'Shown in Active Leads & Calendar',
+    value: 'contacted',
+    label: 'Contacted',
+    description: 'Initial contact made with the lead.',
+    visibility: 'Visible in Pipeline',
+    visibilityClass: 'text-yellow-600',
+    iconBg: 'bg-yellow-100',
+    iconColor: 'text-yellow-600',
+    icon: '📞',
+  },
+  {
+    value: 'confirmed',
+    label: 'Confirmed',
+    description: 'Wedding confirmed and booked.',
+    visibility: 'Visible in Pipeline & Calendar',
     visibilityClass: 'text-green-600',
-    iconBg: 'bg-orange-100',
-    iconColor: 'text-orange-600',
-    icon: '⚡',
-  },
-  {
-    value: 'won',
-    label: 'Won',
-    description:
-      'Converted leads. Moved to the Won section. Still visible on calendar to indicate booked dates.',
-    visibility: 'Hidden from Active Leads · Visible in Calendar',
-    visibilityClass: 'text-blue-600',
     iconBg: 'bg-green-100',
     iconColor: 'text-green-600',
     icon: '✓',
-  },
-  {
-    value: 'no-response',
-    label: 'No Response',
-    description: 'Lead is unresponsive. Automatically moved to Closed Leads.',
-    visibility: 'Hidden from Active Leads & Calendar',
-    visibilityClass: 'text-gray-400',
-    iconBg: 'bg-red-100',
-    iconColor: 'text-red-500',
-    icon: '✕',
-  },
-  {
-    value: 'disqualified',
-    label: 'Disqualified',
-    description: 'Lead does not qualify. Removed from pipeline. Requires follow-up.',
-    visibility: 'Hidden from Active Leads & Calendar',
-    visibilityClass: 'text-gray-400',
-    iconBg: 'bg-red-100',
-    iconColor: 'text-red-500',
-    icon: '✕',
-  },
-  {
-    value: 'lost-prospect',
-    label: 'Lost Prospect',
-    description: 'Prospect not converted. Stored under closed leads.',
-    visibility: 'Hidden from Active Leads & Calendar',
-    visibilityClass: 'text-gray-400',
-    iconBg: 'bg-red-50',
-    iconColor: 'text-red-400',
-    icon: '✕',
   },
 ]
 
@@ -110,8 +76,8 @@ export default async function LeadsPage({ searchParams }: Props) {
 
     if (q) {
       where.or = [
-        { fullName: { contains: q } },
-        { email: { contains: q } },
+        { 'contact.name': { contains: q } },
+        { 'contact.email': { contains: q } },
         { leadId: { contains: q } },
       ]
     }
@@ -119,15 +85,14 @@ export default async function LeadsPage({ searchParams }: Props) {
     if (status) {
       where.status = { equals: status }
     } else {
-      // By default only show active statuses
-      where.status = { in: ['opportunity', 'prospect', 'in-progress', 'won'] }
+      where.status = { in: ['new', 'contacted', 'proposal_sent', 'negotiation', 'confirmed'] }
     }
 
     if (from || to) {
       const dateFilter: Record<string, string> = {}
       if (from) dateFilter.greater_than_equal = from
       if (to) dateFilter.less_than_equal = to
-      where.checkInDate = dateFilter
+      where.weddingDate = dateFilter
     }
 
     const res = await payload.find({
@@ -135,19 +100,20 @@ export default async function LeadsPage({ searchParams }: Props) {
       where,
       sort: '-createdAt',
       limit: 50,
-      depth: 0,
+      depth: 1,
       overrideAccess: true,
     })
 
     leads = res.docs.map((d: any) => ({
       id: d.id,
       leadId: d.leadId ?? null,
-      fullName: d.fullName ?? '',
-      email: d.email ?? '',
-      phone: d.phone ?? null,
-      status: d.status ?? 'opportunity',
+      fullName: d.contact?.name ?? 'Unknown',
+      email: d.contact?.email ?? '',
+      phone: d.contact?.phone ?? null,
+      status: d.status ?? 'new',
       checkInDate: d.checkInDate ?? null,
       checkOutDate: d.checkOutDate ?? null,
+      weddingDate: d.weddingDate ?? null,
     }))
     totalDocs = res.totalDocs
   } catch (e) {

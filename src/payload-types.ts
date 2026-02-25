@@ -70,12 +70,17 @@ export interface Config {
     users: User;
     media: Media;
     leads: Lead;
-    employees: Employee;
-    storage: Storage;
+    contacts: Contact;
     services: Service;
-    'form-fields': FormField;
+    'service-categories': ServiceCategory;
+    'lead-services': LeadService;
     quotations: Quotation;
+    'quotation-items': QuotationItem;
     notes: Note;
+    documents: Document;
+    'lead-assignments': LeadAssignment;
+    'form-fields': FormField;
+    storage: Storage;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -86,12 +91,17 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
-    employees: EmployeesSelect<false> | EmployeesSelect<true>;
-    storage: StorageSelect<false> | StorageSelect<true>;
+    contacts: ContactsSelect<false> | ContactsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
-    'form-fields': FormFieldsSelect<false> | FormFieldsSelect<true>;
+    'service-categories': ServiceCategoriesSelect<false> | ServiceCategoriesSelect<true>;
+    'lead-services': LeadServicesSelect<false> | LeadServicesSelect<true>;
     quotations: QuotationsSelect<false> | QuotationsSelect<true>;
+    'quotation-items': QuotationItemsSelect<false> | QuotationItemsSelect<true>;
     notes: NotesSelect<false> | NotesSelect<true>;
+    documents: DocumentsSelect<false> | DocumentsSelect<true>;
+    'lead-assignments': LeadAssignmentsSelect<false> | LeadAssignmentsSelect<true>;
+    'form-fields': FormFieldsSelect<false> | FormFieldsSelect<true>;
+    storage: StorageSelect<false> | StorageSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -138,6 +148,8 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
+  name: string;
+  role: 'admin' | 'sales' | 'coordinator' | 'manager';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -182,138 +194,57 @@ export interface Media {
  */
 export interface Lead {
   id: number;
-  fullName: string;
-  email: string;
-  phone?: string | null;
-  status:
-    | 'opportunity'
-    | 'prospect'
-    | 'won'
-    | 'lost'
-    | 'in-progress'
-    | 'no-response'
-    | 'disqualified'
-    | 'lost-prospect';
-  checkInDate?: string | null;
-  checkOutDate?: string | null;
-  /**
-   * The actual wedding/event date
-   */
-  weddingDate?: string | null;
-  /**
-   * Client budget in ₹
-   */
-  budget?: number | null;
-  /**
-   * e.g. Eleanor & Mark Vance
-   */
-  coupleName?: string | null;
-  leadSource?: ('website' | 'referral' | 'social-media' | 'walk-in' | 'phone-call' | 'email' | 'other') | null;
-  servicesRequested?:
-    | (
-        | 'venue-decoration'
-        | 'catering'
-        | 'photography'
-        | 'dj-music'
-        | 'mehendi'
-        | 'florals'
-        | 'lighting'
-        | 'hospitality'
-        | 'baraat'
-        | 'special-effects'
-      )[]
-    | null;
-  assignedEmployee?: (number | null) | Employee;
-  /**
-   * Latest note / Google Form Enquiry response
-   */
-  internalNotes?: string | null;
-  /**
-   * e.g. Traditional Indian Wedding, approx. 300 guests, 3-day event.
-   */
-  basicInformation?: string | null;
-  /**
-   * Hospitality & Misc. Services details
-   */
-  hospitalityServices?: string | null;
-  /**
-   * Free-form description of all services required
-   */
-  typesOfServiceRequired?: string | null;
-  /**
-   * Artists & entertainment requirements
-   */
-  artistsRequirement?: string | null;
-  /**
-   * Raw response from the client intake Google Form
-   */
-  googleFormEnquiry?: string | null;
-  firstCallDate?: string | null;
-  proposalSentDate?: string | null;
-  /**
-   * Point of Contact name
-   */
-  pocName?: string | null;
-  /**
-   * Legacy simple quotation. Use the Quotations collection for full quotations.
-   */
-  quotation?:
-    | {
-        service: string;
-        pricePerUnit: number;
-        units: number;
-        total?: number | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Auto-calculated from quotation items
-   */
-  grandTotal?: number | null;
   /**
    * Auto-generated lead ID (e.g. PK1024)
    */
   leadId?: string | null;
+  contact: number | Contact;
+  status: 'new' | 'contacted' | 'proposal_sent' | 'negotiation' | 'confirmed' | 'closed' | 'cancelled';
+  assignedTo?: (number | null) | User;
+  /**
+   * The actual wedding/event date
+   */
+  weddingDate?: string | null;
+  checkInDate?: string | null;
+  checkOutDate?: string | null;
+  guestCount?: number | null;
+  /**
+   * Client budget
+   */
+  budget?: number | null;
+  /**
+   * e.g. Traditional, Modern, etc.
+   */
+  weddingStyle?: string | null;
+  isDestination?: boolean | null;
+  /**
+   * Raw data from Google Form submission
+   */
+  googleFormRawData?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "employees".
+ * via the `definition` "contacts".
  */
-export interface Employee {
+export interface Contact {
   id: number;
   name: string;
   email: string;
   phone?: string | null;
-  role?: string | null;
-  status?: ('active' | 'inactive') | null;
-  department?: string | null;
-  notes?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "storage".
- */
-export interface Storage {
-  id: number;
-  name: string;
-  type?: ('document' | 'image' | 'video' | 'audio' | 'other') | null;
   /**
-   * File size in bytes
+   * Lead source (e.g. Google Form, Instagram)
    */
-  size?: number | null;
-  url?: string | null;
-  status?: ('active' | 'archived' | 'deleted') | null;
-  tags?:
-    | {
-        tag?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  notes?: string | null;
+  source?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -323,11 +254,115 @@ export interface Storage {
  */
 export interface Service {
   id: number;
-  serviceName: string;
+  name: string;
   description?: string | null;
-  category?: ('photography' | 'coordination' | 'decor' | 'catering' | 'entertainment' | 'other') | null;
-  unit?: ('per-event' | 'per-plate' | 'per-hour' | 'package' | 'per-unit') | null;
-  price: number;
+  category: number | ServiceCategory;
+  /**
+   * Default price for this service
+   */
+  base_price: number;
+  /**
+   * e.g. Hindu, Christian (optional)
+   */
+  religion_type?: string | null;
+  is_active?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-categories".
+ */
+export interface ServiceCategory {
+  id: number;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-services".
+ */
+export interface LeadService {
+  id: number;
+  lead: number | Lead;
+  service: number | Service;
+  quantity: number;
+  /**
+   * Override base price for this specific lead
+   */
+  custom_price?: number | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quotations".
+ */
+export interface Quotation {
+  id: number;
+  title: string;
+  lead: number | Lead;
+  status: 'draft' | 'sent' | 'approved';
+  subtotal?: number | null;
+  agencyFee?: number | null;
+  grandTotal?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quotation-items".
+ */
+export interface QuotationItem {
+  id: number;
+  quotation: number | Quotation;
+  /**
+   * Name of the service at the time of quotation creation
+   */
+  serviceNameSnapshot: string;
+  unitPrice: number;
+  quantity: number;
+  total?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notes".
+ */
+export interface Note {
+  id: number;
+  lead: number | Lead;
+  user: number | User;
+  title: string;
+  body: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "documents".
+ */
+export interface Document {
+  id: number;
+  lead: number | Lead;
+  uploadedBy: number | User;
+  fileUrl: string;
+  fileName: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-assignments".
+ */
+export interface LeadAssignment {
+  id: number;
+  lead: number | Lead;
+  user: number | User;
+  role: 'sales' | 'coordinator' | 'manager';
   updatedAt: string;
   createdAt: string;
 }
@@ -354,89 +389,26 @@ export interface FormField {
   createdAt: string;
 }
 /**
- * Manage quotations created for leads.
- *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "quotations".
+ * via the `definition` "storage".
  */
-export interface Quotation {
+export interface Storage {
   id: number;
+  name: string;
+  type?: ('document' | 'image' | 'video' | 'audio' | 'other') | null;
   /**
-   * e.g. "Wedding Package – Priya & Rohan"
+   * File size in bytes
    */
-  title: string;
-  /**
-   * The lead this quotation belongs to.
-   */
-  lead: number | Lead;
-  status: 'draft' | 'sent' | 'approved' | 'rejected';
-  quotationDate?: string | null;
-  /**
-   * Agency fee percentage (e.g. 12 for 12%)
-   */
-  agencyFeePercent?: number | null;
-  /**
-   * Group line items by category (e.g. Guest Hospitality, Artists & Entertainment)
-   */
-  categories?:
+  size?: number | null;
+  url?: string | null;
+  status?: ('active' | 'archived' | 'deleted') | null;
+  tags?:
     | {
-        categoryName: string;
-        items?:
-          | {
-              particulars: string;
-              amount: number;
-              quantity: number;
-              /**
-               * Auto-calculated: amount × quantity
-               */
-              total?: number | null;
-              remarks?: string | null;
-              id?: string | null;
-            }[]
-          | null;
+        tag?: string | null;
         id?: string | null;
       }[]
     | null;
-  /**
-   * Auto-calculated sum of all line items.
-   */
-  subTotal?: number | null;
-  /**
-   * Auto-calculated: subTotal × agencyFeePercent / 100
-   */
-  agencyFees?: number | null;
-  /**
-   * Auto-calculated: subTotal + agencyFees
-   */
-  grandTotal?: number | null;
-  /**
-   * Internal notes about this quotation.
-   */
   notes?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Internal notes attached to leads.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "notes".
- */
-export interface Note {
-  id: number;
-  /**
-   * The lead this note belongs to.
-   */
-  lead: number | Lead;
-  content: string;
-  /**
-   * Name or identifier of the person who created this note.
-   */
-  createdBy?: string | null;
-  /**
-   * Pin this note to the top of the list.
-   */
-  pinned?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -477,28 +449,48 @@ export interface PayloadLockedDocument {
         value: number | Lead;
       } | null)
     | ({
-        relationTo: 'employees';
-        value: number | Employee;
-      } | null)
-    | ({
-        relationTo: 'storage';
-        value: number | Storage;
+        relationTo: 'contacts';
+        value: number | Contact;
       } | null)
     | ({
         relationTo: 'services';
         value: number | Service;
       } | null)
     | ({
-        relationTo: 'form-fields';
-        value: number | FormField;
+        relationTo: 'service-categories';
+        value: number | ServiceCategory;
+      } | null)
+    | ({
+        relationTo: 'lead-services';
+        value: number | LeadService;
       } | null)
     | ({
         relationTo: 'quotations';
         value: number | Quotation;
       } | null)
     | ({
+        relationTo: 'quotation-items';
+        value: number | QuotationItem;
+      } | null)
+    | ({
         relationTo: 'notes';
         value: number | Note;
+      } | null)
+    | ({
+        relationTo: 'documents';
+        value: number | Document;
+      } | null)
+    | ({
+        relationTo: 'lead-assignments';
+        value: number | LeadAssignment;
+      } | null)
+    | ({
+        relationTo: 'form-fields';
+        value: number | FormField;
+      } | null)
+    | ({
+        relationTo: 'storage';
+        value: number | Storage;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -547,6 +539,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -587,73 +581,30 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "leads_select".
  */
 export interface LeadsSelect<T extends boolean = true> {
-  fullName?: T;
-  email?: T;
-  phone?: T;
+  leadId?: T;
+  contact?: T;
   status?: T;
+  assignedTo?: T;
+  weddingDate?: T;
   checkInDate?: T;
   checkOutDate?: T;
-  weddingDate?: T;
+  guestCount?: T;
   budget?: T;
-  coupleName?: T;
-  leadSource?: T;
-  servicesRequested?: T;
-  assignedEmployee?: T;
-  internalNotes?: T;
-  basicInformation?: T;
-  hospitalityServices?: T;
-  typesOfServiceRequired?: T;
-  artistsRequirement?: T;
-  googleFormEnquiry?: T;
-  firstCallDate?: T;
-  proposalSentDate?: T;
-  pocName?: T;
-  quotation?:
-    | T
-    | {
-        service?: T;
-        pricePerUnit?: T;
-        units?: T;
-        total?: T;
-        id?: T;
-      };
-  grandTotal?: T;
-  leadId?: T;
+  weddingStyle?: T;
+  isDestination?: T;
+  googleFormRawData?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "employees_select".
+ * via the `definition` "contacts_select".
  */
-export interface EmployeesSelect<T extends boolean = true> {
+export interface ContactsSelect<T extends boolean = true> {
   name?: T;
   email?: T;
   phone?: T;
-  role?: T;
-  status?: T;
-  department?: T;
-  notes?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "storage_select".
- */
-export interface StorageSelect<T extends boolean = true> {
-  name?: T;
-  type?: T;
-  size?: T;
-  url?: T;
-  status?: T;
-  tags?:
-    | T
-    | {
-        tag?: T;
-        id?: T;
-      };
-  notes?: T;
+  source?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -662,11 +613,96 @@ export interface StorageSelect<T extends boolean = true> {
  * via the `definition` "services_select".
  */
 export interface ServicesSelect<T extends boolean = true> {
-  serviceName?: T;
+  name?: T;
   description?: T;
   category?: T;
-  unit?: T;
-  price?: T;
+  base_price?: T;
+  religion_type?: T;
+  is_active?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-categories_select".
+ */
+export interface ServiceCategoriesSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-services_select".
+ */
+export interface LeadServicesSelect<T extends boolean = true> {
+  lead?: T;
+  service?: T;
+  quantity?: T;
+  custom_price?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quotations_select".
+ */
+export interface QuotationsSelect<T extends boolean = true> {
+  title?: T;
+  lead?: T;
+  status?: T;
+  subtotal?: T;
+  agencyFee?: T;
+  grandTotal?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quotation-items_select".
+ */
+export interface QuotationItemsSelect<T extends boolean = true> {
+  quotation?: T;
+  serviceNameSnapshot?: T;
+  unitPrice?: T;
+  quantity?: T;
+  total?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notes_select".
+ */
+export interface NotesSelect<T extends boolean = true> {
+  lead?: T;
+  user?: T;
+  title?: T;
+  body?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "documents_select".
+ */
+export interface DocumentsSelect<T extends boolean = true> {
+  lead?: T;
+  uploadedBy?: T;
+  fileUrl?: T;
+  fileName?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-assignments_select".
+ */
+export interface LeadAssignmentsSelect<T extends boolean = true> {
+  lead?: T;
+  user?: T;
+  role?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -690,46 +726,21 @@ export interface FormFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "quotations_select".
+ * via the `definition` "storage_select".
  */
-export interface QuotationsSelect<T extends boolean = true> {
-  title?: T;
-  lead?: T;
+export interface StorageSelect<T extends boolean = true> {
+  name?: T;
+  type?: T;
+  size?: T;
+  url?: T;
   status?: T;
-  quotationDate?: T;
-  agencyFeePercent?: T;
-  categories?:
+  tags?:
     | T
     | {
-        categoryName?: T;
-        items?:
-          | T
-          | {
-              particulars?: T;
-              amount?: T;
-              quantity?: T;
-              total?: T;
-              remarks?: T;
-              id?: T;
-            };
+        tag?: T;
         id?: T;
       };
-  subTotal?: T;
-  agencyFees?: T;
-  grandTotal?: T;
   notes?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "notes_select".
- */
-export interface NotesSelect<T extends boolean = true> {
-  lead?: T;
-  content?: T;
-  createdBy?: T;
-  pinned?: T;
   updatedAt?: T;
   createdAt?: T;
 }

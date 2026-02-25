@@ -1,28 +1,33 @@
 import type { CollectionConfig } from 'payload'
 
-export const Users: CollectionConfig = {
-  slug: 'users',
+export const LeadAssignments: CollectionConfig = {
+  slug: 'lead-assignments',
   admin: {
-    useAsTitle: 'name',
+    useAsTitle: 'id',
   },
-  auth: true,
   fields: [
     {
-      name: 'name',
-      type: 'text',
+      name: 'lead',
+      type: 'relationship',
+      relationTo: 'leads',
+      required: true,
+    },
+    {
+      name: 'user',
+      type: 'relationship',
+      relationTo: 'users',
       required: true,
     },
     {
       name: 'role',
       type: 'select',
       options: [
-        { label: 'Admin', value: 'admin' },
         { label: 'Sales', value: 'sales' },
         { label: 'Coordinator', value: 'coordinator' },
         { label: 'Manager', value: 'manager' },
       ],
       required: true,
-      defaultValue: 'coordinator',
     },
   ],
+  timestamps: true,
 }

@@ -1,10 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
-export const Notes: CollectionConfig = {
-  slug: 'notes',
+export const Documents: CollectionConfig = {
+  slug: 'documents',
   admin: {
-    useAsTitle: 'title',
-    defaultColumns: ['title', 'lead', 'user', 'createdAt'],
+    useAsTitle: 'fileName',
   },
   fields: [
     {
@@ -14,19 +13,19 @@ export const Notes: CollectionConfig = {
       required: true,
     },
     {
-      name: 'user',
+      name: 'uploadedBy',
       type: 'relationship',
       relationTo: 'users',
       required: true,
     },
     {
-      name: 'title',
+      name: 'fileUrl',
       type: 'text',
       required: true,
     },
     {
-      name: 'body',
-      type: 'textarea',
+      name: 'fileName',
+      type: 'text',
       required: true,
     },
   ],
