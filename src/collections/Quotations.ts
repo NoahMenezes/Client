@@ -30,12 +30,35 @@ export const Quotations: CollectionConfig = {
       required: true,
     },
     {
-      name: 'subtotal',
+      name: 'categories',
+      type: 'json',
+      admin: {
+        description: 'JSON array of quotation categories and their line items',
+      },
+    },
+    {
+      name: 'agencyFeePercent',
+      type: 'number',
+      defaultValue: 12,
+      admin: {
+        description: 'Agency fee percentage applied to subtotal',
+      },
+    },
+    {
+      name: 'quotationDate',
+      type: 'date',
+    },
+    {
+      name: 'notes',
+      type: 'textarea',
+    },
+    {
+      name: 'subTotal',
       type: 'number',
       defaultValue: 0,
     },
     {
-      name: 'agencyFee',
+      name: 'agencyFees',
       type: 'number',
       defaultValue: 0,
     },
@@ -47,3 +70,4 @@ export const Quotations: CollectionConfig = {
   ],
   timestamps: true,
 }
+
