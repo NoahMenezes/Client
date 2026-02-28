@@ -100,12 +100,7 @@ const statusLabels: Record<string, string> = {
   'lost-prospect': 'Lost Prospect',
 }
 
-const quotationStatusStyles: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-600',
-  sent: 'bg-blue-100 text-blue-700',
-  approved: 'bg-green-100 text-green-700',
-  rejected: 'bg-red-100 text-red-700',
-}
+
 
 function fmt(n: number) {
   return n.toLocaleString('en-IN', { minimumFractionDigits: 0 })
@@ -124,31 +119,7 @@ function formatDate(dateStr: string | null | undefined) {
   }
 }
 
-function formatDateShort(dateStr: string) {
-  try {
-    return new Date(dateStr).toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    })
-  } catch {
-    return dateStr
-  }
-}
 
-function timeAgo(dateStr: string) {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60000)
-  if (diffMins < 1) return 'just now'
-  if (diffMins < 60) return `${diffMins}m ago`
-  const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-  const diffDays = Math.floor(diffHours / 24)
-  if (diffDays < 7) return `${diffDays}d ago`
-  return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-}
 
 export default function LeadProfileTabs({
   lead,

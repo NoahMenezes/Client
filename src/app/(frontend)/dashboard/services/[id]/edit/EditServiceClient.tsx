@@ -14,10 +14,7 @@ export default function EditServiceClient({ service }: { service: any }) {
   return (
     <div className="flex flex-1 flex-col p-6">
       <div className="mb-6 flex items-center gap-3">
-        <Link
-          href="/dashboard/settings"
-          className="text-gray-400 hover:text-gray-700 text-sm"
-        >
+        <Link href="/dashboard/settings" className="text-gray-400 hover:text-gray-700 text-sm">
           ← Back to Settings
         </Link>
         <h1 className="text-2xl font-bold">Edit Service</h1>
@@ -44,7 +41,7 @@ export default function EditServiceClient({ service }: { service: any }) {
               <Input
                 id="serviceName"
                 name="serviceName"
-                defaultValue={service.serviceName}
+                defaultValue={service.name}
                 placeholder="e.g. Bronze Package"
                 required
                 disabled={isPending}
@@ -56,37 +53,41 @@ export default function EditServiceClient({ service }: { service: any }) {
                 <Label htmlFor="category" className="text-blue-600">
                   Category
                 </Label>
-                <select
+                <input
                   id="category"
                   name="category"
-                  defaultValue={service.category}
-                  className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600"
-                  disabled={isPending}
-                >
-                  <option value="photography">Photography</option>
-                  <option value="coordination">Coordination</option>
-                  <option value="decor">Decor</option>
-                  <option value="catering">Catering</option>
-                  <option value="entertainment">Entertainment</option>
-                  <option value="other">Other</option>
-                </select>
+                  defaultValue={
+                    typeof service.category === 'object' && service.category
+                      ? service.category.id
+                      : (service.category ?? '')
+                  }
+                  type="hidden"
+                />
+                <Input
+                  id="categoryDisplay"
+                  defaultValue={
+                    typeof service.category === 'object' && service.category
+                      ? service.category.name
+                      : ''
+                  }
+                  placeholder="Category"
+                  disabled
+                  className="bg-muted"
+                />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="unit" className="text-blue-600">
-                  Unit
+                <Label htmlFor="is_active" className="text-blue-600">
+                  Status
                 </Label>
                 <select
-                  id="unit"
-                  name="unit"
-                  defaultValue={service.unit}
+                  id="is_active"
+                  name="is_active"
+                  defaultValue={service.is_active !== false ? 'true' : 'false'}
                   className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600"
                   disabled={isPending}
                 >
-                  <option value="per-event">Per Event</option>
-                  <option value="per-plate">Per Plate</option>
-                  <option value="per-hour">Per Hour</option>
-                  <option value="package">Package</option>
-                  <option value="per-unit">Per Unit</option>
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
                 </select>
               </div>
             </div>
@@ -99,7 +100,7 @@ export default function EditServiceClient({ service }: { service: any }) {
                 id="price"
                 name="price"
                 type="number"
-                defaultValue={service.price}
+                defaultValue={service.base_price}
                 placeholder="0.00"
                 required
                 disabled={isPending}

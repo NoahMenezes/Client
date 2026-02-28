@@ -71,7 +71,6 @@ export default async function QuotationPrintPage({ params }: PageProps) {
 
       {/* Global print styles injected inline via dangerouslySetInnerHTML on a style tag */}
       <style
-        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
           __html: `
             @media print {

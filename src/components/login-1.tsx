@@ -7,10 +7,10 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
-import { registerUser, type AuthState } from '@/app/actions/auth'
+import { loginUser, type AuthState } from '@/app/actions/auth'
 
 export default function Login() {
-  const [state, action, isPending] = useActionState<AuthState, FormData>(registerUser, null)
+  const [state, action, isPending] = useActionState<AuthState, FormData>(loginUser, null)
 
   return (
     <section className="bg-background grid min-h-screen grid-rows-[auto_1fr] px-4">
@@ -72,10 +72,17 @@ export default function Login() {
             </div>
 
             <Button className="w-full" disabled={isPending} aria-busy={isPending}>
-              {isPending ? 'Signing in…' : 'Sign In / Register'}
+              {isPending ? 'Signing in…' : 'Sign In'}
             </Button>
           </form>
         </Card>
+
+        <p className="text-muted-foreground mt-6 text-center text-sm">
+          Don&apos;t have an account?{' '}
+          <Link href="/signup" className="text-primary font-medium hover:underline">
+            Create one
+          </Link>
+        </p>
       </div>
     </section>
   )

@@ -9,10 +9,23 @@ import { revalidatePath } from 'next/cache'
 export type AuthState = {
   success: boolean
   message: string
-  isExisting?: boolean
 } | null
 
-export async function registerUser(prevState: AuthState, formData: FormData): Promise<AuthState> {
+// ── helpers ─────────────────────────────────────────────────────────────────
+
+async function setAuthCookie(token: string) {
+  const cookieStore = await cookies()
+  cookieStore.set('payload-token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    sameSite: 'lax',
+  })
+}
+
+// ── Login ────────────────────────────────────────────────────────────────────
+
+export async function loginUser(prevState: AuthState, formData: FormData): Promise<AuthState> {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
@@ -20,8 +33,58 @@ export async function registerUser(prevState: AuthState, formData: FormData): Pr
     return { success: false, message: 'Email and password are required.' }
   }
 
+  let shouldRedirect = false
+
+  try {
+    const payload = await getPayload({ config: configPromise })
+
+    const result = await payload.login({
+      collection: 'users',
+      data: { email: email.toLowerCase().trim(), password },
+    })
+
+    if (result.token) {
+      await setAuthCookie(result.token)
+      shouldRedirect = true
+    }
+  } catch (error: unknown) {
+    console.error('[loginUser] error:', error)
+    const msg = error instanceof Error ? error.message : String(error)
+
+    if (
+      msg.toLowerCase().includes('the email or password') ||
+      msg.toLowerCase().includes('unauthorized') ||
+      msg.toLowerCase().includes('invalid')
+    ) {
+      return { success: false, message: 'Incorrect email or password. Please try again.' }
+    }
+
+    return { success: false, message: 'Something went wrong. Please try again.' }
+  }
+
+  if (shouldRedirect) redirect('/dashboard')
+
+  return { success: false, message: 'Login failed. Please try again.' }
+}
+
+// ── Register (Sign Up) ────────────────────────────────────────────────────────
+
+export async function registerUser(prevState: AuthState, formData: FormData): Promise<AuthState> {
+  const name = formData.get('name') as string
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+  const confirmPassword = formData.get('confirmPassword') as string
+
+  if (!name || !email || !password) {
+    return { success: false, message: 'All fields are required.' }
+  }
+
   if (password.length < 8) {
-    return { success: false, message: 'Password must be at least 8 characters long.' }
+    return { success: false, message: 'Password must be at least 8 characters.' }
+  }
+
+  if (password !== confirmPassword) {
+    return { success: false, message: 'Passwords do not match.' }
   }
 
   let shouldRedirect = false
@@ -29,7 +92,7 @@ export async function registerUser(prevState: AuthState, formData: FormData): Pr
   try {
     const payload = await getPayload({ config: configPromise })
 
-    // Check if user already exists
+    // Reject if account already exists
     const existing = await payload.find({
       collection: 'users',
       where: { email: { equals: email.toLowerCase().trim() } },
@@ -37,84 +100,52 @@ export async function registerUser(prevState: AuthState, formData: FormData): Pr
       overrideAccess: true,
     })
 
-    if (existing.totalDocs === 0) {
-      // Derive a display name from the email (e.g. "noah" from "noah@example.com")
-      const name = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-
-      // Create the new user — Payload hashes the password automatically
-      await payload.create({
-        collection: 'users',
-        data: {
-          email: email.toLowerCase().trim(),
-          password,
-          name,
-          role: 'admin',
-        },
-        overrideAccess: true,
-      })
+    if (existing.totalDocs > 0) {
+      return {
+        success: false,
+        message: 'An account with this email already exists. Please log in instead.',
+      }
     }
 
-    // Log the user in (works for both new and existing users)
-    const result = await payload.login({
+    // Create the user
+    await payload.create({
       collection: 'users',
       data: {
         email: email.toLowerCase().trim(),
         password,
+        name: name.trim(),
+        role: 'admin',
       },
+      overrideAccess: true,
+    })
+
+    // Auto-login after registration
+    const result = await payload.login({
+      collection: 'users',
+      data: { email: email.toLowerCase().trim(), password },
     })
 
     if (result.token) {
-      const cookieStore = await cookies()
-      cookieStore.set('payload-token', result.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        path: '/',
-        sameSite: 'lax',
-      })
+      await setAuthCookie(result.token)
       shouldRedirect = true
     }
   } catch (error: unknown) {
     console.error('[registerUser] error:', error)
     const msg = error instanceof Error ? error.message : String(error)
 
-    // Wrong password for existing account
-    if (
-      msg.toLowerCase().includes('the email or password') ||
-      msg.toLowerCase().includes('unauthorized') ||
-      msg.toLowerCase().includes('invalid')
-    ) {
-      return {
-        success: false,
-        message: 'Incorrect password for this account. Please try again.',
-      }
+    if (msg.toLowerCase().includes('duplicate') || msg.toLowerCase().includes('unique')) {
+      return { success: false, message: 'An account with this email already exists.' }
     }
 
-    // Duplicate key errors
-    if (
-      msg.toLowerCase().includes('duplicate') ||
-      msg.toLowerCase().includes('unique') ||
-      msg.toLowerCase().includes('already exists')
-    ) {
-      return {
-        success: false,
-        isExisting: true,
-        message: 'An account with this email already exists.',
-      }
-    }
-
-    return {
-      success: false,
-      message: 'Something went wrong. Please try again.',
-    }
+    return { success: false, message: 'Something went wrong. Please try again.' }
   }
 
-  // redirect() must be called outside try/catch (it throws internally)
-  if (shouldRedirect) {
-    redirect('/dashboard')
-  }
+  if (shouldRedirect) redirect('/dashboard')
 
-  return { success: false, message: 'Login failed. Please try again.' }
+  return { success: false, message: 'Registration failed. Please try again.' }
 }
+
+// ── Logout (clears session) ──────────────────────────────────────────────────
 
 export async function logout() {
   try {
@@ -123,6 +154,7 @@ export async function logout() {
   } catch (e) {
     console.error('[logout] error:', e)
   }
+
   revalidatePath('/')
-  redirect('/')
+  redirect('/login')
 }

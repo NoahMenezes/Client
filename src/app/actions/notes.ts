@@ -9,7 +9,7 @@ export type ActionState = { success: boolean; message: string } | null
 export async function createNote(prev: ActionState, fd: FormData): Promise<ActionState> {
   const content = fd.get('content') as string
   const leadId = fd.get('leadId') as string
-  const createdBy = (fd.get('createdBy') as string) || 'Admin'
+  const _createdBy = (fd.get('createdBy') as string) || 'Admin'
 
   if (!content || !leadId) return { success: false, message: 'Content and lead ID are required.' }
 

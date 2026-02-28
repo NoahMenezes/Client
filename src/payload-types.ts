@@ -323,8 +323,26 @@ export interface Quotation {
   title: string;
   lead: number | Lead;
   status: 'draft' | 'sent' | 'approved';
-  subtotal?: number | null;
-  agencyFee?: number | null;
+  /**
+   * JSON array of quotation categories and their line items
+   */
+  categories?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Agency fee percentage applied to subtotal
+   */
+  agencyFeePercent?: number | null;
+  quotationDate?: string | null;
+  notes?: string | null;
+  subTotal?: number | null;
+  agencyFees?: number | null;
   grandTotal?: number | null;
   updatedAt: string;
   createdAt: string;
@@ -689,8 +707,12 @@ export interface QuotationsSelect<T extends boolean = true> {
   title?: T;
   lead?: T;
   status?: T;
-  subtotal?: T;
-  agencyFee?: T;
+  categories?: T;
+  agencyFeePercent?: T;
+  quotationDate?: T;
+  notes?: T;
+  subTotal?: T;
+  agencyFees?: T;
   grandTotal?: T;
   updatedAt?: T;
   createdAt?: T;

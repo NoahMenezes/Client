@@ -8,11 +8,5 @@ export const metadata: Metadata = {
 }
 
 export default function FrontendLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>
-        <TooltipProvider>{children}</TooltipProvider>
-      </body>
-    </html>
-  )
+  return <TooltipProvider>{children}</TooltipProvider>
 }
