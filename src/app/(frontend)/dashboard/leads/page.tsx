@@ -126,11 +126,22 @@ export default async function LeadsPage({ searchParams }: Props) {
     <div className="flex flex-1 flex-col">
       <Suspense fallback={<div className="h-12 border-b bg-white" />}>
         <SiteHeader title="Leads">
-          <Link href="/dashboard/leads/add">
-            <Button className="bg-[#1a2744] text-white hover:bg-[#243460]" size="sm">
-              + Add Lead
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link 
+              href="https://docs.google.com/forms/d/e/1FAIpQLSczDIpvtKCfNV1EfmIslmNezmP_Ysw60Lv5uMdbD_TRVx-nqA/viewform?fbzx=-4673714178861004412"
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <Button variant="outline" className="border-[#1a2744] text-[#1a2744] hover:bg-gray-100" size="sm">
+                Wedding Enquiry Form
+              </Button>
+            </Link>
+            <Link href="/dashboard/leads/add">
+              <Button className="bg-[#1a2744] text-white hover:bg-[#243460]" size="sm">
+                + Add Lead
+              </Button>
+            </Link>
+          </div>
         </SiteHeader>
       </Suspense>
 
