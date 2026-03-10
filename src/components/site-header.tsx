@@ -1,12 +1,14 @@
 'use client'
 
-import { IconSearch, IconBell, IconUser } from '@tabler/icons-react'
+import { IconSearch } from '@tabler/icons-react'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { Input } from '@/components/ui/input'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import React from 'react'
+import { ProfileBar } from '@/components/profile-bar'
+import { useDashboardUser } from '@/context/user-context'
 
 interface SiteHeaderProps {
   title?: string
@@ -18,6 +20,7 @@ export function SiteHeader({ title = 'Dashboard', showSearch = false, children }
   const router = useRouter()
   const searchParams = useSearchParams()
   const [query, setQuery] = useState(searchParams.get('q') || '')
+  const user = useDashboardUser()
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,24 +52,13 @@ export function SiteHeader({ title = 'Dashboard', showSearch = false, children }
 
         {children && <div className="ml-4 flex items-center gap-2">{children}</div>}
 
-        {/* Right side: notification + avatar */}
-        <div className="ml-auto flex items-center gap-3">
-          <button
-            type="button"
-            className="relative p-1.5 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-            aria-label="Notifications"
-          >
-            <IconBell className="h-5 w-5" />
-            {/* Notification badge */}
-            <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-red-500" />
-          </button>
-          <button
-            type="button"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1a2744] text-white text-xs font-bold hover:bg-[#243460] transition-colors"
-            aria-label="User menu"
-          >
-            <IconUser className="h-4 w-4" />
-          </button>
+        {/* Right side — real user profile bar */}
+        <div className="ml-auto flex items-center">
+          {user ? (
+            <ProfileBar user={user} />
+          ) : (
+            <div className="h-8 w-32 rounded-full bg-gray-100 animate-pulse" />
+          )}
         </div>
       </div>
     </header>

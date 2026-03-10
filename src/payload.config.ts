@@ -57,10 +57,10 @@ export default buildConfig({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: sqliteAdapter({
-    push: false,
+    push: true,
     client: {
       url: process.env.DATABASE_URL || '',
-      authToken: process.env.DATABASE_AUTH_TOKEN || '',
+      authToken: process.env.DATABASE_URL_TOKEN || '',
     },
   }),
   sharp,

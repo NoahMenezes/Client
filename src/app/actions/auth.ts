@@ -33,8 +33,6 @@ export async function loginUser(prevState: AuthState, formData: FormData): Promi
     return { success: false, message: 'Email and password are required.' }
   }
 
-  let shouldRedirect = false
-
   try {
     const payload = await getPayload({ config: configPromise })
 
@@ -45,7 +43,8 @@ export async function loginUser(prevState: AuthState, formData: FormData): Promi
 
     if (result.token) {
       await setAuthCookie(result.token)
-      shouldRedirect = true
+    } else {
+      return { success: false, message: 'Login failed. Please try again.' }
     }
   } catch (error: unknown) {
     console.error('[loginUser] error:', error)
@@ -62,9 +61,7 @@ export async function loginUser(prevState: AuthState, formData: FormData): Promi
     return { success: false, message: 'Something went wrong. Please try again.' }
   }
 
-  if (shouldRedirect) redirect('/dashboard')
-
-  return { success: false, message: 'Login failed. Please try again.' }
+  redirect('/dashboard')
 }
 
 // ── Register (Sign Up) ────────────────────────────────────────────────────────
@@ -86,8 +83,6 @@ export async function registerUser(prevState: AuthState, formData: FormData): Pr
   if (password !== confirmPassword) {
     return { success: false, message: 'Passwords do not match.' }
   }
-
-  let shouldRedirect = false
 
   try {
     const payload = await getPayload({ config: configPromise })
@@ -127,7 +122,8 @@ export async function registerUser(prevState: AuthState, formData: FormData): Pr
 
     if (result.token) {
       await setAuthCookie(result.token)
-      shouldRedirect = true
+    } else {
+      return { success: false, message: 'Registration failed. Please try again.' }
     }
   } catch (error: unknown) {
     console.error('[registerUser] error:', error)
@@ -140,9 +136,7 @@ export async function registerUser(prevState: AuthState, formData: FormData): Pr
     return { success: false, message: 'Something went wrong. Please try again.' }
   }
 
-  if (shouldRedirect) redirect('/dashboard')
-
-  return { success: false, message: 'Registration failed. Please try again.' }
+  redirect('/dashboard')
 }
 
 // ── Logout (clears session) ──────────────────────────────────────────────────
