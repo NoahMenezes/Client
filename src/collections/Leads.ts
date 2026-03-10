@@ -80,6 +80,62 @@ export const Leads: CollectionConfig = {
       label: 'Is Destination Wedding?',
     },
     {
+      name: 'resortCategory',
+      type: 'text',
+      admin: {
+        description: 'e.g. Luxury, Boutique, All-Inclusive',
+      },
+    },
+    {
+      name: 'cuisineType',
+      type: 'text',
+      admin: {
+        description: 'e.g. Indian, Italian, Continental',
+      },
+    },
+    {
+      name: 'servicesLookedFor',
+      type: 'text',
+      admin: {
+        description: 'Comma-separated list of services looked for (e.g., Photography, Videography)',
+      },
+    },
+    {
+      name: 'weddingCeremonies',
+      type: 'text',
+      admin: {
+        description: 'Comma-separated list of wedding ceremonies (e.g., Sangeet, Mehendi, Wedding)',
+      },
+    },
+    {
+      name: 'entertainmentOptions',
+      type: 'text',
+      admin: {
+        description: 'Comma-separated list of entertainment options (e.g., DJ, Live Band, Dancers)',
+      },
+    },
+    {
+      name: 'hospitalityServices',
+      type: 'text',
+      admin: {
+        description: 'Comma-separated list of hospitality services (e.g., Guest Accommodation, Airport Transfers)',
+      },
+    },
+    {
+      name: 'additionalServices',
+      type: 'text',
+      admin: {
+        description: 'Comma-separated list of additional services (e.g., Hair & Makeup, Favors)',
+      },
+    },
+    {
+      name: 'budgetText',
+      type: 'text',
+      admin: {
+        description: 'Client budget as text (e.g., "20k-30k", "Above 50k")',
+      },
+    },
+    {
       name: 'googleFormRawData',
       type: 'json',
       admin: {

@@ -6,6 +6,8 @@ import { SiteHeader } from '@/components/site-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
+const PAGE_LIMIT = 10
+
 const statusStyles: Record<string, string> = {
   new: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
   contacted: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100',
@@ -60,14 +62,17 @@ const statusCategories = [
 ]
 
 interface Props {
-  searchParams: Promise<{ q?: string; status?: string; from?: string; to?: string }>
+  searchParams: Promise<{ q?: string; status?: string; from?: string; to?: string; page?: string }>
 }
 
 export default async function LeadsPage({ searchParams }: Props) {
-  const { q = '', status = '', from = '', to = '' } = await searchParams
+  const { q = '', status = '', from = '', to = '', page = '1' } = await searchParams
+
+  const currentPage = Math.max(1, parseInt(page, 10) || 1)
 
   let leads: any[] = []
   let totalDocs = 0
+  let totalPages = 1
 
   try {
     const payload = await getPayload({ config: configPromise })
@@ -99,7 +104,8 @@ export default async function LeadsPage({ searchParams }: Props) {
       collection: 'leads',
       where,
       sort: '-createdAt',
-      limit: 50,
+      limit: PAGE_LIMIT,
+      page: currentPage,
       depth: 1,
       overrideAccess: true,
     })
@@ -114,22 +120,38 @@ export default async function LeadsPage({ searchParams }: Props) {
       checkInDate: d.checkInDate ?? null,
       checkOutDate: d.checkOutDate ?? null,
       weddingDate: d.weddingDate ?? null,
+      guestCount: d.guestCount ?? null,
+      budget: d.budgetText || (d.budget ? `₹${d.budget.toLocaleString('en-IN')}` : null),
     }))
     totalDocs = res.totalDocs
+    totalPages = res.totalPages ?? Math.ceil(totalDocs / PAGE_LIMIT)
   } catch (e) {
     console.error('Leads fetch error:', e)
   }
 
   const isFiltered = q || status || from || to
 
+  function paginationHref(p: number) {
+    const params = new URLSearchParams()
+    if (q) params.set('q', q)
+    if (status) params.set('status', status)
+    if (from) params.set('from', from)
+    if (to) params.set('to', to)
+    params.set('page', String(p))
+    return `/dashboard/leads?${params.toString()}`
+  }
+
+  const pageNumbers: number[] = []
+  for (let i = 1; i <= totalPages; i++) pageNumbers.push(i)
+
   return (
     <div className="flex flex-1 flex-col">
       <Suspense fallback={<div className="h-12 border-b bg-white" />}>
         <SiteHeader title="Leads">
           <div className="flex items-center gap-2">
-            <Link 
+            <Link
               href="https://docs.google.com/forms/d/e/1FAIpQLSczDIpvtKCfNV1EfmIslmNezmP_Ysw60Lv5uMdbD_TRVx-nqA/viewform?fbzx=-4673714178861004412"
-              target="_blank" 
+              target="_blank"
               rel="noopener noreferrer"
             >
               <Button variant="outline" className="border-[#1a2744] text-[#1a2744] hover:bg-gray-100" size="sm">
@@ -174,7 +196,7 @@ export default async function LeadsPage({ searchParams }: Props) {
           </div>
         </section>
 
-        {/* Filter Active Leads by Date Range */}
+        {/* Filter */}
         <section>
           <h2 className="text-base font-semibold text-gray-800 mb-3">
             Filter Active Leads by Date Range
@@ -183,6 +205,7 @@ export default async function LeadsPage({ searchParams }: Props) {
             method="get"
             className="flex flex-wrap items-end gap-3 bg-white border rounded-xl p-4 shadow-sm"
           >
+            <input type="hidden" name="page" value="1" />
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">Search</label>
               <input
@@ -210,7 +233,7 @@ export default async function LeadsPage({ searchParams }: Props) {
               </select>
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500 font-medium">Start Date</label>
+              <label className="text-xs text-gray-500 font-medium">Wedding Date From</label>
               <input
                 name="from"
                 type="date"
@@ -219,7 +242,7 @@ export default async function LeadsPage({ searchParams }: Props) {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500 font-medium">End Date</label>
+              <label className="text-xs text-gray-500 font-medium">Wedding Date To</label>
               <input
                 name="to"
                 type="date"
@@ -239,19 +262,19 @@ export default async function LeadsPage({ searchParams }: Props) {
                 </Link>
               )}
             </div>
-            {from && to && (
-              <p className="text-xs text-gray-400 self-end pb-1">
-                Example: {from} → {to}
-              </p>
-            )}
           </form>
         </section>
 
         {/* Leads Table */}
         <section>
-          <h2 className="text-base font-semibold text-gray-800 mb-3">
-            Active Leads{isFiltered ? ' (Based on Filter)' : ''}
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base font-semibold text-gray-800">
+              Active Leads{isFiltered ? ' (Based on Filter)' : ''}
+            </h2>
+            <span className="text-xs text-gray-400">
+              {totalDocs} total lead{totalDocs !== 1 ? 's' : ''}
+            </span>
+          </div>
           <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
             {leads.length === 0 ? (
               <div className="p-10 text-center text-gray-400 text-sm">
@@ -265,8 +288,9 @@ export default async function LeadsPage({ searchParams }: Props) {
                       <th className="px-5 py-3 text-left font-medium">Lead ID</th>
                       <th className="px-5 py-3 text-left font-medium">Name</th>
                       <th className="px-5 py-3 text-left font-medium">Contact</th>
-                      <th className="px-5 py-3 text-left font-medium">Check-in</th>
-                      <th className="px-5 py-3 text-left font-medium">Check-out</th>
+                      <th className="px-5 py-3 text-left font-medium">Wedding Date</th>
+                      <th className="px-5 py-3 text-left font-medium">Guests</th>
+                      <th className="px-5 py-3 text-left font-medium">Budget</th>
                       <th className="px-5 py-3 text-left font-medium">Status</th>
                       <th className="px-5 py-3 text-left font-medium">Actions</th>
                     </tr>
@@ -286,10 +310,19 @@ export default async function LeadsPage({ searchParams }: Props) {
                           {lead.phone && <div>{lead.phone}</div>}
                         </td>
                         <td className="px-5 py-3 text-gray-600 text-xs">
-                          {lead.checkInDate || '—'}
+                          {lead.weddingDate
+                            ? new Date(lead.weddingDate).toLocaleDateString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                              })
+                            : '—'}
                         </td>
                         <td className="px-5 py-3 text-gray-600 text-xs">
-                          {lead.checkOutDate || '—'}
+                          {lead.guestCount ?? '—'}
+                        </td>
+                        <td className="px-5 py-3 text-gray-600 text-xs max-w-[120px] truncate">
+                          {lead.budget ?? '—'}
                         </td>
                         <td className="px-5 py-3">
                           <Badge
@@ -313,10 +346,70 @@ export default async function LeadsPage({ searchParams }: Props) {
                     ))}
                   </tbody>
                 </table>
-                <div className="px-5 py-3 border-t text-xs text-gray-400 flex items-center justify-between">
-                  <span>
-                    Showing <strong>{leads.length}</strong> of <strong>{totalDocs}</strong> leads
+
+                {/* Pagination */}
+                <div className="px-5 py-4 border-t flex items-center justify-between gap-4">
+                  <span className="text-xs text-gray-400">
+                    Showing{' '}
+                    <strong>
+                      {(currentPage - 1) * PAGE_LIMIT + 1}–
+                      {Math.min(currentPage * PAGE_LIMIT, totalDocs)}
+                    </strong>{' '}
+                    of <strong>{totalDocs}</strong> leads (page {currentPage} of {totalPages})
                   </span>
+
+                  {totalPages > 1 && (
+                    <div className="flex items-center gap-1">
+                      {currentPage > 1 && (
+                        <Link href={paginationHref(currentPage - 1)}>
+                          <button className="h-7 w-7 rounded flex items-center justify-center text-xs text-gray-500 hover:bg-gray-100 border transition-colors">
+                            ←
+                          </button>
+                        </Link>
+                      )}
+
+                      {pageNumbers.map((p) => {
+                        // Show first, last, and pages near current
+                        const show =
+                          p === 1 ||
+                          p === totalPages ||
+                          Math.abs(p - currentPage) <= 1
+                        const ellipsisBefore = p === currentPage - 2 && currentPage > 3
+                        const ellipsisAfter = p === currentPage + 2 && currentPage < totalPages - 2
+
+                        if (ellipsisBefore || ellipsisAfter) {
+                          return (
+                            <span key={`ellipsis-${p}`} className="text-xs text-gray-400 px-1">
+                              …
+                            </span>
+                          )
+                        }
+                        if (!show) return null
+
+                        return (
+                          <Link key={p} href={paginationHref(p)}>
+                            <button
+                              className={`h-7 w-7 rounded flex items-center justify-center text-xs border transition-colors ${
+                                p === currentPage
+                                  ? 'bg-[#1a2744] text-white border-[#1a2744]'
+                                  : 'text-gray-500 hover:bg-gray-100 border-gray-200'
+                              }`}
+                            >
+                              {p}
+                            </button>
+                          </Link>
+                        )
+                      })}
+
+                      {currentPage < totalPages && (
+                        <Link href={paginationHref(currentPage + 1)}>
+                          <button className="h-7 w-7 rounded flex items-center justify-center text-xs text-gray-500 hover:bg-gray-100 border transition-colors">
+                            →
+                          </button>
+                        </Link>
+                      )}
+                    </div>
+                  )}
                 </div>
               </>
             )}

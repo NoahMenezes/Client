@@ -61,13 +61,24 @@ interface Lead {
   checkOutDate?: string | null
   weddingDate?: string | null
   budget?: number | null
+  budgetText?: string | null
+  guestCount?: number | null
+  weddingStyle?: string | null
+  resortCategory?: string | null
+  cuisineType?: string | null
+  servicesLookedFor?: string | null
+  weddingCeremonies?: string | null
+  entertainmentOptions?: string | null
+  hospitalityServices?: string | null
+  additionalServices?: string | null
+  referralSource?: string | null
+  isDestination?: boolean
   coupleName?: string | null
   leadSource?: string | null
   internalNotes?: string
   basicInformation?: string
-  hospitalityServices?: string
-  typesOfServiceRequired?: string
-  artistsRequirement?: string
+  typesOfServiceRequired?: string | null
+  artistsRequirement?: string | null
   googleFormEnquiry?: string
   firstCallDate?: string | null
   proposalSentDate?: string | null
@@ -399,39 +410,102 @@ export default function LeadProfileTabs({
               </div>
             </div>
 
-            {/* Bottom text boxes: Basic Information / Hospitality / Types of Service */}
-            <div className="grid grid-cols-3 gap-4">
-              <div className="rounded-xl border bg-blue-50/30 p-4">
-                <p className="text-xs font-semibold text-gray-700 mb-2">Basic Information</p>
-                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
-                  {lead.basicInformation || '—'}
-                </p>
-              </div>
-              <div className="rounded-xl border bg-blue-50/30 p-4">
-                <p className="text-xs font-semibold text-gray-700 mb-2">
-                  Hospitality &amp; Misc. Services
-                </p>
-                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
-                  {lead.hospitalityServices || '—'}
-                </p>
-              </div>
-              <div className="rounded-xl border bg-blue-50/30 p-4">
-                <p className="text-xs font-semibold text-gray-700 mb-2">
-                  Types of Service Required
-                </p>
-                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
-                  {lead.typesOfServiceRequired || lead.servicesRequested.join(', ') || '—'}
-                </p>
+            {/* Wedding Details */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-4">Wedding Details</h4>
+              <div className="grid grid-cols-3 gap-x-6 gap-y-4 text-sm">
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">Wedding Style</p>
+                  <p className="text-gray-800 font-medium">{lead.weddingStyle || '—'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">Resort Category</p>
+                  <p className="text-gray-800 font-medium">{lead.resortCategory || '—'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">Cuisine Type</p>
+                  <p className="text-gray-800 font-medium">{lead.cuisineType || '—'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">No. of Guests</p>
+                  <p className="text-gray-800 font-medium">{lead.guestCount ?? '—'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">Budget</p>
+                  <p className="text-gray-800 font-medium">
+                    {lead.budgetText || (lead.budget ? `₹ ${lead.budget.toLocaleString('en-IN')}` : '—')}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">Referral Source</p>
+                  <p className="text-gray-800 font-medium">{lead.referralSource || lead.leadSource || '—'}</p>
+                </div>
               </div>
             </div>
 
-            {/* Artists Requirement */}
-            {lead.artistsRequirement && (
-              <div className="rounded-xl border bg-blue-50/30 p-4">
-                <p className="text-xs font-semibold text-gray-700 mb-2">Artists Requirement</p>
-                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
-                  {lead.artistsRequirement}
-                </p>
+            {/* Ceremonies & Services as pill tags */}
+            {lead.weddingCeremonies && (
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-2">Ceremonies & Rituals</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {lead.weddingCeremonies.split(',').map((c) => c.trim()).filter(Boolean).map((c) => (
+                    <span key={c} className="px-2.5 py-1 rounded-full text-xs bg-purple-50 text-purple-700 border border-purple-100 font-medium">{c}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {lead.entertainmentOptions && (
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-2">Entertainment & Artists</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {lead.entertainmentOptions.split(',').map((c) => c.trim()).filter(Boolean).map((c) => (
+                    <span key={c} className="px-2.5 py-1 rounded-full text-xs bg-blue-50 text-blue-700 border border-blue-100 font-medium">{c}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {lead.hospitalityServices && (
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-2">Hospitality Services</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {lead.hospitalityServices.split(',').map((c) => c.trim()).filter(Boolean).map((c) => (
+                    <span key={c} className="px-2.5 py-1 rounded-full text-xs bg-green-50 text-green-700 border border-green-100 font-medium">{c}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {lead.additionalServices && (
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-2">Additional Services</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {lead.additionalServices.split(',').map((c) => c.trim()).filter(Boolean).map((c) => (
+                    <span key={c} className="px-2.5 py-1 rounded-full text-xs bg-orange-50 text-orange-700 border border-orange-100 font-medium">{c}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {lead.servicesLookedFor && (
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-2">Services Looking For</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {lead.servicesLookedFor.split(',').map((c) => c.trim()).filter(Boolean).map((c) => (
+                    <span key={c} className="px-2.5 py-1 rounded-full text-xs bg-indigo-50 text-indigo-700 border border-indigo-100 font-medium">{c}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Raw JSON payload */}
+            {lead.googleFormEnquiry && (
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-2">Raw Lead Payload (JSON)</p>
+                <pre className="rounded-lg border bg-gray-50 px-4 py-3 text-xs text-gray-600 overflow-auto max-h-60 whitespace-pre-wrap">
+                  {lead.googleFormEnquiry}
+                </pre>
               </div>
             )}
 
