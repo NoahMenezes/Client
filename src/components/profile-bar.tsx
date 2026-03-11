@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import { logout } from '@/app/actions/auth'
 import {
   IconUser,
@@ -79,9 +80,11 @@ export function ProfileBar({ user }: ProfileBarProps) {
         aria-label="Open user menu"
       >
         {user.avatar ? (
-          <img
+          <Image
             src={user.avatar}
             alt={user.name}
+            width={32}
+            height={32}
             className="profile-avatar-img"
           />
         ) : (
@@ -110,9 +113,11 @@ export function ProfileBar({ user }: ProfileBarProps) {
           {/* Header */}
           <div className="profile-dropdown-header">
             {user.avatar ? (
-              <img
+              <Image
                 src={user.avatar}
                 alt={user.name}
+                width={40}
+                height={40}
                 className="profile-dropdown-avatar"
               />
             ) : (
