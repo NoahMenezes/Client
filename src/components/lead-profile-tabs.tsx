@@ -84,31 +84,29 @@ interface Lead {
   proposalSentDate?: string | null
   pocName?: string | null
   servicesRequested: string[]
-  assignedEmployee?: { id: number | string; name: string } | null
+  assignedTo?: { id: number | string; name: string } | null
   quotation: unknown[]
   grandTotal: number
 }
 
 const statusStyles: Record<string, string> = {
-  opportunity: 'bg-orange-100 text-orange-700',
-  prospect: 'bg-yellow-100 text-yellow-700',
-  won: 'bg-green-100 text-green-700',
-  lost: 'bg-red-100 text-red-700',
-  'in-progress': 'bg-blue-100 text-blue-700',
-  'no-response': 'bg-gray-100 text-gray-600',
-  disqualified: 'bg-red-100 text-red-700',
-  'lost-prospect': 'bg-red-50 text-red-500',
+  new: 'bg-blue-100 text-blue-700',
+  contacted: 'bg-yellow-100 text-yellow-700',
+  proposal_sent: 'bg-orange-100 text-orange-700',
+  negotiation: 'bg-purple-100 text-purple-700',
+  confirmed: 'bg-green-100 text-green-700',
+  closed: 'bg-gray-100 text-gray-700',
+  cancelled: 'bg-red-100 text-red-700',
 }
 
 const statusLabels: Record<string, string> = {
-  opportunity: 'Opportunity',
-  prospect: 'Prospect',
-  won: 'Won',
-  lost: 'Lost',
-  'in-progress': 'In Progress',
-  'no-response': 'No Response',
-  disqualified: 'Disqualified',
-  'lost-prospect': 'Lost Prospect',
+  new: 'New',
+  contacted: 'Contacted',
+  proposal_sent: 'Proposal Sent',
+  negotiation: 'Negotiation',
+  confirmed: 'Confirmed',
+  closed: 'Closed',
+  cancelled: 'Cancelled',
 }
 
 
@@ -247,12 +245,14 @@ export default function LeadProfileTabs({
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs text-gray-500 font-medium mb-1.5">Lead Owner</p>
-                <select
-                  defaultValue={
-                    typeof lead.assignedEmployee === 'object' && lead.assignedEmployee !== null
-                      ? String(lead.assignedEmployee.id)
-                      : ''
-                  }
+                  <select
+                    value={
+                      typeof lead.assignedTo === 'object' && lead.assignedTo !== null
+                        ? String(lead.assignedTo.id)
+                        : typeof lead.assignedTo === 'string' || typeof lead.assignedTo === 'number'
+                          ? String(lead.assignedTo)
+                          : ''
+                    }
                   className="rounded-lg border bg-white px-3 py-2 text-sm pr-8 min-w-45 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   onChange={async (e) => {
                     const fd = new FormData()

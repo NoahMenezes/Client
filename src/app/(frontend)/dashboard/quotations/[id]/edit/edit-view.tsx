@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { updateQuotationById, type ActionState } from '@/app/actions/quotations'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -69,7 +70,7 @@ const DEFAULT_QUOTATION: QuotationEditData = {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function EditQuotationPage({ quotation = DEFAULT_QUOTATION, leads = [] }: Props) {
-  const [isPending, setIsPending] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
   const [title, setTitle] = useState(quotation.title ?? '')
   const [leadId, setLeadId] = useState(quotation.leadId ?? '')
@@ -152,11 +153,23 @@ export default function EditQuotationPage({ quotation = DEFAULT_QUOTATION, leads
       setError('Quotation title is required.')
       return
     }
-    setIsPending(true)
-    // Simulate save — replace with real API call
-    setTimeout(() => {
-      setIsPending(false)
-    }, 800)
+
+    const fd = new FormData()
+    fd.set('id', String(quotation.id))
+    fd.set('title', title.trim())
+    fd.set('leadId', leadId)
+    fd.set('agencyFeePercent', String(agencyFeePercent))
+    if (quotationDate) fd.set('quotationDate', quotationDate)
+    fd.set('status', status)
+    if (notes.trim()) fd.set('notes', notes.trim())
+    fd.set('categories', JSON.stringify(categories))
+
+    startTransition(async () => {
+      const result: ActionState = await updateQuotationById(null, fd)
+      if (result && !result.success) {
+        setError(result.message)
+      }
+    })
   }
 
   const backHref = quotation.lead

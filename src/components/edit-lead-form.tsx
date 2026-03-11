@@ -266,7 +266,7 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                 <div className="space-y-5">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                      <FieldLabel required>Couple's Full Name</FieldLabel>
+                      <FieldLabel required>Couple&apos;s Full Name</FieldLabel>
                       <InputField id="fullName" name="fullName" defaultValue={fullName} placeholder="e.g. Dhriti & Tarun" required disabled={isPending} />
                     </div>
                     <div>

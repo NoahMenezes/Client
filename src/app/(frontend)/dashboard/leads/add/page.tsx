@@ -135,7 +135,7 @@ function Stage1({ disabled }: { disabled: boolean }) {
     <div className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
-          <FieldLabel required>Couple's Full Name</FieldLabel>
+          <FieldLabel required>Couple&apos;s Full Name</FieldLabel>
           <InputField id="fullName" name="fullName" placeholder="e.g. Dhriti & Tarun" required disabled={disabled} />
         </div>
         <div>
@@ -265,7 +265,7 @@ function Stage2({ disabled }: { disabled: boolean }) {
 
 // ─── Stage 3: Items / Requirements ───────────────────────────────────────────
 
-function Stage3({ disabled }: { disabled: boolean }) {
+function Stage3({ disabled: _disabled }: { disabled: boolean }) {
   const [servicesLookingFor, setServicesLookingFor] = useState<string[]>([])
   const [ceremonies, setCeremonies] = useState<string[]>([])
   const [entertainment, setEntertainment] = useState<string[]>([])

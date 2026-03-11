@@ -122,7 +122,6 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
     proposalSentDate: null,
     pocName: null,
     servicesRequested: [],
-    assignedEmployee: null,
     quotation: [],
     grandTotal: 0,
   }
