@@ -3,13 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { logout } from '@/app/actions/auth'
-import {
-  IconUser,
-  IconBell,
-  IconSettings,
-  IconLogout,
-  IconChevronDown,
-} from '@tabler/icons-react'
+import { IconUser, IconBell, IconSettings, IconLogout, IconChevronDown } from '@tabler/icons-react'
 import Link from 'next/link'
 
 interface ProfileBarProps {
@@ -59,16 +53,6 @@ export function ProfileBar({ user }: ProfileBarProps) {
 
   return (
     <div className="profile-bar-wrap" ref={ref}>
-      {/* Notification bell */}
-      <button
-        type="button"
-        className="profile-bell-btn"
-        aria-label="Notifications"
-      >
-        <IconBell className="h-5 w-5" />
-        <span className="profile-bell-dot" aria-hidden="true" />
-      </button>
-
       {/* Avatar trigger */}
       <button
         type="button"
@@ -88,10 +72,7 @@ export function ProfileBar({ user }: ProfileBarProps) {
             className="profile-avatar-img"
           />
         ) : (
-          <span
-            className="profile-avatar-initials"
-            style={{ background: avatarColor }}
-          >
+          <span className="profile-avatar-initials" style={{ background: avatarColor }}>
             {initials || <IconUser className="h-4 w-4" />}
           </span>
         )}
@@ -149,11 +130,13 @@ export function ProfileBar({ user }: ProfileBarProps) {
 
           <div className="profile-dropdown-divider" />
 
-          {/* Logout */}
+          {/* Logout - Uses server action for secure session termination */}
           <form
-            action={logout}
+            action={async () => {
+              setOpen(false)
+              await logout()
+            }}
             className="w-full"
-            onSubmit={() => setOpen(false)}
           >
             <button
               type="submit"

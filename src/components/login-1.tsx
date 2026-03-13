@@ -41,6 +41,10 @@ function EyeIcon({ visible }: { visible: boolean }) {
 
 // ── Main Login Component ──────────────────────────────────────────────────────
 export default function Login() {
+  /**
+   * useActionState handles the server action lifecycle,
+   * providing the current state, action to trigger, and pending status.
+   */
   const [state, action, isPending] = useActionState<AuthState, FormData>(loginUser, null)
   const [showPassword, setShowPassword] = useState(false)
 
@@ -69,9 +73,9 @@ export default function Login() {
             <p className="auth-subtitle">Sign in to your Perfect Knot account</p>
           </div>
 
-          {/* Form error */}
+          {/* Form error - Displayed if the server action returns an unsuccessful state */}
           {state !== null && !state.success && (
-            <div className="auth-error" role="alert">
+            <div className="auth-error animate-in fade-in slide-in-from-top-1" role="alert">
               <span className="auth-error-icon">⚠️</span>
               <span>{state.message}</span>
             </div>
@@ -136,7 +140,7 @@ export default function Login() {
               {isPending ? (
                 <>
                   <span className="auth-spinner" aria-hidden="true" />
-                  Signing in…
+                  <span>Signing in…</span>
                 </>
               ) : (
                 'Sign In'

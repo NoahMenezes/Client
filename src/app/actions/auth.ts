@@ -13,6 +13,10 @@ export type AuthState = {
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 
+/**
+ * Sets the Payload authentication cookie in the browser.
+ * This is used by the App Router and Payload's local API to identify the user.
+ */
 async function setAuthCookie(token: string) {
   const cookieStore = await cookies()
   cookieStore.set('payload-token', token, {
@@ -20,6 +24,7 @@ async function setAuthCookie(token: string) {
     secure: process.env.NODE_ENV === 'production',
     path: '/',
     sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 7, // 1 week
   })
 }
 
@@ -43,6 +48,8 @@ export async function loginUser(prevState: AuthState, formData: FormData): Promi
 
     if (result.token) {
       await setAuthCookie(result.token)
+      // Revalidate all data after successful login
+      revalidatePath('/', 'layout')
     } else {
       return { success: false, message: 'Login failed. Please try again.' }
     }
@@ -122,6 +129,8 @@ export async function registerUser(prevState: AuthState, formData: FormData): Pr
 
     if (result.token) {
       await setAuthCookie(result.token)
+      // Revalidate all data after successful registration
+      revalidatePath('/', 'layout')
     } else {
       return { success: false, message: 'Registration failed. Please try again.' }
     }
@@ -141,6 +150,9 @@ export async function registerUser(prevState: AuthState, formData: FormData): Pr
 
 // ── Logout (clears session) ──────────────────────────────────────────────────
 
+/**
+ * Clears the auth cookie and redirects to the login page.
+ */
 export async function logout() {
   try {
     const cookieStore = await cookies()
@@ -149,6 +161,7 @@ export async function logout() {
     console.error('[logout] error:', e)
   }
 
-  revalidatePath('/')
+  // Clear all cached data
+  revalidatePath('/', 'layout')
   redirect('/login')
 }

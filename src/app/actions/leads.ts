@@ -15,7 +15,10 @@ function str(fd: FormData, key: string): string | undefined {
 }
 
 function multiSelect(fd: FormData, key: string): string[] {
-  return fd.getAll(key).map((v) => String(v)).filter(Boolean)
+  return fd
+    .getAll(key)
+    .map((v) => String(v))
+    .filter(Boolean)
 }
 
 /**
@@ -43,9 +46,11 @@ function buildRawPayload(fd: FormData, contactName: string) {
       'Total Number of Guests for the Wedding': [str(fd, 'guestCount') ?? ''],
       'Kindly Select the Style of Wedding.': [str(fd, 'weddingStyle') ?? ''],
       'Kindly Select the various ceremonies/rituals which you would choose to have?': ceremonies,
-      'Kindly Select the Entertainment Options & Artists which you would like to be arranged?': entertainment,
+      'Kindly Select the Entertainment Options & Artists which you would like to be arranged?':
+        entertainment,
       'Kindly Select the Hospitality services you would like to be arranged.': hospitality,
-      'Kindly Select the below services which you would like to include in the Package.': additional,
+      'Kindly Select the below services which you would like to include in the Package.':
+        additional,
       'Kindly Specify the Total Budget Allocated for the Wedding.': [str(fd, 'budgetText') ?? ''],
       'Contact Number': [str(fd, 'phone') ?? ''],
       'Email Address': [str(fd, 'email') ?? ''],
@@ -70,7 +75,8 @@ export async function createLead(prev: ActionState, fd: FormData): Promise<Actio
     const budget = budgetRaw && budgetRaw.trim() !== '' ? Number(budgetRaw) : undefined
 
     const guestCountRaw = fd.get('guestCount') as string
-    const guestCount = guestCountRaw && guestCountRaw.trim() !== '' ? Number(guestCountRaw) : undefined
+    const guestCount =
+      guestCountRaw && guestCountRaw.trim() !== '' ? Number(guestCountRaw) : undefined
 
     // 1. Create or find Contact
     let contactId: number
@@ -162,7 +168,8 @@ export async function updateLead(prev: ActionState, fd: FormData): Promise<Actio
     const budget = budgetRaw && budgetRaw.trim() !== '' ? Number(budgetRaw) : undefined
 
     const guestCountRaw = fd.get('guestCount') as string
-    const guestCount = guestCountRaw && guestCountRaw.trim() !== '' ? Number(guestCountRaw) : undefined
+    const guestCount =
+      guestCountRaw && guestCountRaw.trim() !== '' ? Number(guestCountRaw) : undefined
 
     // Get current lead to find contact
     const currentLead = await payload.findByID({
@@ -175,7 +182,9 @@ export async function updateLead(prev: ActionState, fd: FormData): Promise<Actio
     // Update contact if linked
     if (currentLead.contact) {
       const contactId =
-        typeof currentLead.contact === 'object' ? (currentLead.contact as any).id : currentLead.contact
+        typeof currentLead.contact === 'object'
+          ? (currentLead.contact as any).id
+          : currentLead.contact
       await payload.update({
         collection: 'contacts',
         id: contactId,

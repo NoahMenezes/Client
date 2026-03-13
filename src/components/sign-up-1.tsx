@@ -5,17 +5,34 @@ import { Logo } from '@/components/logo'
 import Link from 'next/link'
 import { registerUser, type AuthState } from '@/app/actions/auth'
 
-
 // ── Eye / EyeOff icons ────────────────────────────────────────────────────────
 function EyeIcon({ visible }: { visible: boolean }) {
   return visible ? (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
       <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
       <line x1="1" y1="1" x2="23" y2="23" />
     </svg>
   ) : (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
       <circle cx="12" cy="12" r="3" />
     </svg>
@@ -87,9 +104,9 @@ export default function SignUp() {
             <p className="auth-subtitle">Start managing weddings beautifully</p>
           </div>
 
-          {/* Form error */}
+          {/* Form error - Displayed if the server action returns an unsuccessful state */}
           {state !== null && !state.success && (
-            <div className="auth-error" role="alert">
+            <div className="auth-error animate-in fade-in slide-in-from-top-1" role="alert">
               <span className="auth-error-icon">⚠️</span>
               <span>{state.message}</span>
             </div>
@@ -98,7 +115,9 @@ export default function SignUp() {
           {/* Sign-Up Form */}
           <form action={action} className="auth-form" id="signup-form">
             <div className="auth-field">
-              <label htmlFor="signup-name" className="auth-label">Full name</label>
+              <label htmlFor="signup-name" className="auth-label">
+                Full name
+              </label>
               <input
                 type="text"
                 id="signup-name"
@@ -113,7 +132,9 @@ export default function SignUp() {
             </div>
 
             <div className="auth-field">
-              <label htmlFor="signup-email" className="auth-label">Email address</label>
+              <label htmlFor="signup-email" className="auth-label">
+                Email address
+              </label>
               <input
                 type="email"
                 id="signup-email"
@@ -127,7 +148,9 @@ export default function SignUp() {
             </div>
 
             <div className="auth-field">
-              <label htmlFor="signup-password" className="auth-label">Password</label>
+              <label htmlFor="signup-password" className="auth-label">
+                Password
+              </label>
               <div className="auth-input-wrap">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -156,7 +179,9 @@ export default function SignUp() {
             </div>
 
             <div className="auth-field">
-              <label htmlFor="signup-confirm" className="auth-label">Confirm password</label>
+              <label htmlFor="signup-confirm" className="auth-label">
+                Confirm password
+              </label>
               <div className="auth-input-wrap">
                 <input
                   type={showConfirm ? 'text' : 'password'}
@@ -191,7 +216,7 @@ export default function SignUp() {
               {isPending ? (
                 <>
                   <span className="auth-spinner" aria-hidden="true" />
-                  Creating account…
+                  <span>Creating account…</span>
                 </>
               ) : (
                 'Create Account'
@@ -202,11 +227,15 @@ export default function SignUp() {
           {/* Switch link */}
           <div className="auth-switch">
             Already have an account?{' '}
-            <Link href="/login" className="auth-link">Sign in</Link>
+            <Link href="/login" className="auth-link">
+              Sign in
+            </Link>
           </div>
         </div>
 
-        <p className="auth-footer">© {new Date().getFullYear()} Perfect Knot CRM. All rights reserved.</p>
+        <p className="auth-footer">
+          © {new Date().getFullYear()} Perfect Knot CRM. All rights reserved.
+        </p>
       </div>
     </section>
   )

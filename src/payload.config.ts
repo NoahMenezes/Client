@@ -52,14 +52,14 @@ export default buildConfig({
   ],
   globals: [Settings],
   editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET || '',
+  secret: process.env.PAYLOAD_SECRET || 'YOUR_SECRET_HERE',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: sqliteAdapter({
     push: true,
     client: {
-      url: process.env.DATABASE_URL || '',
+      url: process.env.DATABASE_URL || 'file:./payload.db',
       authToken: process.env.DATABASE_URL_TOKEN || '',
     },
   }),

@@ -13,22 +13,52 @@ const STAGES = [
 ]
 
 const WEDDING_CEREMONIES = [
-  'Sangeet', 'Haldi', 'Mehendi', 'Baarat', 'Pheras',
-  'Engagement', 'Ring Ceremony', 'Reception', 'After Party', 'Myra Ceremony',
+  'Sangeet',
+  'Haldi',
+  'Mehendi',
+  'Baarat',
+  'Pheras',
+  'Engagement',
+  'Ring Ceremony',
+  'Reception',
+  'After Party',
+  'Myra Ceremony',
 ]
 const ENTERTAINMENT_OPTIONS = [
-  'Photographers & Cinematographers', 'Bridal Makeup Artists', 'Guest Makeup Artists',
-  'Emcee', 'DJ', 'Band', 'Choreographers', 'Dance Troupe', 'Dholwala',
-  'Brass Band', 'Vintage Car', 'Safa Wala', 'Fireworks',
+  'Photographers & Cinematographers',
+  'Bridal Makeup Artists',
+  'Guest Makeup Artists',
+  'Emcee',
+  'DJ',
+  'Band',
+  'Choreographers',
+  'Dance Troupe',
+  'Dholwala',
+  'Brass Band',
+  'Vintage Car',
+  'Safa Wala',
+  'Fireworks',
 ]
 const HOSPITALITY_SERVICES = [
-  'RSVP', 'Logistics Support', 'Airport Representatives',
-  'Guest Welcome In Lobby', 'Transportation Coordination', 'Honeymoon Planning',
+  'RSVP',
+  'Logistics Support',
+  'Airport Representatives',
+  'Guest Welcome In Lobby',
+  'Transportation Coordination',
+  'Honeymoon Planning',
 ]
 const ADDITIONAL_SERVICES = [
-  'Wedding Invite', 'Welcome Hampers', 'Return Gifts', 'Wedding Cake',
-  'Professional Mixologist', 'Hookah', 'Mithai Boxes', 'Live Bangle Maker',
-  'Liquid Support', 'Safabandi for Baarat', 'Vintage Car for Baarat',
+  'Wedding Invite',
+  'Welcome Hampers',
+  'Return Gifts',
+  'Wedding Cake',
+  'Professional Mixologist',
+  'Hookah',
+  'Mithai Boxes',
+  'Live Bangle Maker',
+  'Liquid Support',
+  'Safabandi for Baarat',
+  'Vintage Car for Baarat',
 ]
 const SERVICES_LOOKING_FOR = [
   'End to End Wedding Planning',
@@ -40,7 +70,10 @@ const SERVICES_LOOKING_FOR = [
 
 function csvToArray(csv: string | null | undefined): string[] {
   if (!csv) return []
-  return csv.split(',').map((s) => s.trim()).filter(Boolean)
+  return csv
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
 }
 
 function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
@@ -51,9 +84,24 @@ function FieldLabel({ children, required }: { children: React.ReactNode; require
   )
 }
 
-function InputField({ id, name, type = 'text', placeholder, required, disabled, defaultValue }: {
-  id: string; name: string; type?: string; placeholder?: string;
-  required?: boolean; disabled?: boolean; defaultValue?: string
+function InputField({
+  id,
+  name,
+  type = 'text',
+  placeholder,
+  required,
+  disabled,
+  value,
+  onChange,
+}: {
+  id: string
+  name: string
+  type?: string
+  placeholder?: string
+  required?: boolean
+  disabled?: boolean
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 }) {
   return (
     <input
@@ -63,21 +111,35 @@ function InputField({ id, name, type = 'text', placeholder, required, disabled, 
       placeholder={placeholder}
       required={required}
       disabled={disabled}
-      defaultValue={defaultValue ?? ''}
+      value={value}
+      onChange={onChange}
       className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a2744]/30 focus:border-[#1a2744] transition-all disabled:opacity-50"
     />
   )
 }
 
-function SelectField({ id, name, children, disabled, defaultValue }: {
-  id: string; name: string; children: React.ReactNode; disabled?: boolean; defaultValue?: string
+function SelectField({
+  id,
+  name,
+  children,
+  disabled,
+  value,
+  onChange,
+}: {
+  id: string
+  name: string
+  children: React.ReactNode
+  disabled?: boolean
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
 }) {
   return (
     <select
       id={id}
       name={name}
       disabled={disabled}
-      defaultValue={defaultValue ?? ''}
+      value={value}
+      onChange={onChange}
       className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1a2744]/30 focus:border-[#1a2744] transition-all disabled:opacity-50"
     >
       {children}
@@ -136,29 +198,71 @@ export default function EditLeadClient({ lead }: { lead: any }) {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  // Parse existing CSV values back to arrays for multi-selects
+  // --- FORM STATE ---
+  // We use controlled components to preserve state across stages.
+  const contact = typeof lead.contact === 'object' && lead.contact ? lead.contact : {}
+  const [formData, setFormData] = useState({
+    fullName: contact.name || lead.fullName || '',
+    email: contact.email || lead.email || '',
+    phone: contact.phone || lead.phone || '',
+    status: lead.status || 'new',
+    referralSource: lead.referralSource || '',
+    budget: lead.budget ? String(lead.budget) : '',
+    budgetText: lead.budgetText || '',
+    checkInDate: lead.checkInDate ? lead.checkInDate.split('T')[0] : '',
+    checkOutDate: lead.checkOutDate ? lead.checkOutDate.split('T')[0] : '',
+    weddingDate: lead.weddingDate ? lead.weddingDate.split('T')[0] : '',
+    guestCount: lead.guestCount ? String(lead.guestCount) : '',
+    weddingStyle: lead.weddingStyle || '',
+    resortCategory: lead.resortCategory || '',
+    cuisineType: lead.cuisineType || '',
+    isDestination: !!lead.isDestination,
+  })
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target
+    const isCheckbox = type === 'checkbox'
+    setFormData((prev) => ({
+      ...prev,
+      [name]: isCheckbox ? (e.target as HTMLInputElement).checked : value,
+    }))
+  }
+
+  // Multi-select states
   const [servicesLookingFor, setServicesLookingFor] = useState<string[]>(
-    csvToArray(lead.servicesLookedFor)
+    csvToArray(lead.servicesLookedFor),
   )
   const [ceremonies, setCeremonies] = useState<string[]>(csvToArray(lead.weddingCeremonies))
-  const [entertainment, setEntertainment] = useState<string[]>(csvToArray(lead.entertainmentOptions))
+  const [entertainment, setEntertainment] = useState<string[]>(
+    csvToArray(lead.entertainmentOptions),
+  )
   const [hospitality, setHospitality] = useState<string[]>(csvToArray(lead.hospitalityServices))
   const [additional, setAdditional] = useState<string[]>(csvToArray(lead.additionalServices))
 
-  // Resolve contact
-  const contact = typeof lead.contact === 'object' && lead.contact ? lead.contact : {}
-  const fullName = contact.name || lead.fullName || ''
-  const email = contact.email || lead.email || ''
-  const phone = contact.phone || lead.phone || ''
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const fd = new FormData(e.currentTarget)
+    // Create FormData and append all state values
+    const fd = new FormData()
+    fd.append('id', String(lead.id))
+    Object.entries(formData).forEach(([key, value]) => {
+      if (typeof value === 'boolean') {
+        if (value) fd.append(key, 'on')
+      } else {
+        fd.append(key, value)
+      }
+    })
+    servicesLookingFor.forEach((v) => fd.append('servicesLookingFor', v))
+    ceremonies.forEach((v) => fd.append('weddingCeremonies', v))
+    entertainment.forEach((v) => fd.append('entertainmentOptions', v))
+    hospitality.forEach((v) => fd.append('hospitalityServices', v))
+    additional.forEach((v) => fd.append('additionalServices', v))
+
     setError(null)
     startTransition(async () => {
       const result: ActionState = await updateLead(null, fd)
       if (result && !result.success) {
         setError(result.message)
+        // Go to the first stage with an error
         setStage(1)
       }
     })
@@ -170,11 +274,14 @@ export default function EditLeadClient({ lead }: { lead: any }) {
     <div className="flex flex-1 flex-col min-h-screen bg-gray-50">
       {/* Header */}
       <div className="border-b bg-white px-6 py-4 flex items-center gap-4">
-        <Link href={`/dashboard/leads/${lead.id}`} className="text-gray-400 hover:text-gray-700 text-sm transition-colors">
+        <Link
+          href={`/dashboard/leads/${lead.id}`}
+          className="text-gray-400 hover:text-gray-700 text-sm transition-colors"
+        >
           ← Back to Lead
         </Link>
         <div className="h-4 w-px bg-gray-200" />
-        <h1 className="text-lg font-bold text-[#1a2744]">Edit Lead — {fullName}</h1>
+        <h1 className="text-lg font-bold text-[#1a2744]">Edit Lead — {formData.fullName}</h1>
         <span className="text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">
           {leadDisplayId}
         </span>
@@ -189,7 +296,7 @@ export default function EditLeadClient({ lead }: { lead: any }) {
               const isActive = stage === s.id
               return (
                 <React.Fragment key={s.id}>
-                  <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                  <div className="flex flex-col items-center gap-1 shrink-0">
                     <button
                       type="button"
                       onClick={() => setStage(s.id)}
@@ -204,7 +311,9 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                       {isCompleted ? '✓' : s.id}
                     </button>
                     <div className="text-center">
-                      <p className={`text-xs font-semibold ${isActive ? 'text-[#1a2744]' : 'text-gray-400'}`}>
+                      <p
+                        className={`text-xs font-semibold ${isActive ? 'text-[#1a2744]' : 'text-gray-400'}`}
+                      >
                         {s.label}
                       </p>
                       <p className="text-[10px] text-gray-400 hidden sm:block">{s.description}</p>
@@ -212,7 +321,7 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                   </div>
                   {i < STAGES.length - 1 && (
                     <div
-                      className={`flex-1 h-0.5 mx-3 -mt-[18px] transition-all ${
+                      className={`flex-1 h-0.5 mx-3 -mt-4.5 transition-all ${
                         stage > s.id ? 'bg-[#1a2744]' : 'bg-gray-200'
                       }`}
                     />
@@ -225,24 +334,7 @@ export default function EditLeadClient({ lead }: { lead: any }) {
 
         {/* Form */}
         <form onSubmit={handleSubmit}>
-          <input type="hidden" name="id" value={String(lead.id)} />
-
-          {/* Hidden inputs for multi-selects (always present so data carries through stages) */}
-          {servicesLookingFor.map((v) => (
-            <input key={`svc-${v}`} type="hidden" name="servicesLookingFor" value={v} />
-          ))}
-          {ceremonies.map((v) => (
-            <input key={`cer-${v}`} type="hidden" name="weddingCeremonies" value={v} />
-          ))}
-          {entertainment.map((v) => (
-            <input key={`ent-${v}`} type="hidden" name="entertainmentOptions" value={v} />
-          ))}
-          {hospitality.map((v) => (
-            <input key={`hosp-${v}`} type="hidden" name="hospitalityServices" value={v} />
-          ))}
-          {additional.map((v) => (
-            <input key={`add-${v}`} type="hidden" name="additionalServices" value={v} />
-          ))}
+          {/* No hidden inputs needed for controlled components */}
 
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
             {/* Card Header */}
@@ -267,21 +359,51 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <FieldLabel required>Couple&apos;s Full Name</FieldLabel>
-                      <InputField id="fullName" name="fullName" defaultValue={fullName} placeholder="e.g. Dhriti & Tarun" required disabled={isPending} />
+                      <InputField
+                        id="fullName"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleInputChange as any}
+                        placeholder="e.g. Dhriti & Tarun"
+                        required
+                        disabled={isPending}
+                      />
                     </div>
                     <div>
                       <FieldLabel required>Email Address</FieldLabel>
-                      <InputField id="email" name="email" type="email" defaultValue={email} placeholder="couple@example.com" required disabled={isPending} />
+                      <InputField
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleInputChange as any}
+                        placeholder="couple@example.com"
+                        required
+                        disabled={isPending}
+                      />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <FieldLabel>Contact Number</FieldLabel>
-                      <InputField id="phone" name="phone" defaultValue={phone} placeholder="+91 98765 43210" disabled={isPending} />
+                      <InputField
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange as any}
+                        placeholder="+91 98765 43210"
+                        disabled={isPending}
+                      />
                     </div>
                     <div>
                       <FieldLabel>Lead Status</FieldLabel>
-                      <SelectField id="status" name="status" defaultValue={lead.status || 'new'} disabled={isPending}>
+                      <SelectField
+                        id="status"
+                        name="status"
+                        value={formData.status}
+                        onChange={handleInputChange as any}
+                        disabled={isPending}
+                      >
                         <option value="new">New</option>
                         <option value="contacted">Contacted</option>
                         <option value="proposal_sent">Proposal Sent</option>
@@ -295,16 +417,38 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <FieldLabel>Referral Source</FieldLabel>
-                      <InputField id="referralSource" name="referralSource" defaultValue={lead.referralSource || ''} placeholder="e.g. WedmeGood, Instagram" disabled={isPending} />
+                      <InputField
+                        id="referralSource"
+                        name="referralSource"
+                        value={formData.referralSource}
+                        onChange={handleInputChange as any}
+                        placeholder="e.g. WedmeGood, Instagram"
+                        disabled={isPending}
+                      />
                     </div>
                     <div>
                       <FieldLabel>Budget (₹ numeric)</FieldLabel>
-                      <InputField id="budget" name="budget" type="number" defaultValue={lead.budget ? String(lead.budget) : ''} placeholder="e.g. 3500000" disabled={isPending} />
+                      <InputField
+                        id="budget"
+                        name="budget"
+                        type="number"
+                        value={formData.budget}
+                        onChange={handleInputChange as any}
+                        placeholder="e.g. 3500000"
+                        disabled={isPending}
+                      />
                     </div>
                   </div>
                   <div>
                     <FieldLabel>Budget Description</FieldLabel>
-                    <InputField id="budgetText" name="budgetText" defaultValue={lead.budgetText || ''} placeholder='e.g. "35 Lakh INR (inclusive of all)"' disabled={isPending} />
+                    <InputField
+                      id="budgetText"
+                      name="budgetText"
+                      value={formData.budgetText}
+                      onChange={handleInputChange as any}
+                      placeholder='e.g. "35 Lakh INR (inclusive of all)"'
+                      disabled={isPending}
+                    />
                   </div>
                 </div>
               )}
@@ -315,25 +459,60 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>
                       <FieldLabel>Check-in Date</FieldLabel>
-                      <InputField id="checkInDate" name="checkInDate" type="date" defaultValue={lead.checkInDate ? lead.checkInDate.split('T')[0] : ''} disabled={isPending} />
+                      <InputField
+                        id="checkInDate"
+                        name="checkInDate"
+                        type="date"
+                        value={formData.checkInDate}
+                        onChange={handleInputChange as any}
+                        disabled={isPending}
+                      />
                     </div>
                     <div>
                       <FieldLabel>Check-out Date</FieldLabel>
-                      <InputField id="checkOutDate" name="checkOutDate" type="date" defaultValue={lead.checkOutDate ? lead.checkOutDate.split('T')[0] : ''} disabled={isPending} />
+                      <InputField
+                        id="checkOutDate"
+                        name="checkOutDate"
+                        type="date"
+                        value={formData.checkOutDate}
+                        onChange={handleInputChange as any}
+                        disabled={isPending}
+                      />
                     </div>
                     <div>
                       <FieldLabel>Wedding Date</FieldLabel>
-                      <InputField id="weddingDate" name="weddingDate" type="date" defaultValue={lead.weddingDate ? lead.weddingDate.split('T')[0] : ''} disabled={isPending} />
+                      <InputField
+                        id="weddingDate"
+                        name="weddingDate"
+                        type="date"
+                        value={formData.weddingDate}
+                        onChange={handleInputChange as any}
+                        disabled={isPending}
+                      />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <FieldLabel>Total Number of Guests</FieldLabel>
-                      <InputField id="guestCount" name="guestCount" type="number" defaultValue={lead.guestCount ? String(lead.guestCount) : ''} placeholder="e.g. 150" disabled={isPending} />
+                      <InputField
+                        id="guestCount"
+                        name="guestCount"
+                        type="number"
+                        value={formData.guestCount}
+                        onChange={handleInputChange as any}
+                        placeholder="e.g. 150"
+                        disabled={isPending}
+                      />
                     </div>
                     <div>
                       <FieldLabel>Style of Wedding</FieldLabel>
-                      <SelectField id="weddingStyle" name="weddingStyle" defaultValue={lead.weddingStyle || ''} disabled={isPending}>
+                      <SelectField
+                        id="weddingStyle"
+                        name="weddingStyle"
+                        value={formData.weddingStyle}
+                        onChange={handleInputChange as any}
+                        disabled={isPending}
+                      >
                         <option value="">Select style…</option>
                         <option>Hindu Wedding</option>
                         <option>Muslim Wedding</option>
@@ -349,7 +528,13 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <FieldLabel>Resort Category</FieldLabel>
-                      <SelectField id="resortCategory" name="resortCategory" defaultValue={lead.resortCategory || ''} disabled={isPending}>
+                      <SelectField
+                        id="resortCategory"
+                        name="resortCategory"
+                        value={formData.resortCategory}
+                        onChange={handleInputChange as any}
+                        disabled={isPending}
+                      >
                         <option value="">Select category…</option>
                         <option>3 Star</option>
                         <option>4 Star</option>
@@ -360,7 +545,13 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                     </div>
                     <div>
                       <FieldLabel>Type of Cuisine</FieldLabel>
-                      <SelectField id="cuisineType" name="cuisineType" defaultValue={lead.cuisineType || ''} disabled={isPending}>
+                      <SelectField
+                        id="cuisineType"
+                        name="cuisineType"
+                        value={formData.cuisineType}
+                        onChange={handleInputChange as any}
+                        disabled={isPending}
+                      >
                         <option value="">Select cuisine…</option>
                         <option>Veg</option>
                         <option>Non-Veg</option>
@@ -374,11 +565,15 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                       type="checkbox"
                       id="isDestination"
                       name="isDestination"
-                      defaultChecked={!!lead.isDestination}
+                      checked={formData.isDestination}
+                      onChange={handleInputChange as any}
                       className="h-4 w-4 rounded border-gray-300 text-[#1a2744] focus:ring-[#1a2744]"
                       disabled={isPending}
                     />
-                    <label htmlFor="isDestination" className="text-sm font-medium text-gray-700 cursor-pointer">
+                    <label
+                      htmlFor="isDestination"
+                      className="text-sm font-medium text-gray-700 cursor-pointer"
+                    >
                       Destination Wedding?
                     </label>
                   </div>
@@ -412,7 +607,9 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                   </div>
                   <div>
                     <FieldLabel>Entertainment Options & Artists</FieldLabel>
-                    <p className="text-[11px] text-gray-400 mb-2">Select all entertainment required</p>
+                    <p className="text-[11px] text-gray-400 mb-2">
+                      Select all entertainment required
+                    </p>
                     <MultiCheckGroup
                       name="entertainmentOptions"
                       options={ENTERTAINMENT_OPTIONS}
@@ -434,7 +631,9 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                   </div>
                   <div>
                     <FieldLabel>Additional Services</FieldLabel>
-                    <p className="text-[11px] text-gray-400 mb-2">Bespoke add-ons for the package</p>
+                    <p className="text-[11px] text-gray-400 mb-2">
+                      Bespoke add-ons for the package
+                    </p>
                     <MultiCheckGroup
                       name="additionalServices"
                       options={ADDITIONAL_SERVICES}
@@ -488,8 +687,19 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                     {isPending ? (
                       <span className="flex items-center gap-2">
                         <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8H4z"
+                          />
                         </svg>
                         Saving…
                       </span>
