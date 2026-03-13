@@ -34,6 +34,8 @@ export default async function EditQuotationRoute({ params }: { params: Promise<{
     id: d.id,
     fullName: d.contact?.name || 'Unknown',
     leadId: d.leadId || null,
+    weddingDate: d.weddingDate || null,
+    status: d.status || null,
   }))
 
   const serializedQuotation = {
@@ -48,6 +50,7 @@ export default async function EditQuotationRoute({ params }: { params: Promise<{
     quotationDate: quotation.quotationDate,
     agencyFeePercent: quotation.agencyFeePercent,
     notes: quotation.notes,
+    currency: quotation.currency || 'INR',
     categories: quotation.categories,
     subTotal: quotation.subTotal,
     agencyFees: quotation.agencyFees,

@@ -37,24 +37,27 @@ export default async function DashboardPage({
 
   // Get counts and recent leads
   const [allResult, newResult, contactedResult, confirmedResult, recentLeads] = await Promise.all([
-    payload.find({ collection: 'leads', limit: 0, overrideAccess: true }),
+    payload.find({ collection: 'leads', limit: 0, overrideAccess: true, select: { leadId: true } }),
     payload.find({
       collection: 'leads',
       limit: 0,
       where: { status: { equals: 'new' } },
       overrideAccess: true,
+      select: { leadId: true },
     }),
     payload.find({
       collection: 'leads',
       limit: 0,
       where: { status: { equals: 'contacted' } },
       overrideAccess: true,
+      select: { leadId: true },
     }),
     payload.find({
       collection: 'leads',
       limit: 0,
       where: { status: { equals: 'confirmed' } },
       overrideAccess: true,
+      select: { leadId: true },
     }),
     payload.find({
       collection: 'leads',
@@ -63,6 +66,15 @@ export default async function DashboardPage({
       overrideAccess: true,
       depth: 1,
       where,
+      select: {
+        leadId: true,
+        contact: true,
+        status: true,
+        checkInDate: true,
+        checkOutDate: true,
+        resortCategory: true,
+        cuisineType: true,
+      },
     }),
   ])
 

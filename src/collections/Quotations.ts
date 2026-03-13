@@ -49,6 +49,30 @@ export const Quotations: CollectionConfig = {
       type: 'date',
     },
     {
+      name: 'weddingDate',
+      type: 'date',
+    },
+    {
+      name: 'guestCount',
+      type: 'number',
+    },
+    {
+      name: 'venue',
+      type: 'text',
+    },
+    {
+      name: 'currency',
+      type: 'select',
+      options: [
+        { label: 'INR (₹)', value: 'INR' },
+        { label: 'USD ($)', value: 'USD' },
+        { label: 'EUR (€)', value: 'EUR' },
+        { label: 'GBP (£)', value: 'GBP' },
+      ],
+      defaultValue: 'INR',
+      required: true,
+    },
+    {
       name: 'notes',
       type: 'textarea',
     },

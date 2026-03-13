@@ -34,6 +34,7 @@ export async function createQuotation(prev: ActionState, fd: FormData): Promise<
     const quotationDate = (fd.get('quotationDate') as string) || undefined
     const status = (fd.get('status') as string) || 'draft'
     const notes = (fd.get('notes') as string) || undefined
+    const currency = (fd.get('currency') as string) || 'INR'
 
     const result = await payload.create({
       collection: 'quotations',
@@ -46,6 +47,7 @@ export async function createQuotation(prev: ActionState, fd: FormData): Promise<
         quotationDate,
         status: status as 'draft' | 'sent' | 'approved',
         notes,
+        currency,
         subTotal: 0,
         agencyFees: 0,
         grandTotal: 0,
@@ -81,6 +83,7 @@ export async function updateQuotationById(prev: ActionState, fd: FormData): Prom
     const quotationDate = (fd.get('quotationDate') as string) || undefined
     const status = (fd.get('status') as string) || 'draft'
     const notes = (fd.get('notes') as string) || undefined
+    const currency = (fd.get('currency') as string) || 'INR'
 
     await payload.update({
       collection: 'quotations',
@@ -93,6 +96,7 @@ export async function updateQuotationById(prev: ActionState, fd: FormData): Prom
         subTotal: 0,
         agencyFees: 0,
         grandTotal: 0,
+        currency,
         ...(title ? { title } : {}),
         ...(quotationDate ? { quotationDate } : {}),
         ...(notes !== undefined ? { notes } : {}),
@@ -157,6 +161,7 @@ export async function duplicateQuotation(fd: FormData): Promise<ActionState> {
         quotationDate: (original as any).quotationDate ?? undefined,
         status: 'draft',
         notes: (original as any).notes ?? undefined,
+        currency: (original as any).currency ?? 'INR',
         subTotal: 0,
         agencyFees: 0,
         grandTotal: 0,

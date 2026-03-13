@@ -46,6 +46,7 @@ interface Quotation {
   title: string
   grandTotal: number
   status: string
+  currency?: string
   quotationDate: string | null
   categories: QuotationCategory[]
 }
@@ -111,8 +112,18 @@ const statusLabels: Record<string, string> = {
 
 
 
-function fmt(n: number) {
-  return n.toLocaleString('en-IN', { minimumFractionDigits: 0 })
+const CURRENCIES = [
+  { label: 'INR (₹)', value: 'INR', symbol: '₹' },
+  { label: 'USD ($)', value: 'USD', symbol: '$' },
+  { label: 'EUR (€)', value: 'EUR', symbol: '€' },
+  { label: 'GBP (£)', value: 'GBP', symbol: '£' },
+]
+
+function fmt(n: number, currency: string = 'INR') {
+  if (currency === 'INR') {
+    return n.toLocaleString('en-IN', { minimumFractionDigits: 0 })
+  }
+  return n.toLocaleString('en-US', { minimumFractionDigits: 0 })
 }
 
 function formatDate(dateStr: string | null | undefined) {
@@ -706,7 +717,7 @@ export default function LeadProfileTabs({
                             Q{String(idx + 1).padStart(3, '0')}
                           </td>
                           <td className="px-4 py-3 font-semibold text-blue-600">
-                            ₹{fmt(q.grandTotal)}
+                            {CURRENCIES.find(c => c.value === q.currency)?.symbol || '₹'}{fmt(q.grandTotal, q.currency)}
                           </td>
                           <td className="px-4 py-3 text-gray-600 max-w-50 truncate">
                             {servicesSummary || '—'}

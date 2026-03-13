@@ -64,15 +64,28 @@ export const Leads: CollectionConfig = {
       name: 'budget',
       type: 'number',
       admin: {
-        description: 'Client budget',
+        description: 'Numeric value of the budget',
+      },
+    },
+    {
+      name: 'budgetText',
+      type: 'text',
+      admin: {
+        description: 'Budget range or description from form',
       },
     },
     {
       name: 'weddingStyle',
-      type: 'text',
-      admin: {
-        description: 'e.g. Traditional, Modern, etc.',
-      },
+      type: 'select',
+      options: [
+        { label: 'Hindu Wedding', value: 'hindu' },
+        { label: 'Jain Wedding', value: 'jain' },
+        { label: 'Sikh Wedding', value: 'sikh' },
+        { label: 'Inter Faith Wedding', value: 'inter_faith' },
+        { label: 'Catholic Wedding', value: 'catholic' },
+        { label: 'Islamic Wedding', value: 'islamic' },
+        { label: 'Other', value: 'other' },
+      ],
     },
     {
       name: 'isDestination',
@@ -83,56 +96,56 @@ export const Leads: CollectionConfig = {
       name: 'resortCategory',
       type: 'text',
       admin: {
-        description: 'e.g. Luxury, Boutique, All-Inclusive',
+        description: 'e.g. 3 Star, 4 Star, 5 Star',
       },
     },
     {
       name: 'cuisineType',
       type: 'text',
       admin: {
-        description: 'e.g. Indian, Italian, Continental',
+        description: 'e.g. Veg, Non Veg',
       },
     },
     {
       name: 'servicesLookedFor',
       type: 'text',
       admin: {
-        description: 'Comma-separated list of services looked for (e.g., Photography, Videography)',
+        description: 'Selected services',
       },
     },
     {
       name: 'weddingCeremonies',
       type: 'text',
       admin: {
-        description: 'Comma-separated list of wedding ceremonies (e.g., Sangeet, Mehendi, Wedding)',
+        description: 'Ceremonies selected',
       },
     },
     {
       name: 'entertainmentOptions',
       type: 'text',
       admin: {
-        description: 'Comma-separated list of entertainment options (e.g., DJ, Live Band, Dancers)',
+        description: 'Entertainment options selected',
       },
     },
     {
       name: 'hospitalityServices',
       type: 'text',
       admin: {
-        description: 'Comma-separated list of hospitality services (e.g., Guest Accommodation, Airport Transfers)',
+        description: 'Hospitality services selected',
       },
     },
     {
       name: 'additionalServices',
       type: 'text',
       admin: {
-        description: 'Comma-separated list of additional services (e.g., Hair & Makeup, Favors)',
+        description: 'Additional services selected',
       },
     },
     {
-      name: 'budgetText',
+      name: 'referralSource',
       type: 'text',
       admin: {
-        description: 'Client budget as text (e.g., "20k-30k", "Above 50k")',
+        description: 'Where they found out about us',
       },
     },
     {

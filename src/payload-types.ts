@@ -211,46 +211,47 @@ export interface Lead {
   checkOutDate?: string | null;
   guestCount?: number | null;
   /**
-   * Client budget
+   * Numeric value of the budget
    */
   budget?: number | null;
   /**
-   * e.g. Traditional, Modern, etc.
+   * Budget range or description from form
    */
-  weddingStyle?: string | null;
+  budgetText?: string | null;
+  weddingStyle?: ('hindu' | 'jain' | 'sikh' | 'inter_faith' | 'catholic' | 'islamic' | 'other') | null;
   isDestination?: boolean | null;
   /**
-   * e.g. Luxury, Boutique, All-Inclusive
+   * e.g. 3 Star, 4 Star, 5 Star
    */
   resortCategory?: string | null;
   /**
-   * e.g. Indian, Italian, Continental
+   * e.g. Veg, Non Veg
    */
   cuisineType?: string | null;
   /**
-   * Comma-separated list of services looked for (e.g., Photography, Videography)
+   * Selected services
    */
   servicesLookedFor?: string | null;
   /**
-   * Comma-separated list of wedding ceremonies (e.g., Sangeet, Mehendi, Wedding)
+   * Ceremonies selected
    */
   weddingCeremonies?: string | null;
   /**
-   * Comma-separated list of entertainment options (e.g., DJ, Live Band, Dancers)
+   * Entertainment options selected
    */
   entertainmentOptions?: string | null;
   /**
-   * Comma-separated list of hospitality services (e.g., Guest Accommodation, Airport Transfers)
+   * Hospitality services selected
    */
   hospitalityServices?: string | null;
   /**
-   * Comma-separated list of additional services (e.g., Hair & Makeup, Favors)
+   * Additional services selected
    */
   additionalServices?: string | null;
   /**
-   * Client budget as text (e.g., "20k-30k", "Above 50k")
+   * Where they found out about us
    */
-  budgetText?: string | null;
+  referralSource?: string | null;
   /**
    * Raw data from Google Form submission
    */
@@ -372,6 +373,10 @@ export interface Quotation {
    */
   agencyFeePercent?: number | null;
   quotationDate?: string | null;
+  weddingDate?: string | null;
+  guestCount?: number | null;
+  venue?: string | null;
+  currency: 'INR' | 'USD' | 'EUR' | 'GBP';
   notes?: string | null;
   subTotal?: number | null;
   agencyFees?: number | null;
@@ -662,6 +667,7 @@ export interface LeadsSelect<T extends boolean = true> {
   checkOutDate?: T;
   guestCount?: T;
   budget?: T;
+  budgetText?: T;
   weddingStyle?: T;
   isDestination?: T;
   resortCategory?: T;
@@ -671,7 +677,7 @@ export interface LeadsSelect<T extends boolean = true> {
   entertainmentOptions?: T;
   hospitalityServices?: T;
   additionalServices?: T;
-  budgetText?: T;
+  referralSource?: T;
   googleFormRawData?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -750,6 +756,10 @@ export interface QuotationsSelect<T extends boolean = true> {
   categories?: T;
   agencyFeePercent?: T;
   quotationDate?: T;
+  weddingDate?: T;
+  guestCount?: T;
+  venue?: T;
+  currency?: T;
   notes?: T;
   subTotal?: T;
   agencyFees?: T;

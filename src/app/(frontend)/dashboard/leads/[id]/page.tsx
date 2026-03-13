@@ -28,7 +28,35 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
 
   let lead: any
   try {
-    lead = await payload.findByID({ collection: 'leads', id, overrideAccess: true, depth: 1 })
+    lead = await payload.findByID({
+      collection: 'leads',
+      id,
+      overrideAccess: true,
+      depth: 1,
+      select: {
+        leadId: true,
+        contact: true,
+        status: true,
+        assignedTo: true,
+        weddingDate: true,
+        checkInDate: true,
+        checkOutDate: true,
+        guestCount: true,
+        budget: true,
+        budgetText: true,
+        weddingStyle: true,
+        isDestination: true,
+        resortCategory: true,
+        cuisineType: true,
+        servicesLookedFor: true,
+        weddingCeremonies: true,
+        entertainmentOptions: true,
+        hospitalityServices: true,
+        additionalServices: true,
+        referralSource: true,
+        googleFormRawData: true,
+      },
+    })
   } catch {
     notFound()
   }
@@ -78,6 +106,7 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
       title: q.title,
       grandTotal: q.grandTotal || 0,
       status: q.status || 'draft',
+      currency: q.currency || 'INR',
       quotationDate: q.quotationDate || null,
       categories: q.categories || [],
     }))

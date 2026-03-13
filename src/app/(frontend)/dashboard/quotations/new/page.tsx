@@ -16,12 +16,20 @@ export default async function NewQuotationPage({
     limit: 1000,
     depth: 1,
     overrideAccess: true,
+    select: {
+      leadId: true,
+      contact: true,
+      weddingDate: true,
+      status: true,
+    },
   })
 
   const leads = res.docs.map((d: any) => ({
     id: d.id,
     fullName: d.contact?.name || 'Unknown',
     leadId: d.leadId || null,
+    weddingDate: d.weddingDate || null,
+    status: d.status || null,
   }))
 
   return (

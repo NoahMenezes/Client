@@ -36,6 +36,7 @@ export interface QuotationViewData {
   agencyFees?: number
   agencyFeePercent?: number
   grandTotal?: number
+  currency?: string
   notes?: string
 }
 
@@ -52,8 +53,18 @@ const STATUS_STYLES: Record<string, string> = {
   rejected: 'bg-red-100 text-red-700',
 }
 
-function fmt(n: number) {
-  return n.toLocaleString('en-IN', { minimumFractionDigits: 0 })
+const CURRENCIES = [
+  { label: 'INR (₹)', value: 'INR', symbol: '₹' },
+  { label: 'USD ($)', value: 'USD', symbol: '$' },
+  { label: 'EUR (€)', value: 'EUR', symbol: '€' },
+  { label: 'GBP (£)', value: 'GBP', symbol: '£' },
+]
+
+function fmt(n: number, currency: string = 'INR') {
+  if (currency === 'INR') {
+    return n.toLocaleString('en-IN', { minimumFractionDigits: 0 })
+  }
+  return n.toLocaleString('en-US', { minimumFractionDigits: 0 })
 }
 
 const DEFAULT_QUOTATION: QuotationViewData = {
@@ -76,6 +87,8 @@ export default function QuotationViewContent({ quotation = DEFAULT_QUOTATION }: 
   const agencyFeePercent = quotation.agencyFeePercent ?? 12
   const grandTotal = quotation.grandTotal ?? 0
   const lead = quotation.lead ?? null
+  const currency = quotation.currency || 'INR'
+  const currencySymbol = CURRENCIES.find((c) => c.value === currency)?.symbol || '₹'
 
   const backHref = lead
     ? `/dashboard/leads/${lead.id}?tab=quotations`
@@ -160,7 +173,7 @@ export default function QuotationViewContent({ quotation = DEFAULT_QUOTATION }: 
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-gray-400 mb-0.5">Grand Total</p>
-                  <p className="text-2xl font-bold text-gray-900">₹{fmt(grandTotal)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{currencySymbol}{fmt(grandTotal, currency)}</p>
                 </div>
               </div>
             </div>
@@ -181,11 +194,11 @@ export default function QuotationViewContent({ quotation = DEFAULT_QUOTATION }: 
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-gray-50">
-                    <th className="px-5 py-3 text-left font-semibold text-gray-600 w-12">Sr.</th>
+                    <th className="px-5 py-3 text-left font-semibold text-gray-600">Sr.</th>
                     <th className="px-5 py-3 text-left font-semibold text-gray-600">Particulars</th>
-                    <th className="px-5 py-3 text-right font-semibold text-gray-600 w-32">Cost</th>
+                    <th className="px-5 py-3 text-right font-semibold text-gray-600 w-32">Cost ({currencySymbol})</th>
                     <th className="px-5 py-3 text-right font-semibold text-gray-600 w-24">Qty</th>
-                    <th className="px-5 py-3 text-right font-semibold text-gray-600 w-36">Total</th>
+                    <th className="px-5 py-3 text-right font-semibold text-gray-600 w-36">Total ({currencySymbol})</th>
                     <th className="px-5 py-3 text-left font-semibold text-gray-600 w-40">Remarks</th>
                   </tr>
                 </thead>
@@ -208,13 +221,13 @@ export default function QuotationViewContent({ quotation = DEFAULT_QUOTATION }: 
                             <td className="px-5 py-3 text-gray-400 text-xs">{rowCounter}</td>
                             <td className="px-5 py-3 text-gray-700">{item.particulars}</td>
                             <td className="px-5 py-3 text-right text-gray-700">
-                              {item.amount ? `₹${fmt(item.amount)}` : '—'}
+                              {item.amount ? `${currencySymbol}${fmt(item.amount, currency)}` : '—'}
                             </td>
                             <td className="px-5 py-3 text-right text-gray-700">
                               {item.quantity ?? 1}
                             </td>
                             <td className="px-5 py-3 text-right font-semibold text-gray-800">
-                              ₹{fmt(itemTotal)}
+                              {currencySymbol}{fmt(itemTotal, currency)}
                             </td>
                             <td className="px-5 py-3 text-gray-500 text-xs">
                               {item.remarks || '—'}
@@ -232,20 +245,20 @@ export default function QuotationViewContent({ quotation = DEFAULT_QUOTATION }: 
                 <div className="flex flex-col items-end gap-1.5 text-sm">
                   <div className="flex items-center gap-8 w-72">
                     <span className="text-gray-500 flex-1">Sub-Total</span>
-                    <span className="font-semibold text-gray-800 text-right">₹{fmt(subTotal)}</span>
+                    <span className="font-semibold text-gray-800 text-right">{currencySymbol}{fmt(subTotal, currency)}</span>
                   </div>
                   <div className="flex items-center gap-8 w-72">
                     <span className="text-gray-500 flex-1">
                       Agency Fees ({agencyFeePercent}%)
                     </span>
                     <span className="font-semibold text-gray-800 text-right">
-                      ₹{fmt(agencyFees)}
+                      {currencySymbol}{fmt(agencyFees, currency)}
                     </span>
                   </div>
                   <div className="flex items-center gap-8 w-72 pt-2 border-t mt-1">
                     <span className="font-bold text-gray-900 text-base flex-1">Grand Total</span>
                     <span className="font-bold text-gray-900 text-xl text-right">
-                      ₹{fmt(grandTotal)}
+                      {currencySymbol}{fmt(grandTotal, currency)}
                     </span>
                   </div>
                 </div>
