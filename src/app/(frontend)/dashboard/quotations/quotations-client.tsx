@@ -46,7 +46,13 @@ function fmt(n: number, currency: string = 'INR') {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function QuotationsClient({ initialQuotations }: { initialQuotations: Quotation[], totalDocs: number }) {
+export default function QuotationsClient({
+  initialQuotations,
+  totalDocs,
+}: {
+  initialQuotations: Quotation[]
+  totalDocs: number
+}) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
@@ -118,9 +124,7 @@ export default function QuotationsClient({ initialQuotations }: { initialQuotati
         {filtered.length === 0 ? (
           <div className="rounded-xl border bg-white shadow-sm p-12 text-center">
             <p className="text-gray-400 text-sm mb-4">
-              {search || statusFilter
-                ? 'No quotations match your filter.'
-                : 'No quotations found.'}
+              {search || statusFilter ? 'No quotations match your filter.' : 'No quotations found.'}
             </p>
             <Link href="/dashboard/quotations/new">
               <Button className="bg-blue-600 text-white hover:bg-blue-700" size="sm">
@@ -144,103 +148,108 @@ export default function QuotationsClient({ initialQuotations }: { initialQuotati
                 </tr>
               </thead>
               <tbody>
-                {filtered.slice((currentPage - 1) * PAGE_LIMIT, currentPage * PAGE_LIMIT).map((q, rawIdx) => {
-                  const idx = (currentPage - 1) * PAGE_LIMIT + rawIdx
-                  const servicesSummary = (q.categories ?? [])
-                    .map((c) => c.categoryName)
-                    .slice(0, 3)
-                    .join(', ')
-                  const currency = q.currency || 'INR'
-                  const currencySymbol = CURRENCIES.find((c) => c.value === currency)?.symbol || '₹'
+                {filtered
+                  .slice((currentPage - 1) * PAGE_LIMIT, currentPage * PAGE_LIMIT)
+                  .map((q, rawIdx) => {
+                    const idx = (currentPage - 1) * PAGE_LIMIT + rawIdx
+                    const servicesSummary = (q.categories ?? [])
+                      .map((c) => c.categoryName)
+                      .slice(0, 3)
+                      .join(', ')
+                    const currency = q.currency || 'INR'
+                    const currencySymbol =
+                      CURRENCIES.find((c) => c.value === currency)?.symbol || '₹'
 
-                  return (
-                    <tr
-                      key={q.id}
-                      className="border-b last:border-0 hover:bg-gray-50/50 transition-colors"
-                    >
-                      <td className="px-5 py-3 font-medium text-gray-400 text-xs">
-                        {String(idx + 1).padStart(3, '0')}
-                      </td>
-                      <td className="px-5 py-3 font-medium text-gray-800 max-w-45">
-                        <p className="truncate">{q.title}</p>
-                      </td>
-                      <td className="px-5 py-3 text-gray-600">
-                        {q.lead ? (
-                          <Link
-                            href={`/dashboard/leads/${q.lead.id}`}
-                            className="hover:text-blue-600 hover:underline"
-                          >
-                            {q.lead.fullName}
-                          </Link>
-                        ) : (
-                          '—'
-                        )}
-                      </td>
-                      <td className="px-5 py-3 font-semibold text-gray-900">
-                        {currencySymbol}{fmt(q.grandTotal, currency)}
-                      </td>
-                      <td className="px-5 py-3 text-gray-500 max-w-50">
-                        <p className="truncate">{servicesSummary || '—'}</p>
-                      </td>
-                      <td className="px-5 py-3">
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                            STATUS_STYLES[q.status] || 'bg-gray-100 text-gray-500'
-                          }`}
-                        >
-                          {q.status.charAt(0).toUpperCase() + q.status.slice(1)}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3 text-gray-500 text-xs">
-                        {q.quotationDate
-                          ? new Date(q.quotationDate).toLocaleDateString('en-IN', {
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric',
-                            })
-                          : '—'}
-                      </td>
-                      <td className="px-5 py-3">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Link href={`/dashboard/quotations/${q.id}`}>
-                            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1">
-                              <IconEye className="h-3.5 w-3.5" />
-                              View
-                            </Button>
-                          </Link>
-                          <Link href={`/dashboard/quotations/${q.id}/edit`}>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 px-2 text-xs gap-1 text-blue-600 hover:text-blue-700"
+                    return (
+                      <tr
+                        key={q.id}
+                        className="border-b last:border-0 hover:bg-gray-50/50 transition-colors"
+                      >
+                        <td className="px-5 py-3 font-medium text-gray-400 text-xs">
+                          {String(idx + 1).padStart(3, '0')}
+                        </td>
+                        <td className="px-5 py-3 font-medium text-gray-800 max-w-45">
+                          <p className="truncate">{q.title}</p>
+                        </td>
+                        <td className="px-5 py-3 text-gray-600">
+                          {q.lead ? (
+                            <Link
+                              href={`/dashboard/leads/${q.lead.id}`}
+                              className="hover:text-blue-600 hover:underline"
                             >
-                              <IconPencil className="h-3.5 w-3.5" />
-                              Edit
-                            </Button>
-                          </Link>
-                          <button
-                            type="button"
-                            title="Delete"
-                            disabled={deletingId === String(q.id)}
-                            onClick={() => handleDelete(q)}
-                            className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
+                              {q.lead.fullName}
+                            </Link>
+                          ) : (
+                            '—'
+                          )}
+                        </td>
+                        <td className="px-5 py-3 font-semibold text-gray-900">
+                          {currencySymbol}
+                          {fmt(q.grandTotal, currency)}
+                        </td>
+                        <td className="px-5 py-3 text-gray-500 max-w-50">
+                          <p className="truncate">{servicesSummary || '—'}</p>
+                        </td>
+                        <td className="px-5 py-3">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                              STATUS_STYLES[q.status] || 'bg-gray-100 text-gray-500'
+                            }`}
                           >
-                            <IconTrash className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
+                            {q.status.charAt(0).toUpperCase() + q.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3 text-gray-500 text-xs">
+                          {q.quotationDate
+                            ? new Date(q.quotationDate).toLocaleDateString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                              })
+                            : '—'}
+                        </td>
+                        <td className="px-5 py-3">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Link href={`/dashboard/quotations/${q.id}`}>
+                              <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1">
+                                <IconEye className="h-3.5 w-3.5" />
+                                View
+                              </Button>
+                            </Link>
+                            <Link href={`/dashboard/quotations/${q.id}/edit`}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-xs gap-1 text-blue-600 hover:text-blue-700"
+                              >
+                                <IconPencil className="h-3.5 w-3.5" />
+                                Edit
+                              </Button>
+                            </Link>
+                            <button
+                              type="button"
+                              title="Delete"
+                              disabled={deletingId === String(q.id)}
+                              onClick={() => handleDelete(q)}
+                              className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
+                            >
+                              <IconTrash className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
               </tbody>
             </table>
 
             {/* Pagination */}
             <div className="px-5 py-4 border-t flex items-center justify-between">
               <span className="text-sm text-gray-500">
-                Showing <strong>{Math.min(filtered.length, (currentPage - 1) * PAGE_LIMIT + 1)}</strong>–
+                Showing{' '}
+                <strong>{Math.min(filtered.length, (currentPage - 1) * PAGE_LIMIT + 1)}</strong>–
                 <strong>{Math.min(filtered.length, currentPage * PAGE_LIMIT)}</strong> of{' '}
-                <strong>{filtered.length}</strong> quotations
+                <strong>{search || statusFilter ? filtered.length : totalDocs}</strong> quotations
               </span>
               {Math.ceil(filtered.length / PAGE_LIMIT) > 1 && (
                 <div className="flex gap-2">

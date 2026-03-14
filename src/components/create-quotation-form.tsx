@@ -9,13 +9,50 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 // Inline SVG icons
 const IconGripVertical = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="9" y1="4" x2="9" y2="20"/><line x1="15" y1="4" x2="15" y2="20"/></svg>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    width="16"
+    height="16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+  >
+    <line x1="9" y1="4" x2="9" y2="20" />
+    <line x1="15" y1="4" x2="15" y2="20" />
+  </svg>
 )
 const IconPlus = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    width="14"
+    height="14"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+  >
+    <path d="M12 5v14M5 12h14" />
+  </svg>
 )
 const IconTrash = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    width="16"
+    height="16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+  >
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6l-1 14H6L5 6" />
+    <path d="M10 11v6M14 11v6" />
+    <path d="M9 6V4h6v2" />
+  </svg>
 )
 
 interface LineItem {
@@ -185,9 +222,17 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
   return (
     <div className="flex flex-1 flex-col min-h-screen bg-gray-50/50">
       <header className="flex h-14 items-center border-b px-6 gap-3 bg-white sticky top-0 z-10">
-        <Link href={backHref} className="p-2 -ml-2 rounded-md text-gray-400 hover:text-gray-600 transition-colors">
+        <Link
+          href={backHref}
+          className="p-2 -ml-2 rounded-md text-gray-400 hover:text-gray-600 transition-colors"
+        >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
           </svg>
         </Link>
         <h1 className="text-lg font-bold text-gray-900 px-2">Create New Quotation</h1>
@@ -210,7 +255,9 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
         {/* ─── Meta fields ─── */}
         <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b bg-gray-50/50">
-            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Basic Information</h2>
+            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+              Basic Information
+            </h2>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -230,7 +277,10 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="lead-search" className="text-xs font-semibold text-gray-500 uppercase">
+                <Label
+                  htmlFor="lead-search"
+                  className="text-xs font-semibold text-gray-500 uppercase"
+                >
                   Select Lead / Client <span className="text-red-500">*</span>
                 </Label>
                 <div className="relative group">
@@ -241,23 +291,54 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
                         value={leadSearch}
                         onChange={(e) => {
                           setLeadSearch(e.target.value)
-                          // If search matches a lead exactly, or user is typing, we might want to reset leadId 
+                          // If search matches a lead exactly, or user is typing, we might want to reset leadId
                           // but for simplicity, we just filter the dropdown
                         }}
                         placeholder="Search by name or ID..."
-                        className="rounded-lg border-gray-200 pl-8"
+                        className="rounded-lg border-gray-200 pl-8 pr-8"
                         disabled={isPending}
                       />
-                      <svg className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      <svg
+                        className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
                       </svg>
+                      {leadSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setLeadSearch('')}
+                          className="absolute right-2.5 top-2.5 text-gray-400 hover:text-gray-600"
+                        >
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                     <select
                       id="lead"
                       value={leadId}
                       onChange={(e) => {
                         setLeadId(e.target.value)
-                        const l = leads.find(l => String(l.id) === e.target.value)
+                        const l = leads.find((l) => String(l.id) === e.target.value)
                         if (l) {
                           setLeadSearch(l.fullName)
                           if (!title) setTitle(`Wedding Package – ${l.fullName}`)
@@ -270,22 +351,29 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
                       <option value="">Choose Lead...</option>
                       {filteredLeads.map((l) => (
                         <option key={l.id} value={String(l.id)}>
-                          {l.fullName} {l.leadId ? `(${l.leadId})` : ''} 
-                          {l.weddingDate ? ` — ${new Date(l.weddingDate).toLocaleDateString()}` : ''}
+                          {l.fullName} {l.leadId ? `(${l.leadId})` : ''}
+                          {l.weddingDate
+                            ? ` — ${new Date(l.weddingDate).toLocaleDateString()}`
+                            : ''}
                           {l.status ? ` [${l.status.toUpperCase()}]` : ''}
                         </option>
                       ))}
                     </select>
                   </div>
                   {filteredLeads.length === 0 && leadSearch && (
-                    <p className="absolute -bottom-5 left-0 text-[10px] text-red-500">No matching leads found</p>
+                    <p className="absolute -bottom-5 left-0 text-[10px] text-red-500">
+                      No matching leads found
+                    </p>
                   )}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="currency" className="text-xs font-semibold text-gray-500 uppercase">
+                  <Label
+                    htmlFor="currency"
+                    className="text-xs font-semibold text-gray-500 uppercase"
+                  >
                     Currency
                   </Label>
                   <select
@@ -303,7 +391,10 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
                   </select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="quotationDate" className="text-xs font-semibold text-gray-500 uppercase">
+                  <Label
+                    htmlFor="quotationDate"
+                    className="text-xs font-semibold text-gray-500 uppercase"
+                  >
                     Date
                   </Label>
                   <Input
@@ -336,7 +427,10 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
                   </select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="agencyFeePercent" className="text-xs font-semibold text-gray-500 uppercase">
+                  <Label
+                    htmlFor="agencyFeePercent"
+                    className="text-xs font-semibold text-gray-500 uppercase"
+                  >
                     Agency Fee (%)
                   </Label>
                   <div className="relative">
@@ -362,7 +456,9 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
         {/* ─── Categories + items ─── */}
         <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b bg-gray-50/50 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Line Items & Services</h2>
+            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+              Line Items & Services
+            </h2>
             <button
               type="button"
               onClick={addCategory}
@@ -437,7 +533,9 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
 
                         return (
                           <tr key={ii} className="group hover:bg-gray-50/30 transition-colors">
-                            <td className="px-4 py-3.5 text-gray-300 font-mono text-xs">{globalIdx.toString().padStart(2, '0')}</td>
+                            <td className="px-4 py-3.5 text-gray-300 font-mono text-xs">
+                              {globalIdx.toString().padStart(2, '0')}
+                            </td>
                             <td className="px-4 py-3.5">
                               <input
                                 type="text"
@@ -448,9 +546,11 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
                                 disabled={isPending}
                               />
                             </td>
-                             <td className="px-4 py-3.5">
+                            <td className="px-4 py-3.5">
                               <div className="flex items-center justify-end gap-1">
-                                <span className="text-gray-400 text-xs shrink-0">{currencySymbol}</span>
+                                <span className="text-gray-400 text-xs shrink-0">
+                                  {currencySymbol}
+                                </span>
                                 <input
                                   type="number"
                                   value={item.amount || ''}
@@ -464,7 +564,7 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
                                 />
                               </div>
                             </td>
-                             <td className="px-4 py-3.5">
+                            <td className="px-4 py-3.5">
                               <input
                                 type="number"
                                 value={item.quantity || ''}
@@ -477,9 +577,10 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
                                 disabled={isPending}
                               />
                             </td>
-                             <td className="px-4 py-3.5 text-right">
+                            <td className="px-4 py-3.5 text-right">
                               <span className="inline-block bg-[#1a2744]/5 text-[#1a2744] font-bold text-sm px-3 py-1 rounded-md">
-                                {currencySymbol}{fmt(rowTotal)}
+                                {currencySymbol}
+                                {fmt(rowTotal)}
                               </span>
                             </td>
                             <td className="px-4 py-3.5">
@@ -518,44 +619,64 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
         {/* ─── Summary & Calculations ─── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
-             <div className="bg-white rounded-2xl border shadow-sm p-6">
-               <Label htmlFor="notes" className="text-xs font-bold text-gray-500 uppercase mb-3 block">Terms & Additional Notes</Label>
-               <textarea
-                  id="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Payment terms, validity, or general remarks for the client..."
-                  className="w-full h-32 rounded-xl border-gray-200 text-sm focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all p-4"
-                  disabled={isPending}
-               />
-             </div>
+            <div className="bg-white rounded-2xl border shadow-sm p-6">
+              <Label
+                htmlFor="notes"
+                className="text-xs font-bold text-gray-500 uppercase mb-3 block"
+              >
+                Terms & Additional Notes
+              </Label>
+              <textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Payment terms, validity, or general remarks for the client..."
+                className="w-full h-32 rounded-xl border-gray-200 text-sm focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all p-4"
+                disabled={isPending}
+              />
+            </div>
           </div>
 
           <div className="space-y-4">
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-5">Financial Summary</h3>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-5">
+                Financial Summary
+              </h3>
 
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">Subtotal</span>
-                  <span className="text-sm font-bold text-gray-900 font-mono">{currencySymbol}{fmt(subTotal)}</span>
+                  <span className="text-sm font-bold text-gray-900 font-mono">
+                    {currencySymbol}
+                    {fmt(subTotal)}
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500 flex items-center gap-1.5">
                     Agency Fees
-                    <span className="bg-[#1a2744]/10 text-[#1a2744] text-[10px] font-bold px-1.5 py-0.5 rounded">{agencyFeePercent}%</span>
+                    <span className="bg-[#1a2744]/10 text-[#1a2744] text-[10px] font-bold px-1.5 py-0.5 rounded">
+                      {agencyFeePercent}%
+                    </span>
                   </span>
-                  <span className="text-sm font-bold text-gray-900 font-mono">{currencySymbol}{fmt(agencyFees)}</span>
+                  <span className="text-sm font-bold text-gray-900 font-mono">
+                    {currencySymbol}
+                    {fmt(agencyFees)}
+                  </span>
                 </div>
 
                 <div className="pt-4 border-t border-gray-100">
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Grand Total</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                      Grand Total
+                    </span>
                     <span className="text-xs font-bold text-gray-400 uppercase">{currency}</span>
                   </div>
                   <div className="flex justify-between items-baseline">
-                    <span className="text-2xl font-black text-[#1a2744] font-mono">{currencySymbol}{fmt(grandTotal)}</span>
+                    <span className="text-2xl font-black text-[#1a2744] font-mono">
+                      {currencySymbol}
+                      {fmt(grandTotal)}
+                    </span>
                     <span className="text-xs text-gray-400">(incl. agency fees)</span>
                   </div>
                 </div>
@@ -581,8 +702,19 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
                 {isPending ? (
                   <div className="flex items-center gap-2">
                     <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
                     </svg>
                     Processing...
                   </div>
@@ -597,4 +729,3 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
     </div>
   )
 }
-

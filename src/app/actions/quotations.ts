@@ -38,6 +38,12 @@ export async function createQuotation(prev: ActionState, fd: FormData): Promise<
     const notes = (fd.get('notes') as string) || undefined
     const currency = (fd.get('currency') as string) || 'INR'
 
+    const subTotal = categories.reduce((sum, cat) => {
+      return sum + cat.items.reduce((s, item) => s + (item.amount || 0) * (item.quantity || 1), 0)
+    }, 0)
+    const agencyFees = Math.round(subTotal * agencyFeePercent) / 100
+    const grandTotal = subTotal + agencyFees
+
     const result = await payload.create({
       collection: 'quotations',
       overrideAccess: true,
@@ -50,9 +56,9 @@ export async function createQuotation(prev: ActionState, fd: FormData): Promise<
         status: status as 'draft' | 'sent' | 'approved',
         notes,
         currency,
-        subTotal: 0,
-        agencyFees: 0,
-        grandTotal: 0,
+        subTotal,
+        agencyFees,
+        grandTotal,
         ...(currentUser ? { createdBy: currentUser.id } : {}),
       } as any,
     })
@@ -88,6 +94,12 @@ export async function updateQuotationById(prev: ActionState, fd: FormData): Prom
     const notes = (fd.get('notes') as string) || undefined
     const currency = (fd.get('currency') as string) || 'INR'
 
+    const subTotal = categories.reduce((sum, cat) => {
+      return sum + cat.items.reduce((s, item) => s + (item.amount || 0) * (item.quantity || 1), 0)
+    }, 0)
+    const agencyFees = Math.round(subTotal * agencyFeePercent) / 100
+    const grandTotal = subTotal + agencyFees
+
     await payload.update({
       collection: 'quotations',
       id,
@@ -96,9 +108,9 @@ export async function updateQuotationById(prev: ActionState, fd: FormData): Prom
         categories,
         agencyFeePercent,
         status: status as 'draft' | 'sent' | 'approved',
-        subTotal: 0,
-        agencyFees: 0,
-        grandTotal: 0,
+        subTotal,
+        agencyFees,
+        grandTotal,
         currency,
         ...(title ? { title } : {}),
         ...(quotationDate ? { quotationDate } : {}),
@@ -165,9 +177,9 @@ export async function duplicateQuotation(fd: FormData): Promise<ActionState> {
         status: 'draft',
         notes: (original as any).notes ?? undefined,
         currency: (original as any).currency ?? 'INR',
-        subTotal: 0,
-        agencyFees: 0,
-        grandTotal: 0,
+        subTotal: (original as any).subTotal ?? 0,
+        agencyFees: (original as any).agencyFees ?? 0,
+        grandTotal: (original as any).grandTotal ?? 0,
       } as any,
     })
     newId = result.id

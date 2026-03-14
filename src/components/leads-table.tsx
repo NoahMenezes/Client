@@ -134,7 +134,7 @@ export function LeadsTable({ leads, totalDocs }: { leads: Lead[]; totalDocs: num
         )}
         <div className="flex items-center justify-between px-4 py-3 border-t text-sm text-muted-foreground">
           <span>
-            Showing <strong>{leads.length}</strong> of <strong>{totalDocs}</strong>
+            Showing <strong>1-{leads.length}</strong> of <strong>{totalDocs}</strong>
           </span>
           {totalDocs > leads.length && (
             <Link href="/dashboard/leads">

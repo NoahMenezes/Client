@@ -10,11 +10,51 @@ export type ActionState = { success: boolean; message: string } | null
 export async function createEmployee(prev: ActionState, fd: FormData): Promise<ActionState> {
   const name = fd.get('name') as string
   const email = fd.get('email') as string
-  if (!name || !email) return { success: false, message: 'Name and email required.' }
+  const password = fd.get('password') as string
+
+  if (!name || !email || !password) {
+    return { success: false, message: 'Name, email, and password are required.' }
+  }
 
   let ok = false
   try {
     const payload = await getPayload({ config: configPromise })
+
+    const normalizedEmail = email.toLowerCase().trim()
+
+    // Check if user exists
+    const existingUser = await payload.find({
+      collection: 'users',
+      where: { email: { equals: normalizedEmail } },
+      limit: 1,
+      overrideAccess: true,
+    })
+
+    if (existingUser.totalDocs > 0) {
+      // Update existing user credentials
+      await payload.update({
+        collection: 'users',
+        id: existingUser.docs[0].id,
+        data: {
+          password,
+          name,
+        },
+        overrideAccess: true,
+      })
+    } else {
+      // Create new user for login
+      await payload.create({
+        collection: 'users',
+        overrideAccess: true,
+        data: {
+          email: normalizedEmail,
+          password,
+          name,
+          role: 'coordinator',
+        },
+      })
+    }
+
     await payload.create({
       collection: 'employees',
       overrideAccess: true,
