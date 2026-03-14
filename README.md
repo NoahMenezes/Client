@@ -1,67 +1,99 @@
-# Payload Blank Template
+# Perfect Knot CRM
 
-This template comes configured with the bare minimum to get started on anything you need.
+A comprehensive CRM designed specifically for wedding planners, built on **Next.js 15** and **Payload CMS 3.0**. 
 
-## Quick start
+Perfect Knot allows you to track wedding inquiries, generate professional white-label PDF quotations, manage your event calendar, and oversee your team—all from a single, fast, and secure dashboard.
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+---
 
-## Quick Start - local setup
+## 🚀 Features
 
-To spin up this template locally, follow these steps:
+### 1. Lead Management
+- **Pipeline Tracking:** Move leads effortlessly through stages: *New → Contacted → Proposal Sent → Negotiation → Confirmed*.
+- **Wedding Details:** Record critical data like Check-in/Check-out dates, Wedding Date, Guest Count, and Budget.
+- **Filters & Search:** Instantly find leads by name, email, status, or specific wedding date ranges.
 
-### Clone
+### 2. Smart Quotation Engine
+- **Service Categories:** Add line items across categories like Photography, Decoration, Venue, and Catering.
+- **Dynamic Pricing:** Automatically calculates sub-totals, discounts, taxes (%), and grand totals.
+- **Multiple Currencies:** Support for INR (₹), USD ($), EUR (€), and GBP (£).
+- **Professional PDF Generation (Client-Side):** Generate print-ready, clean, white-labeled quotations right from the browser. 
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+### 3. Interactive Event Calendar
+- **Automated Sync:** Wedding dates, check-ins, and check-outs are automatically plotted on the calendar when added to a lead.
+- **Color-Coded Events:** 🟢 Check-ins, 🔴 Check-outs, and 🟣 Wedding dates.
+- **Multiple Views:** Month, Week, and Day views with a detailed side-summary panel for selected dates.
 
-### Development
+### 4. Multi-Tenant Architecture (User Isolation)
+- **Data Privacy:** Users only see the leads, quotations, and employees *they* created.
+- **Account Scoping:** Lead and quotation lists are strictly bound to the authenticated user's `payload-token`.
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+### 5. Employee & Team Management
+- Add team members with roles, departments, statuses, and contact information.
+- Fully paginated employee lists.
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+### 6. Admin Settings
+- **Price Management:** Define standard base prices for frequently offered services to quickly drop into new quotes.
+- **Custom Form Builder:** Add dynamic intake questions to your client forms on the fly.
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+---
 
-#### Docker (Optional)
+## 🛠 Tech Stack
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+- **Framework:** [Next.js 15](https://nextjs.org/) (App Router, Server Actions)
+- **Backend/CMS:** [Payload CMS 3.0](https://payloadcms.com/) (Headless CMS, running completely within Next.js)
+- **Database:** SQLite (LibSQL adapter via Payload)
+- **Styling:** Tailwind CSS + Shadcn UI
+- **Icons:** Tabler Icons React
+- **Dates/Time:** `date-fns`
 
-To do so, follow these steps:
+---
 
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+## ⚙️ Local Development
 
-## How it works
+### Prerequisites
+Make sure you have [Node.js](https://nodejs.org/en/) (v18.20.2+ recommended) and `pnpm` installed.
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+### 1. Clone & Install
+```bash
+git clone https://github.com/NoahMenezes/Client.git
+cd Client
+pnpm install
+```
 
-### Collections
+### 2. Environment Variables
+Create a `.env` file in the root based on `.env.example` (if present) or add:
+```env
+PAYLOAD_SECRET=your_super_secret_payload_string
+DATABASE_URI=file:./payload.db
+```
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+### 3. Run the Development Server
+```bash
+pnpm dev
+```
+The application will be accessible at:
+- **Frontend/Dashboard:** [http://localhost:3000](http://localhost:3000)
+- **Payload Admin Panel:** [http://localhost:3000/admin](http://localhost:3000/admin)
 
-- #### Users (Authentication)
+### 4. First Time Setup (Admin User)
+On your first run, you'll need to create an initial user account:
+1. Navigate to `http://localhost:3000/admin`
+2. Follow the on-screen instructions to create the first admin user.
+3. You can then log into the main CRM interface at `http://localhost:3000/login`.
 
-  Users are auth-enabled collections that have access to the admin panel.
+---
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+## 🗄️ Database Structure (Payload Collections)
 
-- #### Media
+- **Users:** System authentication and user accounts.
+- **Leads:** Stores client inquiries, wedding dates, and pipeline status. Linked to `createdBy`.
+- **Quotations:** Stores financial estimates, line items, and discounts. Linked to a `Lead` and `createdBy`.
+- **Employees:** Stores team member details.
+- **Services:** Stores base services and standard pricing (controlled via Settings).
+- **FormFields:** Stores dynamic intake questions (controlled via Settings).
 
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
+---
 
-### Docker
-
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
-
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
-
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
-
-## Questions
-
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+## 🤝 Need Help?
+Check out the **Help** tab inside the dashboard, or connect with us on [Frover.io's LinkedIn](https://www.linkedin.com/company/frover-io/posts/?feedView=all) for support and feature requests!
