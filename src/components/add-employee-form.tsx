@@ -12,9 +12,10 @@ export default function AddEmployeeForm() {
   const [state, action, isPending] = useActionState<ActionState, FormData>(createEmployee, null)
 
   return (
-    <div className="flex flex-1 flex-col p-6">
+    <div className="flex flex-1 flex-col items-center justify-center p-6">
+      <div className="w-full max-w-2xl">
       <h1 className="text-2xl font-bold mb-6">Add New Employee</h1>
-      <Card className="max-w-2xl bg-white">
+      <Card className="w-full bg-white">
         <CardHeader>
           <CardTitle className="text-lg">Employee Details</CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -149,6 +150,7 @@ export default function AddEmployeeForm() {
           </form>
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }
