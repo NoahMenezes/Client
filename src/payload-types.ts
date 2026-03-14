@@ -204,6 +204,10 @@ export interface Lead {
   status: 'new' | 'contacted' | 'proposal_sent' | 'negotiation' | 'confirmed' | 'closed' | 'cancelled';
   assignedTo?: (number | null) | User;
   /**
+   * The user account that created this lead
+   */
+  createdBy?: (number | null) | User;
+  /**
    * The actual wedding/event date
    */
   weddingDate?: string | null;
@@ -355,6 +359,10 @@ export interface Quotation {
   id: number;
   title: string;
   lead: number | Lead;
+  /**
+   * The user account that created this quotation
+   */
+  createdBy?: (number | null) | User;
   status: 'draft' | 'sent' | 'approved';
   /**
    * JSON array of quotation categories and their line items
@@ -662,6 +670,7 @@ export interface LeadsSelect<T extends boolean = true> {
   contact?: T;
   status?: T;
   assignedTo?: T;
+  createdBy?: T;
   weddingDate?: T;
   checkInDate?: T;
   checkOutDate?: T;
@@ -752,6 +761,7 @@ export interface LeadServicesSelect<T extends boolean = true> {
 export interface QuotationsSelect<T extends boolean = true> {
   title?: T;
   lead?: T;
+  createdBy?: T;
   status?: T;
   categories?: T;
   agencyFeePercent?: T;

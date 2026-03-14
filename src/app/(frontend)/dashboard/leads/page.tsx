@@ -6,6 +6,7 @@ import { SiteHeader } from '@/components/site-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { deleteLead } from '@/app/actions/leads'
+import { getCurrentUser } from '@/app/actions/auth'
 
 const PAGE_LIMIT = 10
 
@@ -77,8 +78,13 @@ export default async function LeadsPage({ searchParams }: Props) {
 
   try {
     const payload = await getPayload({ config: configPromise })
+    const currentUser = await getCurrentUser()
 
     const where: Record<string, any> = {}
+
+    if (currentUser) {
+      where.createdBy = { equals: currentUser.id }
+    }
 
     if (q) {
       where.or = [

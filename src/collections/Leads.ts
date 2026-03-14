@@ -42,6 +42,15 @@ export const Leads: CollectionConfig = {
       relationTo: 'users',
     },
     {
+      name: 'createdBy',
+      type: 'relationship',
+      relationTo: 'users',
+      admin: {
+        description: 'The user account that created this lead',
+        readOnly: true,
+      },
+    },
+    {
       name: 'weddingDate',
       type: 'date',
       admin: {

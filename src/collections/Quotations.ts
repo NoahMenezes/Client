@@ -19,6 +19,15 @@ export const Quotations: CollectionConfig = {
       required: true,
     },
     {
+      name: 'createdBy',
+      type: 'relationship',
+      relationTo: 'users',
+      admin: {
+        description: 'The user account that created this quotation',
+        readOnly: true,
+      },
+    },
+    {
       name: 'status',
       type: 'select',
       options: [

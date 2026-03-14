@@ -1,10 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useTransition } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { IconPlus, IconEye, IconPencil } from '@tabler/icons-react'
+import { IconPlus, IconEye, IconPencil, IconTrash } from '@tabler/icons-react'
 import { SiteHeader } from '@/components/site-header'
+import { deleteQuotation } from '@/app/actions/quotations'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -47,6 +49,22 @@ function fmt(n: number, currency: string = 'INR') {
 export default function QuotationsClient({ initialQuotations, totalDocs }: { initialQuotations: Quotation[], totalDocs: number }) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [, startTransition] = useTransition()
+  const router = useRouter()
+
+  const handleDelete = (q: Quotation) => {
+    if (!confirm(`Delete "${q.title}"? This cannot be undone.`)) return
+    setDeletingId(String(q.id))
+    const fd = new FormData()
+    fd.set('id', String(q.id))
+    if (q.lead) fd.set('leadId', String(q.lead.id))
+    startTransition(async () => {
+      await deleteQuotation(fd)
+      setDeletingId(null)
+      router.refresh()
+    })
+  }
 
   const filtered = initialQuotations.filter((q) => {
     const matchesSearch =
@@ -195,6 +213,15 @@ export default function QuotationsClient({ initialQuotations, totalDocs }: { ini
                               Edit
                             </Button>
                           </Link>
+                          <button
+                            type="button"
+                            title="Delete"
+                            disabled={deletingId === String(q.id)}
+                            onClick={() => handleDelete(q)}
+                            className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
+                          >
+                            <IconTrash className="h-3.5 w-3.5" />
+                          </button>
                         </div>
                       </td>
                     </tr>

@@ -4,6 +4,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { getCurrentUser } from '@/app/actions/auth'
 
 export type ActionState = { success: boolean; message: string } | null
 
@@ -70,6 +71,7 @@ export async function createLead(prev: ActionState, fd: FormData): Promise<Actio
 
   try {
     const payload = await getPayload({ config: configPromise })
+    const currentUser = await getCurrentUser()
 
     const budgetRaw = fd.get('budget') as string
     const budget = budgetRaw && budgetRaw.trim() !== '' ? Number(budgetRaw) : undefined
@@ -141,6 +143,7 @@ export async function createLead(prev: ActionState, fd: FormData): Promise<Actio
         referralSource: str(fd, 'referralSource'),
         isDestination: fd.get('isDestination') === 'on' || fd.get('isDestination') === 'Yes',
         googleFormRawData: rawPayload,
+        ...(currentUser ? { createdBy: currentUser.id } : {}),
       } as any,
     })
     newLeadId = lead.id

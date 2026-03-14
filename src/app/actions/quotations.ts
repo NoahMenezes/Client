@@ -4,6 +4,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { getCurrentUser } from '@/app/actions/auth'
 
 export type ActionState = { success: boolean; message: string } | null
 
@@ -27,6 +28,7 @@ export async function createQuotation(prev: ActionState, fd: FormData): Promise<
   let newId: string | number | null = null
   try {
     const payload = await getPayload({ config: configPromise })
+    const currentUser = await getCurrentUser()
 
     const categoriesRaw = fd.get('categories') as string
     const categories: QuotationCategory[] = categoriesRaw ? JSON.parse(categoriesRaw) : []
@@ -51,6 +53,7 @@ export async function createQuotation(prev: ActionState, fd: FormData): Promise<
         subTotal: 0,
         agencyFees: 0,
         grandTotal: 0,
+        ...(currentUser ? { createdBy: currentUser.id } : {}),
       } as any,
     })
     newId = result.id

@@ -165,3 +165,23 @@ export async function logout() {
   revalidatePath('/', 'layout')
   redirect('/login')
 }
+
+// ── Get current logged-in user ───────────────────────────────────────────────
+
+/**
+ * Returns the currently authenticated user's id and role, or null if not logged in.
+ */
+export async function getCurrentUser(): Promise<{ id: number; role: string } | null> {
+  try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get('payload-token')?.value
+    if (!token) return null
+
+    const payload = await getPayload({ config: configPromise })
+    const { user } = await payload.auth({ headers: new Headers({ cookie: `payload-token=${token}` }) })
+    if (!user) return null
+    return { id: user.id as number, role: (user as any).role ?? 'coordinator' }
+  } catch {
+    return null
+  }
+}
