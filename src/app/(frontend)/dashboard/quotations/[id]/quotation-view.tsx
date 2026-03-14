@@ -3,6 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { deleteQuotation } from '@/app/actions/quotations'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -132,16 +133,30 @@ export default function QuotationViewContent({ quotation = DEFAULT_QUOTATION }: 
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5 text-gray-600">
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            Download PDF
-          </Button>
+          <form
+            action={async () => {
+              const fd = new FormData()
+              fd.set('id', String(quotation.id))
+              await deleteQuotation(fd)
+            }}
+          >
+            <Button
+              type="submit"
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-red-500 border-red-200 hover:bg-red-50 hover:text-red-700"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14H6L5 6" />
+                <path d="M10 11v6M14 11v6" />
+                <path d="M9 6V4h6v2" />
+              </svg>
+              Delete
+            </Button>
+          </form>
           <Link href={`/dashboard/quotations/${quotation.id}/edit`}>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white gap-1.5">
+            <Button size="sm" className="bg-[#1a2744] hover:bg-[#243460] text-white gap-1.5">
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
@@ -274,16 +289,13 @@ export default function QuotationViewContent({ quotation = DEFAULT_QUOTATION }: 
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex justify-between items-center pt-2">
+          {/* Actions - Back only, Delete is in the header */}
+          <div className="flex justify-start items-center pt-2">
             <Link href={backHref}>
               <Button variant="outline" size="sm">
                 ← Back to Quotations
               </Button>
             </Link>
-            <Button variant="destructive" size="sm">
-              Delete Quotation
-            </Button>
           </div>
         </div>
       </main>
