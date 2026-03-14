@@ -68,7 +68,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <Link
-                href="/help"
+                href="/dashboard/help"
                 className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
               >
                 <IconHelp className="h-4 w-4" />

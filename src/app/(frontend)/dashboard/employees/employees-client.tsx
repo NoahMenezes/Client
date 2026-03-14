@@ -21,8 +21,11 @@ interface EmployeesClientProps {
   totalDocs: number
 }
 
-export function EmployeesClient({ employees, totalDocs }: EmployeesClientProps) {
+export function EmployeesClient({ employees }: EmployeesClientProps) {
   const [search, setSearch] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const PAGE_LIMIT = 10
 
   const filtered = employees.filter(
     (e) =>
@@ -37,7 +40,10 @@ export function EmployeesClient({ employees, totalDocs }: EmployeesClientProps) 
           placeholder="Search by name or email"
           className="rounded-md border bg-background px-3 py-1.5 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value)
+            setCurrentPage(1)
+          }}
         />
       </div>
 
@@ -62,7 +68,7 @@ export function EmployeesClient({ employees, totalDocs }: EmployeesClientProps) 
               </tr>
             </thead>
             <tbody>
-              {filtered.map((emp) => (
+              {filtered.slice((currentPage - 1) * PAGE_LIMIT, currentPage * PAGE_LIMIT).map((emp) => (
                 <tr key={emp.id} className="border-b hover:bg-muted/30">
                   <td className="px-4 py-3 font-medium">
                     PK-{String(emp.id).padStart(3, '0')}
@@ -113,8 +119,30 @@ export function EmployeesClient({ employees, totalDocs }: EmployeesClientProps) 
         )}
         <div className="flex items-center justify-between px-4 py-3 border-t text-sm text-muted-foreground">
           <span>
-            Showing <strong>{filtered.length}</strong> of <strong>{totalDocs}</strong> results
+            Showing <strong>{Math.min(filtered.length, (currentPage - 1) * PAGE_LIMIT + 1)}</strong>–
+            <strong>{Math.min(filtered.length, currentPage * PAGE_LIMIT)}</strong> of{' '}
+            <strong>{filtered.length}</strong> results
           </span>
+          {Math.ceil(filtered.length / PAGE_LIMIT) > 1 && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={currentPage >= Math.ceil(filtered.length / PAGE_LIMIT)}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </main>

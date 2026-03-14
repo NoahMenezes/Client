@@ -12,9 +12,10 @@ export default function EditEmployeeClient({ employee }: { employee: any }) {
   const [state, action, isPending] = useActionState<ActionState, FormData>(updateEmployee, null)
 
   return (
-    <div className="flex flex-1 flex-col p-6">
+    <div className="flex flex-1 flex-col items-center justify-center p-6">
+      <div className="w-full max-w-2xl">
       <h1 className="text-2xl font-bold mb-6">Edit Employee – {employee.name}</h1>
-      <Card className="max-w-2xl">
+      <Card className="w-full bg-white">
         <CardHeader><CardTitle className="text-lg">Employee Details</CardTitle></CardHeader>
         <CardContent>
           {state && !state.success && (
@@ -67,6 +68,7 @@ export default function EditEmployeeClient({ employee }: { employee: any }) {
           </form>
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }

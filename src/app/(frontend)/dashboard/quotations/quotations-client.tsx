@@ -46,9 +46,12 @@ function fmt(n: number, currency: string = 'INR') {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function QuotationsClient({ initialQuotations, totalDocs }: { initialQuotations: Quotation[], totalDocs: number }) {
+export default function QuotationsClient({ initialQuotations }: { initialQuotations: Quotation[], totalDocs: number }) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const PAGE_LIMIT = 10
+
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [, startTransition] = useTransition()
   const router = useRouter()
@@ -82,12 +85,18 @@ export default function QuotationsClient({ initialQuotations, totalDocs }: { ini
           <input
             placeholder="Search quotations or leads..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setCurrentPage(1)
+            }}
             className="rounded-md border bg-background px-3 py-1.5 text-sm w-56 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => {
+              setStatusFilter(e.target.value)
+              setCurrentPage(1)
+            }}
             className="rounded-md border bg-background px-3 py-1.5 text-sm focus:outline-none"
           >
             <option value="">All Statuses</option>
@@ -121,11 +130,6 @@ export default function QuotationsClient({ initialQuotations, totalDocs }: { ini
           </div>
         ) : (
           <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b flex items-center justify-between">
-              <p className="text-sm text-gray-500">
-                Showing <strong>{filtered.length}</strong> of <strong>{totalDocs}</strong> quotations
-              </p>
-            </div>
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-gray-50 text-xs uppercase text-gray-400">
@@ -140,7 +144,8 @@ export default function QuotationsClient({ initialQuotations, totalDocs }: { ini
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((q, idx) => {
+                {filtered.slice((currentPage - 1) * PAGE_LIMIT, currentPage * PAGE_LIMIT).map((q, rawIdx) => {
+                  const idx = (currentPage - 1) * PAGE_LIMIT + rawIdx
                   const servicesSummary = (q.categories ?? [])
                     .map((c) => c.categoryName)
                     .slice(0, 3)
@@ -229,6 +234,35 @@ export default function QuotationsClient({ initialQuotations, totalDocs }: { ini
                 })}
               </tbody>
             </table>
+
+            {/* Pagination */}
+            <div className="px-5 py-4 border-t flex items-center justify-between">
+              <span className="text-sm text-gray-500">
+                Showing <strong>{Math.min(filtered.length, (currentPage - 1) * PAGE_LIMIT + 1)}</strong>–
+                <strong>{Math.min(filtered.length, currentPage * PAGE_LIMIT)}</strong> of{' '}
+                <strong>{filtered.length}</strong> quotations
+              </span>
+              {Math.ceil(filtered.length / PAGE_LIMIT) > 1 && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage >= Math.ceil(filtered.length / PAGE_LIMIT)}
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </main>
