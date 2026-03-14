@@ -130,7 +130,7 @@ export default function AddEmployeeForm() {
                 className="w-full rounded-md border bg-gray-50/50 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-600"
                 placeholder="Any additional notes about this employee..."
                 disabled={isPending}
-              />
+              ></textarea>
             </div>
 
             <div className="flex gap-3 justify-end pt-4">

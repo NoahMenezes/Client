@@ -247,6 +247,19 @@ export async function deleteLead(fd: FormData) {
   const id = fd.get('id') as string
   try {
     const payload = await getPayload({ config: configPromise })
+
+    // Delete all quotations linked to this lead first (FK constraint)
+    const linkedQuotations = await payload.find({
+      collection: 'quotations',
+      where: { lead: { equals: Number(id) } },
+      limit: 1000,
+      pagination: false,
+      overrideAccess: true,
+    })
+    for (const q of linkedQuotations.docs) {
+      await payload.delete({ collection: 'quotations', id: String(q.id), overrideAccess: true })
+    }
+
     await payload.delete({ collection: 'leads', id, overrideAccess: true })
   } catch (e) {
     console.error(e)
