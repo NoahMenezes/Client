@@ -5,6 +5,7 @@ import configPromise from '@payload-config'
 import { SiteHeader } from '@/components/site-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { deleteLead } from '@/app/actions/leads'
 
 const PAGE_LIMIT = 10
 
@@ -332,15 +333,37 @@ export default async function LeadsPage({ searchParams }: Props) {
                           </Badge>
                         </td>
                         <td className="px-5 py-3">
-                          <Link href={`/dashboard/leads/${lead.id}`}>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 px-3 text-xs text-blue-600 hover:text-blue-700"
-                            >
-                              View
-                            </Button>
-                          </Link>
+                          <div className="flex items-center gap-2">
+                            <Link href={`/dashboard/leads/${lead.id}`}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-3 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              >
+                                View
+                              </Button>
+                            </Link>
+                            <Link href={`/dashboard/leads/${lead.id}/edit`}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-3 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                              >
+                                Edit
+                              </Button>
+                            </Link>
+                            <form action={deleteLead}>
+                              <input type="hidden" name="id" value={lead.id} />
+                              <Button
+                                type="submit"
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-3 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                Delete
+                              </Button>
+                            </form>
+                          </div>
                         </td>
                       </tr>
                     ))}

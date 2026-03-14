@@ -6,13 +6,19 @@ import configPromise from '@payload-config'
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
+  let user = null;
+
   try {
     const headers = await getHeaders()
     const payload = await getPayload({ config: configPromise })
-    const { user } = await payload.auth({ headers })
-    if (user) redirect('/dashboard')
+    const result = await payload.auth({ headers })
+    user = result.user
   } catch (e) {
     console.error('[HomePage] Auth check failed:', e)
+  }
+
+  if (user) {
+    redirect('/dashboard')
   }
 
   // Not authenticated — go to login

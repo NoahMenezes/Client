@@ -85,9 +85,10 @@ export async function createLead(prev: ActionState, fd: FormData): Promise<Actio
       where: { email: { equals: email.toLowerCase().trim() } },
       limit: 1,
       overrideAccess: true,
+      pagination: false,
     })
 
-    if (existing.totalDocs > 0) {
+    if (existing.docs.length > 0) {
       contactId = existing.docs[0].id as number
       await payload.update({
         collection: 'contacts',

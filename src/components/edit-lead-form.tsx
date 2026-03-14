@@ -239,8 +239,7 @@ export default function EditLeadClient({ lead }: { lead: any }) {
   const [hospitality, setHospitality] = useState<string[]>(csvToArray(lead.hospitalityServices))
   const [additional, setAdditional] = useState<string[]>(csvToArray(lead.additionalServices))
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const handleSave = async () => {
     // Create FormData and append all state values
     const fd = new FormData()
     fd.append('id', String(lead.id))
@@ -262,7 +261,6 @@ export default function EditLeadClient({ lead }: { lead: any }) {
       const result: ActionState = await updateLead(null, fd)
       if (result && !result.success) {
         setError(result.message)
-        // Go to the first stage with an error
         setStage(1)
       }
     })
@@ -333,7 +331,7 @@ export default function EditLeadClient({ lead }: { lead: any }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={(e) => e.preventDefault()}>
           {/* No hidden inputs needed for controlled components */}
 
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
@@ -514,14 +512,13 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                         disabled={isPending}
                       >
                         <option value="">Select style…</option>
-                        <option>Hindu Wedding</option>
-                        <option>Muslim Wedding</option>
-                        <option>Christian Wedding</option>
-                        <option>Sikh Wedding</option>
-                        <option>South Indian Wedding</option>
-                        <option>Destination Wedding</option>
-                        <option>Intimate / Micro Wedding</option>
-                        <option>Other</option>
+                        <option value="hindu">Hindu Wedding</option>
+                        <option value="islamic">Islamic Wedding</option>
+                        <option value="catholic">Catholic Wedding</option>
+                        <option value="sikh">Sikh Wedding</option>
+                        <option value="jain">Jain Wedding</option>
+                        <option value="inter_faith">Inter Faith Wedding</option>
+                        <option value="other">Other</option>
                       </SelectField>
                     </div>
                   </div>
@@ -680,7 +677,8 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                   </button>
                 ) : (
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={handleSave}
                     disabled={isPending}
                     className="px-6 py-2 text-sm font-semibold rounded-lg bg-[#1a2744] text-white hover:bg-[#243460] transition-all disabled:opacity-50 shadow-sm"
                   >

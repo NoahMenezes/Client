@@ -211,14 +211,13 @@ function Stage2({ disabled }: { disabled: boolean }) {
           <FieldLabel>Style of Wedding</FieldLabel>
           <SelectField id="weddingStyle" name="weddingStyle" defaultValue="" disabled={disabled}>
             <option value="">Select style…</option>
-            <option>Hindu Wedding</option>
-            <option>Muslim Wedding</option>
-            <option>Christian Wedding</option>
-            <option>Sikh Wedding</option>
-            <option>South Indian Wedding</option>
-            <option>Destination Wedding</option>
-            <option>Intimate / Micro Wedding</option>
-            <option>Other</option>
+            <option value="hindu">Hindu Wedding</option>
+            <option value="islamic">Islamic Wedding</option>
+            <option value="catholic">Catholic Wedding</option>
+            <option value="sikh">Sikh Wedding</option>
+            <option value="jain">Jain Wedding</option>
+            <option value="inter_faith">Inter Faith Wedding</option>
+            <option value="other">Other</option>
           </SelectField>
         </div>
       </div>
@@ -350,9 +349,9 @@ export default function AddLeadPage() {
     if (stage > 1) setStage(stage - 1)
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const fd = new FormData(e.currentTarget)
+  const handleSave = () => {
+    if (!formRef.current) return
+    const fd = new FormData(formRef.current)
     setError(null)
     startTransition(async () => {
       const result: ActionState = await createLead(null, fd)
@@ -416,7 +415,7 @@ export default function AddLeadPage() {
         </div>
 
         {/* Form Card */}
-        <form ref={formRef} onSubmit={handleSubmit}>
+        <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
             {/* Card Header */}
             <div className="border-b px-6 py-4 bg-gradient-to-r from-[#1a2744]/5 to-transparent">
@@ -481,7 +480,8 @@ export default function AddLeadPage() {
                   </button>
                 ) : (
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={handleSave}
                     disabled={isPending}
                     className="px-6 py-2 text-sm font-semibold rounded-lg bg-[#1a2744] text-white hover:bg-[#243460] transition-all disabled:opacity-50 shadow-sm"
                   >

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { logout } from '@/app/actions/auth'
-import { IconUser, IconBell, IconSettings, IconLogout, IconChevronDown } from '@tabler/icons-react'
+import { IconUser, IconSettings, IconLogout, IconChevronDown } from '@tabler/icons-react'
 import Link from 'next/link'
 
 interface ProfileBarProps {
