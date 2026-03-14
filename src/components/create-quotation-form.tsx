@@ -448,37 +448,39 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
                                 disabled={isPending}
                               />
                             </td>
-                            <td className="px-4 py-3.5">
-                              <div className="flex items-center justify-end gap-1.5 font-medium text-gray-600">
-                                <span className="text-gray-300 text-xs">{currencySymbol}</span>
+                             <td className="px-4 py-3.5">
+                              <div className="flex items-center justify-end gap-1">
+                                <span className="text-gray-400 text-xs shrink-0">{currencySymbol}</span>
                                 <input
                                   type="number"
                                   value={item.amount || ''}
                                   onChange={(e) =>
                                     updateItem(ci, ii, 'amount', Number(e.target.value) || 0)
                                   }
-                                  className="w-24 bg-transparent text-right focus:outline-none"
+                                  className="w-24 text-right text-sm font-medium text-gray-800 bg-gray-50 border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#1a2744]/20 focus:border-[#1a2744] transition-all"
                                   placeholder="0.00"
                                   min={0}
                                   disabled={isPending}
                                 />
                               </div>
                             </td>
-                            <td className="px-4 py-3.5">
+                             <td className="px-4 py-3.5">
                               <input
                                 type="number"
                                 value={item.quantity || ''}
                                 onChange={(e) =>
                                   updateItem(ci, ii, 'quantity', Number(e.target.value) || 1)
                                 }
-                                className="w-full bg-transparent text-right focus:outline-none font-medium text-gray-600"
+                                className="w-16 text-right text-sm font-medium text-gray-800 bg-gray-50 border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#1a2744]/20 focus:border-[#1a2744] transition-all"
                                 placeholder="1"
                                 min={1}
                                 disabled={isPending}
                               />
                             </td>
-                            <td className="px-4 py-3.5 text-right font-bold text-gray-900 bg-blue-50/20 group-hover:bg-blue-50/40 transition-all">
-                              {currencySymbol}{fmt(rowTotal)}
+                             <td className="px-4 py-3.5 text-right">
+                              <span className="inline-block bg-[#1a2744]/5 text-[#1a2744] font-bold text-sm px-3 py-1 rounded-md">
+                                {currencySymbol}{fmt(rowTotal)}
+                              </span>
                             </td>
                             <td className="px-4 py-3.5">
                               <input
@@ -530,49 +532,51 @@ export default function CreateQuotationForm({ leads, defaultLeadId, defaultLeadN
           </div>
 
           <div className="space-y-4">
-            <div className="bg-[#1a2744] rounded-2xl shadow-xl p-6 text-white overflow-hidden relative">
-              <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-                <svg className="h-32 w-32" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z" />
-                </svg>
-              </div>
-              
-              <h3 className="text-xs font-bold uppercase tracking-widest text-blue-200 mb-6">Financial Summary</h3>
-              
-              <div className="space-y-4 relative">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-blue-100/60">Subtotal</span>
-                  <span className="font-mono font-bold leading-none">{currencySymbol}{fmt(subTotal)}</span>
-                </div>
-                
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-blue-100/60 flex items-center gap-1.5">
-                    Agency Fees
-                    <span className="bg-blue-400/20 text-[10px] px-1.5 py-0.5 rounded border border-blue-400/30 text-blue-100">{agencyFeePercent}%</span>
-                  </span>
-                  <span className="font-mono font-bold leading-none">{currencySymbol}{fmt(agencyFees)}</span>
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-5">Financial Summary</h3>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">Subtotal</span>
+                  <span className="text-sm font-bold text-gray-900 font-mono">{currencySymbol}{fmt(subTotal)}</span>
                 </div>
 
-                <div className="pt-6 mt-2 border-t border-blue-400/20 flex flex-col gap-2">
-                  <span className="text-xs font-bold uppercase text-blue-200 tracking-wider">Grand Total Amount</span>
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-2xl font-mono font-black">{currencySymbol}{fmt(grandTotal)}</span>
-                    <span className="text-[10px] font-bold text-blue-300/60 uppercase">{currency}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500 flex items-center gap-1.5">
+                    Agency Fees
+                    <span className="bg-[#1a2744]/10 text-[#1a2744] text-[10px] font-bold px-1.5 py-0.5 rounded">{agencyFeePercent}%</span>
+                  </span>
+                  <span className="text-sm font-bold text-gray-900 font-mono">{currencySymbol}{fmt(agencyFees)}</span>
+                </div>
+
+                <div className="pt-4 border-t border-gray-100">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Grand Total</span>
+                    <span className="text-xs font-bold text-gray-400 uppercase">{currency}</span>
+                  </div>
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-2xl font-black text-[#1a2744] font-mono">{currencySymbol}{fmt(grandTotal)}</span>
+                    <span className="text-xs text-gray-400">(incl. agency fees)</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Link href={backHref} className="flex-1">
-                <Button type="button" variant="outline" disabled={isPending} className="w-full rounded-xl h-11 border-gray-200 font-bold text-gray-600 hover:bg-gray-100">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isPending}
+                  className="w-full rounded-xl h-11 border-gray-200 font-bold text-gray-600 hover:bg-gray-100 transition-all"
+                >
                   Discard
                 </Button>
               </Link>
               <Button
                 type="submit"
                 disabled={isPending}
-                className="flex-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-11 font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98]"
+                className="flex-1 bg-[#1a2744] hover:bg-[#243460] text-white rounded-xl h-11 font-bold shadow-lg shadow-[#1a2744]/20 transition-all active:scale-[0.98]"
               >
                 {isPending ? (
                   <div className="flex items-center gap-2">
