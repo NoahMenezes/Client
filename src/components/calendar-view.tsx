@@ -25,53 +25,87 @@ import {
 } from 'date-fns'
 import Link from 'next/link'
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 export interface CalendarEvent {
   id: string | number
   leadId: string | null
   title: string
+  date: string                 // the specific date this event instance is for
+  type: 'checkIn' | 'checkOut' | 'wedding'
   checkInDate: string | null
   checkOutDate: string | null
+  weddingDate: string | null
   status: string
 }
 
+// ─── Status colors (matches Leads collection statuses) ────────────────────────
+
 const statusColor: Record<string, string> = {
-  opportunity: 'bg-orange-400',
-  prospect: 'bg-yellow-400',
-  won: 'bg-green-500',
-  lost: 'bg-red-400',
-  'in-progress': 'bg-blue-500',
+  new:           'bg-blue-500',
+  contacted:     'bg-yellow-400',
+  proposal_sent: 'bg-orange-400',
+  negotiation:   'bg-purple-500',
+  confirmed:     'bg-green-500',
+  closed:        'bg-gray-400',
+  cancelled:     'bg-red-400',
 }
 
 const statusBadge: Record<string, string> = {
-  opportunity: 'bg-orange-100 text-orange-700',
-  prospect: 'bg-yellow-100 text-yellow-700',
-  won: 'bg-green-100 text-green-700',
-  lost: 'bg-red-100 text-red-700',
-  'in-progress': 'bg-blue-100 text-blue-700',
+  new:           'bg-blue-100 text-blue-700',
+  contacted:     'bg-yellow-100 text-yellow-700',
+  proposal_sent: 'bg-orange-100 text-orange-700',
+  negotiation:   'bg-purple-100 text-purple-700',
+  confirmed:     'bg-green-100 text-green-700',
+  closed:        'bg-gray-100 text-gray-700',
+  cancelled:     'bg-red-100 text-red-700',
+}
+
+const statusLabels: Record<string, string> = {
+  new:           'New',
+  contacted:     'Contacted',
+  proposal_sent: 'Proposal Sent',
+  negotiation:   'Negotiation',
+  confirmed:     'Confirmed',
+  closed:        'Closed',
+  cancelled:     'Cancelled',
+}
+
+// ─── Event type config ────────────────────────────────────────────────────────
+
+const eventTypeConfig = {
+  checkIn:  { label: 'Check-in',  bg: 'bg-emerald-50 border-emerald-200', dot: 'bg-emerald-500', text: 'text-emerald-700', icon: '→' },
+  checkOut: { label: 'Check-out', bg: 'bg-rose-50 border-rose-200',       dot: 'bg-rose-500',    text: 'text-rose-700',    icon: '←' },
+  wedding:  { label: 'Wedding',   bg: 'bg-violet-50 border-violet-200',   dot: 'bg-violet-500',  text: 'text-violet-700',  icon: '💍' },
 }
 
 type ViewMode = 'month' | 'week' | 'day'
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
 function getEventsForDay(events: CalendarEvent[], day: Date) {
   return events.filter((e) => {
-    const checkIn = e.checkInDate ? parseISO(e.checkInDate) : null
-    const checkOut = e.checkOutDate ? parseISO(e.checkOutDate) : null
-    if (checkIn && isSameDay(checkIn, day)) return true
-    if (checkOut && isSameDay(checkOut, day)) return true
-    return false
+    try {
+      return isSameDay(parseISO(e.date), day)
+    } catch {
+      return false
+    }
   })
 }
 
+// ─── Event Pill ───────────────────────────────────────────────────────────────
+
 function EventPill({ event, small = false }: { event: CalendarEvent; small?: boolean }) {
-  const dot = statusColor[event.status] ?? 'bg-gray-400'
+  const cfg = eventTypeConfig[event.type]
   return (
     <Link href={`/dashboard/leads/${event.id}`}>
       <div
-        className={`flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity truncate ${
-          small ? 'max-w-[120px]' : 'max-w-full'
-        } bg-white border border-gray-200 shadow-sm`}
+        className={`flex items-center gap-1 rounded border px-1.5 py-0.5 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity ${
+          small ? 'max-w-[130px]' : 'max-w-full'
+        } ${cfg.bg} shadow-sm`}
       >
-        <span className={`h-2 w-2 shrink-0 rounded-full ${dot}`} />
+        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${cfg.dot}`} />
+        <span className={`shrink-0 ${cfg.text}`}>{cfg.icon}</span>
         <span className="truncate text-gray-700">{event.title}</span>
       </div>
     </Link>
@@ -79,6 +113,7 @@ function EventPill({ event, small = false }: { event: CalendarEvent; small?: boo
 }
 
 // ── Month View ────────────────────────────────────────────────────────────────
+
 function MonthView({
   current,
   events,
@@ -132,8 +167,8 @@ function MonthView({
                 {format(day, 'd')}
               </span>
               <div className="mt-1 flex flex-col gap-0.5">
-                {dayEvents.slice(0, 2).map((ev) => (
-                  <EventPill key={`${ev.id}-${day.toISOString()}`} event={ev} small />
+                {dayEvents.slice(0, 2).map((ev, i) => (
+                  <EventPill key={`${ev.id}-${ev.type}-${i}`} event={ev} small />
                 ))}
                 {dayEvents.length > 2 && (
                   <span className="text-xs text-gray-400 pl-1">+{dayEvents.length - 2} more</span>
@@ -148,6 +183,7 @@ function MonthView({
 }
 
 // ── Week View ─────────────────────────────────────────────────────────────────
+
 function WeekView({
   current,
   events,
@@ -193,8 +229,8 @@ function WeekView({
               }`}
               onClick={() => onSelectDay(day)}
             >
-              {dayEvents.map((ev) => (
-                <EventPill key={ev.id} event={ev} />
+              {dayEvents.map((ev, i) => (
+                <EventPill key={`${ev.id}-${ev.type}-${i}`} event={ev} />
               ))}
               {dayEvents.length === 0 && (
                 <span className="text-xs text-gray-300 mt-2 text-center">—</span>
@@ -208,6 +244,7 @@ function WeekView({
 }
 
 // ── Day View ──────────────────────────────────────────────────────────────────
+
 function DayView({ current, events }: { current: Date; events: CalendarEvent[] }) {
   const dayEvents = getEventsForDay(events, current)
 
@@ -233,22 +270,31 @@ function DayView({ current, events }: { current: Date; events: CalendarEvent[] }
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {dayEvents.map((ev) => {
+          {dayEvents.map((ev, i) => {
+            const cfg = eventTypeConfig[ev.type]
             const checkIn = ev.checkInDate ? parseISO(ev.checkInDate) : null
             const checkOut = ev.checkOutDate ? parseISO(ev.checkOutDate) : null
+            const wedding = ev.weddingDate ? parseISO(ev.weddingDate) : null
             return (
-              <Link key={ev.id} href={`/dashboard/leads/${ev.id}`}>
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <Link key={`${ev.id}-${ev.type}-${i}`} href={`/dashboard/leads/${ev.id}`}>
+                <Card className={`hover:shadow-md transition-shadow cursor-pointer border ${cfg.bg}`}>
                   <CardContent className="py-3 px-4">
                     <div className="flex items-start justify-between gap-2">
                       <div>
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className={`h-2 w-2 rounded-full ${cfg.dot}`} />
+                          <span className={`text-[10px] font-bold uppercase tracking-wider ${cfg.text}`}>
+                            {cfg.icon} {cfg.label}
+                          </span>
+                        </div>
                         <p className="font-semibold text-sm text-gray-900">{ev.title}</p>
                         <p className="text-xs text-gray-400 mt-0.5">
                           {ev.leadId ?? `Lead #${ev.id}`}
                         </p>
-                        <div className="flex gap-2 mt-1.5 text-xs text-gray-500">
+                        <div className="flex flex-wrap gap-x-3 mt-1.5 text-xs text-gray-500">
                           {checkIn && <span>Check-in: {format(checkIn, 'dd MMM yyyy')}</span>}
                           {checkOut && <span>Check-out: {format(checkOut, 'dd MMM yyyy')}</span>}
+                          {wedding && <span>💍 Wedding: {format(wedding, 'dd MMM yyyy')}</span>}
                         </div>
                       </div>
                       <Badge
@@ -256,7 +302,7 @@ function DayView({ current, events }: { current: Date; events: CalendarEvent[] }
                           statusBadge[ev.status] ?? 'bg-gray-100 text-gray-600'
                         }`}
                       >
-                        {ev.status.replace('-', ' ')}
+                        {statusLabels[ev.status] ?? ev.status}
                       </Badge>
                     </div>
                   </CardContent>
@@ -271,6 +317,7 @@ function DayView({ current, events }: { current: Date; events: CalendarEvent[] }
 }
 
 // ── Side Summary ──────────────────────────────────────────────────────────────
+
 function DaySummary({ day, events }: { day: Date; events: CalendarEvent[] }) {
   const dayEvents = getEventsForDay(events, day)
 
@@ -278,7 +325,7 @@ function DaySummary({ day, events }: { day: Date; events: CalendarEvent[] }) {
     <div className="w-64 shrink-0 border-l border-gray-100 bg-gray-50/60 flex flex-col">
       <div className="px-4 py-3 border-b border-gray-100">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-          Summary for {format(day, 'MMM d')}
+          {format(day, 'MMM d')} — {dayEvents.length} event{dayEvents.length !== 1 ? 's' : ''}
         </p>
       </div>
       <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-2">
@@ -287,17 +334,21 @@ function DaySummary({ day, events }: { day: Date; events: CalendarEvent[] }) {
             No events this day. Select a day with events to see a summary.
           </p>
         ) : (
-          dayEvents.map((ev) => {
+          dayEvents.map((ev, i) => {
+            const cfg = eventTypeConfig[ev.type]
             const checkIn = ev.checkInDate ? parseISO(ev.checkInDate) : null
             const checkOut = ev.checkOutDate ? parseISO(ev.checkOutDate) : null
-            const dot = statusColor[ev.status] ?? 'bg-gray-400'
+            const wedding = ev.weddingDate ? parseISO(ev.weddingDate) : null
             return (
-              <Link key={ev.id} href={`/dashboard/leads/${ev.id}`}>
-                <div className="rounded-lg bg-white border border-gray-200 p-2.5 hover:shadow-sm transition-shadow cursor-pointer">
+              <Link key={`${ev.id}-${ev.type}-${i}`} href={`/dashboard/leads/${ev.id}`}>
+                <div className={`rounded-lg border p-2.5 hover:shadow-sm transition-shadow cursor-pointer ${cfg.bg}`}>
                   <div className="flex items-center gap-1.5 mb-1">
-                    <span className={`h-2 w-2 rounded-full shrink-0 ${dot}`} />
-                    <p className="text-xs font-semibold text-gray-800 truncate">{ev.title}</p>
+                    <span className={`h-2 w-2 rounded-full shrink-0 ${cfg.dot}`} />
+                    <span className={`text-[10px] font-bold uppercase tracking-wider ${cfg.text}`}>
+                      {cfg.icon} {cfg.label}
+                    </span>
                   </div>
+                  <p className="text-xs font-semibold text-gray-800 truncate">{ev.title}</p>
                   <p className="text-xs text-gray-400">{ev.leadId ?? `#${ev.id}`}</p>
                   {checkIn && (
                     <p className="text-xs text-gray-500 mt-0.5">In: {format(checkIn, 'dd MMM')}</p>
@@ -305,12 +356,15 @@ function DaySummary({ day, events }: { day: Date; events: CalendarEvent[] }) {
                   {checkOut && (
                     <p className="text-xs text-gray-500">Out: {format(checkOut, 'dd MMM')}</p>
                   )}
+                  {wedding && (
+                    <p className="text-xs text-gray-500">💍 {format(wedding, 'dd MMM')}</p>
+                  )}
                   <Badge
                     className={`mt-1.5 text-xs capitalize ${
                       statusBadge[ev.status] ?? 'bg-gray-100 text-gray-600'
                     }`}
                   >
-                    {ev.status.replace('-', ' ')}
+                    {statusLabels[ev.status] ?? ev.status}
                   </Badge>
                 </div>
               </Link>
@@ -323,6 +377,7 @@ function DaySummary({ day, events }: { day: Date; events: CalendarEvent[] }) {
 }
 
 // ── Main Export ───────────────────────────────────────────────────────────────
+
 export default function CalendarView({ events }: { events: CalendarEvent[] }) {
   const [current, setCurrent] = React.useState(new Date())
   const [view, setView] = React.useState<ViewMode>('month')
@@ -409,11 +464,18 @@ export default function CalendarView({ events }: { events: CalendarEvent[] }) {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 px-4 py-2 border-t border-gray-100 bg-gray-50/60 shrink-0 flex-wrap">
+      <div className="flex items-center gap-6 px-4 py-2.5 border-t border-gray-100 bg-gray-50/60 shrink-0 flex-wrap">
+        {Object.entries(eventTypeConfig).map(([key, cfg]) => (
+          <div key={key} className="flex items-center gap-1.5 text-xs text-gray-500">
+            <span className={`h-2.5 w-2.5 rounded-full ${cfg.dot}`} />
+            <span>{cfg.icon} {cfg.label}</span>
+          </div>
+        ))}
+        <span className="text-gray-300 mx-1">|</span>
         {Object.entries(statusColor).map(([s, cls]) => (
           <div key={s} className="flex items-center gap-1.5 text-xs text-gray-500">
-            <span className={`h-2.5 w-2.5 rounded-full ${cls}`} />
-            <span className="capitalize">{s.replace('-', ' ')}</span>
+            <span className={`h-2 w-2 rounded-full ${cls}`} />
+            <span className="capitalize">{statusLabels[s] ?? s}</span>
           </div>
         ))}
       </div>
