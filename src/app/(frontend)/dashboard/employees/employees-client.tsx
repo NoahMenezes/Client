@@ -5,6 +5,15 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { IconPencil } from '@tabler/icons-react'
 import { deleteEmployee } from '@/app/actions/employees'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
 
 interface Employee {
   id: string | number
@@ -25,6 +34,7 @@ export function EmployeesClient({ employees, totalDocs }: EmployeesClientProps) 
   const [currentPage, setCurrentPage] = useState(1)
 
   const PAGE_LIMIT = 10
+  const MAX_PAGES = 50
 
   const filtered = employees
 
@@ -98,32 +108,78 @@ export function EmployeesClient({ employees, totalDocs }: EmployeesClientProps) 
             </tbody>
           </table>
         )}
-        <div className="flex items-center justify-between px-4 py-3 border-t text-sm text-muted-foreground">
-          <span>
+        <div className="px-5 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span className="text-xs text-muted-foreground order-2 sm:order-1">
             Showing <strong>{Math.min(filtered.length, (currentPage - 1) * PAGE_LIMIT + 1)}</strong>
             –<strong>{Math.min(filtered.length, currentPage * PAGE_LIMIT)}</strong> of{' '}
             <strong>{totalDocs}</strong> results
           </span>
-          {Math.ceil(filtered.length / PAGE_LIMIT) > 1 && (
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage >= Math.ceil(filtered.length / PAGE_LIMIT)}
-                onClick={() => setCurrentPage((p) => p + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          )}
+          <Pagination className="order-1 sm:order-2 w-auto mx-0">
+            <PaginationContent>
+              {currentPage > 1 && (
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setCurrentPage((p) => p - 1)
+                    }}
+                  />
+                </PaginationItem>
+              )}
+
+              {Array.from(
+                {
+                  length: Math.max(1, Math.min(MAX_PAGES, Math.ceil(filtered.length / PAGE_LIMIT))),
+                },
+                (_, i) => i + 1,
+              ).map((p) => {
+                const totalPages = Math.min(MAX_PAGES, Math.ceil(filtered.length / PAGE_LIMIT))
+                const isFirst = p === 1
+                const isLast = p === totalPages
+                const isWithinRange = Math.abs(p - currentPage) <= 1
+
+                if (isFirst || isLast || isWithinRange) {
+                  return (
+                    <PaginationItem key={p}>
+                      <PaginationLink
+                        href="#"
+                        isActive={p === currentPage}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setCurrentPage(p)
+                        }}
+                      >
+                        {p}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )
+                }
+
+                if (p === currentPage - 2 || p === currentPage + 2) {
+                  return (
+                    <PaginationItem key={p}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )
+                }
+
+                return null
+              })}
+
+              {currentPage < Math.min(MAX_PAGES, Math.ceil(filtered.length / PAGE_LIMIT)) && (
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setCurrentPage((p) => p + 1)
+                    }}
+                  />
+                </PaginationItem>
+              )}
+            </PaginationContent>
+          </Pagination>
         </div>
       </div>
     </main>

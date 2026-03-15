@@ -7,6 +7,15 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { deleteLead } from '@/app/actions/leads'
 import { getCurrentUser } from '@/app/actions/auth'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
 
 const PAGE_LIMIT = 10
 
@@ -112,7 +121,7 @@ export default async function LeadsPage({ searchParams }: Props) {
       budget: d.budgetText || (d.budget ? `₹${d.budget.toLocaleString('en-IN')}` : null),
     }))
     totalDocs = res.totalDocs
-    totalPages = res.totalPages ?? Math.ceil(totalDocs / PAGE_LIMIT)
+    totalPages = Math.min(50, res.totalPages ?? Math.ceil(totalDocs / PAGE_LIMIT))
   } catch (e) {
     console.error('Leads fetch error:', e)
   }
@@ -122,9 +131,6 @@ export default async function LeadsPage({ searchParams }: Props) {
     params.set('page', String(p))
     return `/dashboard/leads?${params.toString()}`
   }
-
-  const pageNumbers: number[] = []
-  for (let i = 1; i <= totalPages; i++) pageNumbers.push(i)
 
   return (
     <div className="flex flex-1 flex-col">
@@ -193,7 +199,7 @@ export default async function LeadsPage({ searchParams }: Props) {
           <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
             {leads.length === 0 ? (
               <div className="p-10 text-center text-gray-400 text-sm">
-                {isFiltered ? 'No leads match your filter.' : 'No leads yet. Add your first lead.'}
+                No leads yet. Add your first lead.
               </div>
             ) : (
               <>
@@ -285,8 +291,8 @@ export default async function LeadsPage({ searchParams }: Props) {
                 </table>
 
                 {/* Pagination */}
-                <div className="px-5 py-4 border-t flex items-center justify-between gap-4">
-                  <span className="text-xs text-gray-400">
+                <div className="px-5 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <span className="text-xs text-gray-400 order-2 sm:order-1">
                     Showing{' '}
                     <strong>
                       {(currentPage - 1) * PAGE_LIMIT + 1}–
@@ -295,55 +301,47 @@ export default async function LeadsPage({ searchParams }: Props) {
                     of <strong>{totalDocs}</strong> leads (page {currentPage} of {totalPages})
                   </span>
 
-                  {totalPages > 1 && (
-                    <div className="flex items-center gap-1">
+                  <Pagination className="order-1 sm:order-2 w-auto mx-0">
+                    <PaginationContent>
                       {currentPage > 1 && (
-                        <Link href={paginationHref(currentPage - 1)}>
-                          <button className="h-7 w-7 rounded flex items-center justify-center text-xs text-gray-500 hover:bg-gray-100 border transition-colors">
-                            ←
-                          </button>
-                        </Link>
+                        <PaginationItem>
+                          <PaginationPrevious href={paginationHref(currentPage - 1)} />
+                        </PaginationItem>
                       )}
 
-                      {pageNumbers.map((p) => {
-                        // Show first, last, and pages near current
-                        const show = p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1
-                        const ellipsisBefore = p === currentPage - 2 && currentPage > 3
-                        const ellipsisAfter = p === currentPage + 2 && currentPage < totalPages - 2
+                      {Array.from({ length: Math.max(1, totalPages) }, (_, i) => i + 1).map((p) => {
+                        const isFirst = p === 1
+                        const isLast = p === totalPages
+                        const isWithinRange = Math.abs(p - currentPage) <= 1
 
-                        if (ellipsisBefore || ellipsisAfter) {
+                        if (isFirst || isLast || isWithinRange) {
                           return (
-                            <span key={`ellipsis-${p}`} className="text-xs text-gray-400 px-1">
-                              …
-                            </span>
+                            <PaginationItem key={p}>
+                              <PaginationLink href={paginationHref(p)} isActive={p === currentPage}>
+                                {p}
+                              </PaginationLink>
+                            </PaginationItem>
                           )
                         }
-                        if (!show) return null
 
-                        return (
-                          <Link key={p} href={paginationHref(p)}>
-                            <button
-                              className={`h-7 w-7 rounded flex items-center justify-center text-xs border transition-colors ${
-                                p === currentPage
-                                  ? 'bg-[#1a2744] text-white border-[#1a2744]'
-                                  : 'text-gray-500 hover:bg-gray-100 border-gray-200'
-                              }`}
-                            >
-                              {p}
-                            </button>
-                          </Link>
-                        )
+                        if (p === currentPage - 2 || p === currentPage + 2) {
+                          return (
+                            <PaginationItem key={p}>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          )
+                        }
+
+                        return null
                       })}
 
                       {currentPage < totalPages && (
-                        <Link href={paginationHref(currentPage + 1)}>
-                          <button className="h-7 w-7 rounded flex items-center justify-center text-xs text-gray-500 hover:bg-gray-100 border transition-colors">
-                            →
-                          </button>
-                        </Link>
+                        <PaginationItem>
+                          <PaginationNext href={paginationHref(currentPage + 1)} />
+                        </PaginationItem>
                       )}
-                    </div>
-                  )}
+                    </PaginationContent>
+                  </Pagination>
                 </div>
               </>
             )}
