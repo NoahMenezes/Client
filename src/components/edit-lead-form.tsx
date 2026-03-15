@@ -95,6 +95,7 @@ function InputField({
   disabled,
   value,
   onChange,
+  error,
 }: {
   id: string
   name: string
@@ -102,8 +103,9 @@ function InputField({
   placeholder?: string
   required?: boolean
   disabled?: boolean
-  value: string
+  value: string | number
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  error?: boolean
 }) {
   return (
     <input
@@ -115,7 +117,11 @@ function InputField({
       disabled={disabled}
       value={value}
       onChange={onChange}
-      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a2744]/30 focus:border-[#1a2744] transition-all disabled:opacity-50"
+      className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
+        error
+          ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
+          : 'border-gray-200 focus:ring-[#1a2744]/30 focus:border-[#1a2744]'
+      }`}
     />
   )
 }
@@ -127,6 +133,7 @@ function SelectField({
   disabled,
   value,
   onChange,
+  error,
 }: {
   id: string
   name: string
@@ -134,6 +141,7 @@ function SelectField({
   disabled?: boolean
   value: string
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
+  error?: boolean
 }) {
   return (
     <select
@@ -142,7 +150,11 @@ function SelectField({
       disabled={disabled}
       value={value}
       onChange={onChange}
-      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1a2744]/30 focus:border-[#1a2744] transition-all disabled:opacity-50"
+      className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
+        error
+          ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
+          : 'border-gray-200 focus:ring-[#1a2744]/30 focus:border-[#1a2744]'
+      }`}
     >
       {children}
     </select>
@@ -200,6 +212,8 @@ export default function EditLeadClient({ lead }: { lead: any }) {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
   // --- FORM STATE ---
   // We use controlled components to preserve state across stages.
   const contact = typeof lead.contact === 'object' && lead.contact ? lead.contact : {}
@@ -228,6 +242,51 @@ export default function EditLeadClient({ lead }: { lead: any }) {
       ...prev,
       [name]: isCheckbox ? (e.target as HTMLInputElement).checked : value,
     }))
+
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev }
+        delete newErrors[name]
+        return newErrors
+      })
+    }
+  }
+
+  const validateStage = (currentStage: number) => {
+    const newErrors: Record<string, string> = {}
+    let isValid = true
+
+    if (currentStage === 1) {
+      if (!formData.fullName.trim()) newErrors.fullName = 'Required'
+      if (!formData.email.trim()) newErrors.email = 'Required'
+      if (!formData.phone.trim()) newErrors.phone = 'Required'
+      if (!formData.referralSource.trim()) newErrors.referralSource = 'Required'
+      if (!formData.budget) newErrors.budget = 'Required'
+      if (!formData.budgetText.trim()) newErrors.budgetText = 'Required'
+    }
+
+    if (currentStage === 2) {
+      if (!formData.checkInDate) newErrors.checkInDate = 'Required'
+      if (!formData.checkOutDate) newErrors.checkOutDate = 'Required'
+      if (!formData.weddingDate) newErrors.weddingDate = 'Required'
+      if (!formData.guestCount) newErrors.guestCount = 'Required'
+      if (!formData.weddingStyle) newErrors.weddingStyle = 'Required'
+      if (!formData.resortCategory) newErrors.resortCategory = 'Required'
+      if (!formData.cuisineType) newErrors.cuisineType = 'Required'
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      isValid = false
+    }
+
+    return isValid
+  }
+
+  const goNext = () => {
+    if (validateStage(stage)) {
+      setStage(stage + 1)
+    }
   }
 
   // Multi-select states
@@ -367,6 +426,7 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                         placeholder="e.g. Dhriti & Tarun"
                         required
                         disabled={isPending}
+                        error={!!errors.fullName}
                       />
                     </div>
                     <div>
@@ -380,12 +440,13 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                         placeholder="couple@example.com"
                         required
                         disabled={isPending}
+                        error={!!errors.email}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                      <FieldLabel>Contact Number</FieldLabel>
+                      <FieldLabel required>Contact Number</FieldLabel>
                       <InputField
                         id="phone"
                         name="phone"
@@ -393,30 +454,27 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                         onChange={handleInputChange as any}
                         placeholder="+91 98765 43210"
                         disabled={isPending}
+                        error={!!errors.phone}
                       />
                     </div>
                     <div>
-                      <FieldLabel>Lead Status</FieldLabel>
+                      <FieldLabel required>Lead Status</FieldLabel>
                       <SelectField
                         id="status"
                         name="status"
                         value={formData.status}
                         onChange={handleInputChange as any}
                         disabled={isPending}
+                        error={!!errors.status}
                       >
-                        <option value="new">New</option>
-                        <option value="contacted">Contacted</option>
-                        <option value="proposal_sent">Proposal Sent</option>
-                        <option value="negotiation">Negotiation</option>
                         <option value="confirmed">Confirmed</option>
                         <option value="closed">Closed</option>
-                        <option value="cancelled">Cancelled</option>
                       </SelectField>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                      <FieldLabel>Referral Source</FieldLabel>
+                      <FieldLabel required>Referral Source</FieldLabel>
                       <InputField
                         id="referralSource"
                         name="referralSource"
@@ -424,10 +482,11 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                         onChange={handleInputChange as any}
                         placeholder="e.g. WedmeGood, Instagram"
                         disabled={isPending}
+                        error={!!errors.referralSource}
                       />
                     </div>
                     <div>
-                      <FieldLabel>Budget (₹ numeric)</FieldLabel>
+                      <FieldLabel required>Budget (₹ numeric)</FieldLabel>
                       <InputField
                         id="budget"
                         name="budget"
@@ -436,11 +495,12 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                         onChange={handleInputChange as any}
                         placeholder="e.g. 3500000"
                         disabled={isPending}
+                        error={!!errors.budget}
                       />
                     </div>
                   </div>
                   <div>
-                    <FieldLabel>Budget Description</FieldLabel>
+                    <FieldLabel required>Budget Description</FieldLabel>
                     <InputField
                       id="budgetText"
                       name="budgetText"
@@ -448,6 +508,7 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                       onChange={handleInputChange as any}
                       placeholder='e.g. "35 Lakh INR (inclusive of all)"'
                       disabled={isPending}
+                      error={!!errors.budgetText}
                     />
                   </div>
                 </div>
@@ -457,49 +518,73 @@ export default function EditLeadClient({ lead }: { lead: any }) {
               {stage === 2 && (
                 <div className="space-y-5">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <div>
-                      <FieldLabel>Check-in Date</FieldLabel>
+                    <div className={errors.checkInDate ? 'rounded-md ring-2 ring-red-200' : ''}>
+                      <FieldLabel required>Check-in Date</FieldLabel>
                       <DatePicker
                         date={formData.checkInDate ? new Date(formData.checkInDate) : undefined}
-                        setDate={(date) =>
+                        setDate={(date) => {
                           setFormData((prev) => ({
                             ...prev,
                             checkInDate: date ? date.toISOString() : '',
                           }))
-                        }
+                          if (errors.checkInDate) {
+                            setErrors((prev) => {
+                              const n = { ...prev }
+                              delete n.checkInDate
+                              return n
+                            })
+                          }
+                        }}
                         disabled={isPending}
+                        className={errors.checkInDate ? 'border-red-500' : ''}
                       />
                     </div>
-                    <div>
-                      <FieldLabel>Check-out Date</FieldLabel>
+                    <div className={errors.checkOutDate ? 'rounded-md ring-2 ring-red-200' : ''}>
+                      <FieldLabel required>Check-out Date</FieldLabel>
                       <DatePicker
                         date={formData.checkOutDate ? new Date(formData.checkOutDate) : undefined}
-                        setDate={(date) =>
+                        setDate={(date) => {
                           setFormData((prev) => ({
                             ...prev,
                             checkOutDate: date ? date.toISOString() : '',
                           }))
-                        }
+                          if (errors.checkOutDate) {
+                            setErrors((prev) => {
+                              const n = { ...prev }
+                              delete n.checkOutDate
+                              return n
+                            })
+                          }
+                        }}
                         disabled={isPending}
+                        className={errors.checkOutDate ? 'border-red-500' : ''}
                       />
                     </div>
-                    <div>
-                      <FieldLabel>Wedding Date</FieldLabel>
+                    <div className={errors.weddingDate ? 'rounded-md ring-2 ring-red-200' : ''}>
+                      <FieldLabel required>Wedding Date</FieldLabel>
                       <DatePicker
                         date={formData.weddingDate ? new Date(formData.weddingDate) : undefined}
-                        setDate={(date) =>
+                        setDate={(date) => {
                           setFormData((prev) => ({
                             ...prev,
                             weddingDate: date ? date.toISOString() : '',
                           }))
-                        }
+                          if (errors.weddingDate) {
+                            setErrors((prev) => {
+                              const n = { ...prev }
+                              delete n.weddingDate
+                              return n
+                            })
+                          }
+                        }}
                         disabled={isPending}
+                        className={errors.weddingDate ? 'border-red-500' : ''}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                      <FieldLabel>Total Number of Guests</FieldLabel>
+                      <FieldLabel required>Total Number of Guests</FieldLabel>
                       <InputField
                         id="guestCount"
                         name="guestCount"
@@ -508,16 +593,18 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                         onChange={handleInputChange as any}
                         placeholder="e.g. 150"
                         disabled={isPending}
+                        error={!!errors.guestCount}
                       />
                     </div>
                     <div>
-                      <FieldLabel>Style of Wedding</FieldLabel>
+                      <FieldLabel required>Style of Wedding</FieldLabel>
                       <SelectField
                         id="weddingStyle"
                         name="weddingStyle"
                         value={formData.weddingStyle}
                         onChange={handleInputChange as any}
                         disabled={isPending}
+                        error={!!errors.weddingStyle}
                       >
                         <option value="">Select style…</option>
                         <option value="hindu">Hindu Wedding</option>
@@ -532,13 +619,14 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                      <FieldLabel>Resort Category</FieldLabel>
+                      <FieldLabel required>Resort Category</FieldLabel>
                       <SelectField
                         id="resortCategory"
                         name="resortCategory"
                         value={formData.resortCategory}
                         onChange={handleInputChange as any}
                         disabled={isPending}
+                        error={!!errors.resortCategory}
                       >
                         <option value="">Select category…</option>
                         <option>3 Star</option>
@@ -549,13 +637,14 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                       </SelectField>
                     </div>
                     <div>
-                      <FieldLabel>Type of Cuisine</FieldLabel>
+                      <FieldLabel required>Type of Cuisine</FieldLabel>
                       <SelectField
                         id="cuisineType"
                         name="cuisineType"
                         value={formData.cuisineType}
                         onChange={handleInputChange as any}
                         disabled={isPending}
+                        error={!!errors.cuisineType}
                       >
                         <option value="">Select cuisine…</option>
                         <option>Veg</option>
@@ -677,7 +766,7 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                 {stage < 3 ? (
                   <button
                     type="button"
-                    onClick={() => setStage(stage + 1)}
+                    onClick={goNext}
                     disabled={isPending}
                     className="px-5 py-2 text-sm font-semibold rounded-lg bg-[#1a2744] text-white hover:bg-[#243460] transition-all disabled:opacity-50 shadow-sm"
                   >

@@ -110,8 +110,6 @@ const statusLabels: Record<string, string> = {
   cancelled: 'Cancelled',
 }
 
-
-
 const CURRENCIES = [
   { label: 'INR (₹)', value: 'INR', symbol: '₹' },
   { label: 'USD ($)', value: 'USD', symbol: '$' },
@@ -138,8 +136,6 @@ function formatDate(dateStr: string | null | undefined) {
     return dateStr
   }
 }
-
-
 
 export default function LeadProfileTabs({
   lead,
@@ -224,6 +220,7 @@ export default function LeadProfileTabs({
 
   const tabs = [
     { id: 'info', label: 'INFO' },
+    { id: 'items', label: 'ITEMS' },
     { id: 'notes', label: 'NOTES' },
     { id: 'quotations', label: 'QUOTATIONS' },
   ] as const
@@ -256,14 +253,14 @@ export default function LeadProfileTabs({
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs text-gray-500 font-medium mb-1.5">Lead Owner</p>
-                  <select
-                    value={
-                      typeof lead.assignedTo === 'object' && lead.assignedTo !== null
-                        ? String(lead.assignedTo.id)
-                        : typeof lead.assignedTo === 'string' || typeof lead.assignedTo === 'number'
-                          ? String(lead.assignedTo)
-                          : ''
-                    }
+                <select
+                  value={
+                    typeof lead.assignedTo === 'object' && lead.assignedTo !== null
+                      ? String(lead.assignedTo.id)
+                      : typeof lead.assignedTo === 'string' || typeof lead.assignedTo === 'number'
+                        ? String(lead.assignedTo)
+                        : ''
+                  }
                   className="rounded-lg border bg-white px-3 py-2 text-sm pr-8 min-w-45 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   onChange={async (e) => {
                     const fd = new FormData()
@@ -444,81 +441,18 @@ export default function LeadProfileTabs({
                 <div>
                   <p className="text-xs text-gray-400 mb-1">Budget</p>
                   <p className="text-gray-800 font-medium">
-                    {lead.budgetText || (lead.budget ? `₹ ${lead.budget.toLocaleString('en-IN')}` : '—')}
+                    {lead.budgetText ||
+                      (lead.budget ? `₹ ${lead.budget.toLocaleString('en-IN')}` : '—')}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 mb-1">Referral Source</p>
-                  <p className="text-gray-800 font-medium">{lead.referralSource || lead.leadSource || '—'}</p>
+                  <p className="text-gray-800 font-medium">
+                    {lead.referralSource || lead.leadSource || '—'}
+                  </p>
                 </div>
               </div>
             </div>
-
-            {/* Ceremonies & Services as pill tags */}
-            {lead.weddingCeremonies && (
-              <div>
-                <p className="text-xs text-gray-400 font-medium mb-2">Ceremonies & Rituals</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {lead.weddingCeremonies.split(',').map((c) => c.trim()).filter(Boolean).map((c) => (
-                    <span key={c} className="px-2.5 py-1 rounded-full text-xs bg-purple-50 text-purple-700 border border-purple-100 font-medium">{c}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {lead.entertainmentOptions && (
-              <div>
-                <p className="text-xs text-gray-400 font-medium mb-2">Entertainment & Artists</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {lead.entertainmentOptions.split(',').map((c) => c.trim()).filter(Boolean).map((c) => (
-                    <span key={c} className="px-2.5 py-1 rounded-full text-xs bg-blue-50 text-blue-700 border border-blue-100 font-medium">{c}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {lead.hospitalityServices && (
-              <div>
-                <p className="text-xs text-gray-400 font-medium mb-2">Hospitality Services</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {lead.hospitalityServices.split(',').map((c) => c.trim()).filter(Boolean).map((c) => (
-                    <span key={c} className="px-2.5 py-1 rounded-full text-xs bg-green-50 text-green-700 border border-green-100 font-medium">{c}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {lead.additionalServices && (
-              <div>
-                <p className="text-xs text-gray-400 font-medium mb-2">Additional Services</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {lead.additionalServices.split(',').map((c) => c.trim()).filter(Boolean).map((c) => (
-                    <span key={c} className="px-2.5 py-1 rounded-full text-xs bg-orange-50 text-orange-700 border border-orange-100 font-medium">{c}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {lead.servicesLookedFor && (
-              <div>
-                <p className="text-xs text-gray-400 font-medium mb-2">Services Looking For</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {lead.servicesLookedFor.split(',').map((c) => c.trim()).filter(Boolean).map((c) => (
-                    <span key={c} className="px-2.5 py-1 rounded-full text-xs bg-indigo-50 text-indigo-700 border border-indigo-100 font-medium">{c}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Raw JSON payload */}
-            {lead.googleFormEnquiry && (
-              <div>
-                <p className="text-xs text-gray-400 font-medium mb-2">Raw Lead Payload (JSON)</p>
-                <pre className="rounded-lg border bg-gray-50 px-4 py-3 text-xs text-gray-600 overflow-auto max-h-60 whitespace-pre-wrap">
-                  {lead.googleFormEnquiry}
-                </pre>
-              </div>
-            )}
 
             {/* Update Details button */}
             <div className="flex justify-end pt-2">
@@ -528,6 +462,130 @@ export default function LeadProfileTabs({
                 </Button>
               </Link>
             </div>
+          </div>
+        )}
+
+        {/* ─────────────────────── ITEMS TAB ─────────────────────── */}
+        {activeTab === 'items' && (
+          <div className="p-6 space-y-6">
+            <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">
+              Requirements & Preferences
+            </h4>
+
+            {!lead.weddingCeremonies &&
+              !lead.entertainmentOptions &&
+              !lead.hospitalityServices &&
+              !lead.additionalServices &&
+              !lead.servicesLookedFor && (
+                <p className="text-sm text-gray-500 text-center py-8">
+                  No items or preferences recorded for this lead.
+                </p>
+              )}
+
+            {/* Wedding Ceremonies */}
+            {lead.weddingCeremonies && (
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-2">Ceremonies & Rituals</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {lead.weddingCeremonies
+                    .split(',')
+                    .map((c) => c.trim())
+                    .filter(Boolean)
+                    .map((c) => (
+                      <span
+                        key={c}
+                        className="px-2.5 py-1 rounded-full text-xs bg-purple-50 text-purple-700 border border-purple-100 font-medium"
+                      >
+                        {c}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Entertainment */}
+            {lead.entertainmentOptions && (
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-2">Entertainment & Artists</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {lead.entertainmentOptions
+                    .split(',')
+                    .map((c) => c.trim())
+                    .filter(Boolean)
+                    .map((c) => (
+                      <span
+                        key={c}
+                        className="px-2.5 py-1 rounded-full text-xs bg-blue-50 text-blue-700 border border-blue-100 font-medium"
+                      >
+                        {c}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Hospitality */}
+            {lead.hospitalityServices && (
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-2">Hospitality Services</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {lead.hospitalityServices
+                    .split(',')
+                    .map((c) => c.trim())
+                    .filter(Boolean)
+                    .map((c) => (
+                      <span
+                        key={c}
+                        className="px-2.5 py-1 rounded-full text-xs bg-green-50 text-green-700 border border-green-100 font-medium"
+                      >
+                        {c}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Additional */}
+            {lead.additionalServices && (
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-2">Additional Services</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {lead.additionalServices
+                    .split(',')
+                    .map((c) => c.trim())
+                    .filter(Boolean)
+                    .map((c) => (
+                      <span
+                        key={c}
+                        className="px-2.5 py-1 rounded-full text-xs bg-orange-50 text-orange-700 border border-orange-100 font-medium"
+                      >
+                        {c}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Services Looking For */}
+            {lead.servicesLookedFor && (
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-2">Services Looking For</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {lead.servicesLookedFor
+                    .split(',')
+                    .map((c) => c.trim())
+                    .filter(Boolean)
+                    .map((c) => (
+                      <span
+                        key={c}
+                        className="px-2.5 py-1 rounded-full text-xs bg-indigo-50 text-indigo-700 border border-indigo-100 font-medium"
+                      >
+                        {c}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -717,7 +775,8 @@ export default function LeadProfileTabs({
                             Q{String(idx + 1).padStart(3, '0')}
                           </td>
                           <td className="px-4 py-3 font-semibold text-blue-600">
-                            {CURRENCIES.find(c => c.value === q.currency)?.symbol || '₹'}{fmt(q.grandTotal, q.currency)}
+                            {CURRENCIES.find((c) => c.value === q.currency)?.symbol || '₹'}
+                            {fmt(q.grandTotal, q.currency)}
                           </td>
                           <td className="px-4 py-3 text-gray-600 max-w-50 truncate">
                             {servicesSummary || '—'}

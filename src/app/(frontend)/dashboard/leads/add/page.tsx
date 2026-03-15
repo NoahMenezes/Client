@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { createLead, type ActionState } from '@/app/actions/leads'
+import { DatePicker } from '@/components/date-picker'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -13,25 +14,55 @@ const STAGES = [
 ]
 
 const WEDDING_CEREMONIES = [
-  'Sangeet', 'Haldi', 'Mehendi', 'Baarat', 'Pheras',
-  'Engagement', 'Ring Ceremony', 'Reception', 'After Party', 'Myra Ceremony',
+  'Sangeet',
+  'Haldi',
+  'Mehendi',
+  'Baarat',
+  'Pheras',
+  'Engagement',
+  'Ring Ceremony',
+  'Reception',
+  'After Party',
+  'Myra Ceremony',
 ]
 
 const ENTERTAINMENT_OPTIONS = [
-  'Photographers & Cinematographers', 'Bridal Makeup Artists', 'Guest Makeup Artists',
-  'Emcee', 'DJ', 'Band', 'Choreographers', 'Dance Troupe', 'Dholwala',
-  'Brass Band', 'Vintage Car', 'Safa Wala', 'Fireworks',
+  'Photographers & Cinematographers',
+  'Bridal Makeup Artists',
+  'Guest Makeup Artists',
+  'Emcee',
+  'DJ',
+  'Band',
+  'Choreographers',
+  'Dance Troupe',
+  'Dholwala',
+  'Brass Band',
+  'Vintage Car',
+  'Safa Wala',
+  'Fireworks',
 ]
 
 const HOSPITALITY_SERVICES = [
-  'RSVP', 'Logistics Support', 'Airport Representatives',
-  'Guest Welcome In Lobby', 'Transportation Coordination', 'Honeymoon Planning',
+  'RSVP',
+  'Logistics Support',
+  'Airport Representatives',
+  'Guest Welcome In Lobby',
+  'Transportation Coordination',
+  'Honeymoon Planning',
 ]
 
 const ADDITIONAL_SERVICES = [
-  'Wedding Invite', 'Welcome Hampers', 'Return Gifts', 'Wedding Cake',
-  'Professional Mixologist', 'Hookah', 'Mithai Boxes', 'Live Bangle Maker',
-  'Liquid Support', 'Safabandi for Baarat', 'Vintage Car for Baarat',
+  'Wedding Invite',
+  'Welcome Hampers',
+  'Return Gifts',
+  'Wedding Cake',
+  'Professional Mixologist',
+  'Hookah',
+  'Mithai Boxes',
+  'Live Bangle Maker',
+  'Liquid Support',
+  'Safabandi for Baarat',
+  'Vintage Car for Baarat',
 ]
 
 const SERVICES_LOOKING_FOR = [
@@ -52,9 +83,26 @@ function FieldLabel({ children, required }: { children: React.ReactNode; require
   )
 }
 
-function InputField({ id, name, type = 'text', placeholder, required, disabled, defaultValue }: {
-  id: string; name: string; type?: string; placeholder?: string;
-  required?: boolean; disabled?: boolean; defaultValue?: string
+function InputField({
+  id,
+  name,
+  type = 'text',
+  placeholder,
+  required,
+  disabled,
+  value,
+  onChange,
+  error,
+}: {
+  id: string
+  name: string
+  type?: string
+  placeholder?: string
+  required?: boolean
+  disabled?: boolean
+  value?: string | number
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+  error?: boolean
 }) {
   return (
     <input
@@ -64,22 +112,46 @@ function InputField({ id, name, type = 'text', placeholder, required, disabled, 
       placeholder={placeholder}
       required={required}
       disabled={disabled}
-      defaultValue={defaultValue}
-      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a2744]/30 focus:border-[#1a2744] transition-all disabled:opacity-50"
+      value={value}
+      onChange={onChange}
+      className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
+        error
+          ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
+          : 'border-gray-200 focus:ring-[#1a2744]/30 focus:border-[#1a2744]'
+      }`}
     />
   )
 }
 
-function SelectField({ id, name, children, disabled, defaultValue }: {
-  id: string; name: string; children: React.ReactNode; disabled?: boolean; defaultValue?: string
+function SelectField({
+  id,
+  name,
+  children,
+  disabled,
+  value,
+  onChange,
+  error,
+}: {
+  id: string
+  name: string
+  children: React.ReactNode
+  disabled?: boolean
+  value?: string
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void
+  error?: boolean
 }) {
   return (
     <select
       id={id}
       name={name}
       disabled={disabled}
-      defaultValue={defaultValue}
-      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1a2744]/30 focus:border-[#1a2744] transition-all disabled:opacity-50"
+      value={value}
+      onChange={onChange}
+      className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 transition-all disabled:opacity-50 ${
+        error
+          ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
+          : 'border-gray-200 focus:ring-[#1a2744]/30 focus:border-[#1a2744]'
+      }`}
     >
       {children}
     </select>
@@ -130,35 +202,74 @@ function MultiCheckGroup({
 
 // ─── Stage 1: Lead Metadata ───────────────────────────────────────────────────
 
-function Stage1({ disabled }: { disabled: boolean }) {
+function Stage1({
+  disabled,
+  formData,
+  onChange,
+  errors,
+}: {
+  disabled: boolean
+  formData: any
+  onChange: any
+  errors: any
+}) {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <FieldLabel required>Couple&apos;s Full Name</FieldLabel>
-          <InputField id="fullName" name="fullName" placeholder="e.g. Dhriti & Tarun" required disabled={disabled} />
+          <InputField
+            id="fullName"
+            name="fullName"
+            placeholder="e.g. Dhriti & Tarun"
+            required
+            disabled={disabled}
+            value={formData.fullName}
+            onChange={onChange}
+            error={!!errors.fullName}
+          />
         </div>
         <div>
           <FieldLabel required>Email Address</FieldLabel>
-          <InputField id="email" name="email" type="email" placeholder="couple@example.com" required disabled={disabled} />
+          <InputField
+            id="email"
+            name="email"
+            type="email"
+            placeholder="couple@example.com"
+            required
+            disabled={disabled}
+            value={formData.email}
+            onChange={onChange}
+            error={!!errors.email}
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <FieldLabel>Contact Number</FieldLabel>
-          <InputField id="phone" name="phone" placeholder="+91 98765 43210" disabled={disabled} />
+          <InputField
+            id="phone"
+            name="phone"
+            placeholder="+91 98765 43210"
+            disabled={disabled}
+            value={formData.phone}
+            onChange={onChange}
+            error={!!errors.phone}
+          />
         </div>
         <div>
           <FieldLabel>Lead Status</FieldLabel>
-          <SelectField id="status" name="status" defaultValue="new" disabled={disabled}>
-            <option value="new">New</option>
-            <option value="contacted">Contacted</option>
-            <option value="proposal_sent">Proposal Sent</option>
-            <option value="negotiation">Negotiation</option>
+          <SelectField
+            id="status"
+            name="status"
+            disabled={disabled}
+            value={formData.status}
+            onChange={onChange}
+            error={!!errors.status}
+          >
             <option value="confirmed">Confirmed</option>
             <option value="closed">Closed</option>
-            <option value="cancelled">Cancelled</option>
           </SelectField>
         </div>
       </div>
@@ -166,17 +277,42 @@ function Stage1({ disabled }: { disabled: boolean }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <FieldLabel>Referral Source</FieldLabel>
-          <InputField id="referralSource" name="referralSource" placeholder="e.g. WedmeGood, Instagram, Friend" disabled={disabled} />
+          <InputField
+            id="referralSource"
+            name="referralSource"
+            placeholder="e.g. WedmeGood, Instagram, Friend"
+            disabled={disabled}
+            value={formData.referralSource}
+            onChange={onChange}
+            error={!!errors.referralSource}
+          />
         </div>
         <div>
-          <FieldLabel>Budget (₹ numeric, optional)</FieldLabel>
-          <InputField id="budget" name="budget" type="number" placeholder="e.g. 3500000" disabled={disabled} />
+          <FieldLabel>Budget (₹ numeric)</FieldLabel>
+          <InputField
+            id="budget"
+            name="budget"
+            type="number"
+            placeholder="e.g. 3500000"
+            disabled={disabled}
+            value={formData.budget}
+            onChange={onChange}
+            error={!!errors.budget}
+          />
         </div>
       </div>
 
       <div>
         <FieldLabel>Budget Description</FieldLabel>
-        <InputField id="budgetText" name="budgetText" placeholder='e.g. "35 Lakh INR (inclusive of all)"' disabled={disabled} />
+        <InputField
+          id="budgetText"
+          name="budgetText"
+          placeholder='e.g. "35 Lakh INR (inclusive of all)"'
+          disabled={disabled}
+          value={formData.budgetText}
+          onChange={onChange}
+          error={!!errors.budgetText}
+        />
       </div>
     </div>
   )
@@ -184,32 +320,93 @@ function Stage1({ disabled }: { disabled: boolean }) {
 
 // ─── Stage 2: Bride & Groom Details ──────────────────────────────────────────
 
-function Stage2({ disabled }: { disabled: boolean }) {
+function Stage2({
+  disabled,
+  formData,
+  onChange,
+  setFormData,
+  errors,
+}: {
+  disabled: boolean
+  formData: any
+  onChange: any
+  setFormData: any
+  errors: any
+}) {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div>
+        <div className={errors.checkInDate ? 'rounded-md ring-2 ring-red-200' : ''}>
           <FieldLabel>Check-in Date</FieldLabel>
-          <InputField id="checkInDate" name="checkInDate" type="date" disabled={disabled} />
+          <DatePicker
+            date={formData.checkInDate ? new Date(formData.checkInDate) : undefined}
+            setDate={(date) =>
+              setFormData((prev: any) => ({
+                ...prev,
+                checkInDate: date ? date.toISOString() : '',
+              }))
+            }
+            disabled={disabled}
+            className={errors.checkInDate ? 'border-red-500' : ''}
+          />
+          <input type="hidden" name="checkInDate" value={formData.checkInDate} />
         </div>
-        <div>
+        <div className={errors.checkOutDate ? 'rounded-md ring-2 ring-red-200' : ''}>
           <FieldLabel>Check-out Date</FieldLabel>
-          <InputField id="checkOutDate" name="checkOutDate" type="date" disabled={disabled} />
+          <DatePicker
+            date={formData.checkOutDate ? new Date(formData.checkOutDate) : undefined}
+            setDate={(date) =>
+              setFormData((prev: any) => ({
+                ...prev,
+                checkOutDate: date ? date.toISOString() : '',
+              }))
+            }
+            disabled={disabled}
+            className={errors.checkOutDate ? 'border-red-500' : ''}
+          />
+          <input type="hidden" name="checkOutDate" value={formData.checkOutDate} />
         </div>
-        <div>
+        <div className={errors.weddingDate ? 'rounded-md ring-2 ring-red-200' : ''}>
           <FieldLabel>Wedding Date</FieldLabel>
-          <InputField id="weddingDate" name="weddingDate" type="date" disabled={disabled} />
+          <DatePicker
+            date={formData.weddingDate ? new Date(formData.weddingDate) : undefined}
+            setDate={(date) =>
+              setFormData((prev: any) => ({
+                ...prev,
+                weddingDate: date ? date.toISOString() : '',
+              }))
+            }
+            disabled={disabled}
+            className={errors.weddingDate ? 'border-red-500' : ''}
+          />
+          <input type="hidden" name="weddingDate" value={formData.weddingDate} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <FieldLabel>Total Number of Guests</FieldLabel>
-          <InputField id="guestCount" name="guestCount" type="number" placeholder="e.g. 150" disabled={disabled} />
+          <InputField
+            id="guestCount"
+            name="guestCount"
+            type="number"
+            placeholder="e.g. 150"
+            disabled={disabled}
+            value={formData.guestCount}
+            onChange={onChange}
+            error={!!errors.guestCount}
+          />
         </div>
         <div>
           <FieldLabel>Style of Wedding</FieldLabel>
-          <SelectField id="weddingStyle" name="weddingStyle" defaultValue="" disabled={disabled}>
+          <SelectField
+            id="weddingStyle"
+            name="weddingStyle"
+            disabled={disabled}
+            value={formData.weddingStyle}
+            onChange={onChange}
+            error={!!errors.weddingStyle}
+          >
             <option value="">Select style…</option>
             <option value="hindu">Hindu Wedding</option>
             <option value="islamic">Islamic Wedding</option>
@@ -225,7 +422,14 @@ function Stage2({ disabled }: { disabled: boolean }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <FieldLabel>Resort Category</FieldLabel>
-          <SelectField id="resortCategory" name="resortCategory" defaultValue="" disabled={disabled}>
+          <SelectField
+            id="resortCategory"
+            name="resortCategory"
+            disabled={disabled}
+            value={formData.resortCategory}
+            onChange={onChange}
+            error={!!errors.resortCategory}
+          >
             <option value="">Select category…</option>
             <option>3 Star</option>
             <option>4 Star</option>
@@ -236,7 +440,14 @@ function Stage2({ disabled }: { disabled: boolean }) {
         </div>
         <div>
           <FieldLabel>Type of Cuisine</FieldLabel>
-          <SelectField id="cuisineType" name="cuisineType" defaultValue="" disabled={disabled}>
+          <SelectField
+            id="cuisineType"
+            name="cuisineType"
+            disabled={disabled}
+            value={formData.cuisineType}
+            onChange={onChange}
+            error={!!errors.cuisineType}
+          >
             <option value="">Select cuisine…</option>
             <option>Veg</option>
             <option>Non-Veg</option>
@@ -251,6 +462,8 @@ function Stage2({ disabled }: { disabled: boolean }) {
           type="checkbox"
           id="isDestination"
           name="isDestination"
+          checked={formData.isDestination}
+          onChange={onChange}
           className="h-4 w-4 rounded border-gray-300 text-[#1a2744] focus:ring-[#1a2744]"
           disabled={disabled}
         />
@@ -264,13 +477,31 @@ function Stage2({ disabled }: { disabled: boolean }) {
 
 // ─── Stage 3: Items / Requirements ───────────────────────────────────────────
 
-function Stage3({ disabled: _disabled }: { disabled: boolean }) {
-  const [servicesLookingFor, setServicesLookingFor] = useState<string[]>([])
-  const [ceremonies, setCeremonies] = useState<string[]>([])
-  const [entertainment, setEntertainment] = useState<string[]>([])
-  const [hospitality, setHospitality] = useState<string[]>([])
-  const [additional, setAdditional] = useState<string[]>([])
-
+function Stage3({
+  disabled: _disabled,
+  servicesLookingFor,
+  setServicesLookingFor,
+  ceremonies,
+  setCeremonies,
+  entertainment,
+  setEntertainment,
+  hospitality,
+  setHospitality,
+  additional,
+  setAdditional,
+}: {
+  disabled: boolean
+  servicesLookingFor: string[]
+  setServicesLookingFor: (val: string[]) => void
+  ceremonies: string[]
+  setCeremonies: (val: string[]) => void
+  entertainment: string[]
+  setEntertainment: (val: string[]) => void
+  hospitality: string[]
+  setHospitality: (val: string[]) => void
+  additional: string[]
+  setAdditional: (val: string[]) => void
+}) {
   return (
     <div className="space-y-7">
       <div>
@@ -286,7 +517,9 @@ function Stage3({ disabled: _disabled }: { disabled: boolean }) {
 
       <div>
         <FieldLabel>Ceremonies & Rituals</FieldLabel>
-        <p className="text-[11px] text-gray-400 mb-2">Select all ceremonies the couple would like</p>
+        <p className="text-[11px] text-gray-400 mb-2">
+          Select all ceremonies the couple would like
+        </p>
         <MultiCheckGroup
           name="weddingCeremonies"
           options={WEDDING_CEREMONIES}
@@ -338,11 +571,88 @@ export default function AddLeadPage() {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
+  // State for form data
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    status: 'confirmed',
+    referralSource: '',
+    budget: '',
+    budgetText: '',
+    checkInDate: '',
+    checkOutDate: '',
+    weddingDate: '',
+    guestCount: '',
+    weddingStyle: '',
+    resortCategory: '',
+    cuisineType: '',
+    isDestination: false,
+  })
+
+  // State for multi-check groups
+  const [servicesLookingFor, setServicesLookingFor] = useState<string[]>([])
+  const [ceremonies, setCeremonies] = useState<string[]>([])
+  const [entertainment, setEntertainment] = useState<string[]>([])
+  const [hospitality, setHospitality] = useState<string[]>([])
+  const [additional, setAdditional] = useState<string[]>([])
+
+  // Errors state
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
   // Collect the form ref so we can call FormData on it
   const formRef = React.useRef<HTMLFormElement>(null)
 
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value, type } = e.target
+    const isCheckbox = type === 'checkbox'
+    const finalValue = isCheckbox ? (e.target as HTMLInputElement).checked : value
+
+    setFormData((prev) => ({ ...prev, [name]: finalValue }))
+
+    // Clear error for this field if it exists
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev }
+        delete newErrors[name]
+        return newErrors
+      })
+    }
+  }
+
+  const validateStage = (currentStage: number) => {
+    const newErrors: Record<string, string> = {}
+    let isValid = true
+
+    if (currentStage === 1) {
+      if (!formData.fullName.trim()) newErrors.fullName = 'Full Name is required'
+      if (!formData.email.trim()) newErrors.email = 'Email is required'
+    }
+
+    if (currentStage === 2) {
+      if (!formData.checkInDate) newErrors.checkInDate = 'Check-in Date is required'
+      if (!formData.checkOutDate) newErrors.checkOutDate = 'Check-out Date is required'
+      if (!formData.weddingDate) newErrors.weddingDate = 'Wedding Date is required'
+      if (!formData.guestCount) newErrors.guestCount = 'Guest Count is required'
+      if (!formData.weddingStyle) newErrors.weddingStyle = 'Wedding Style is required'
+      if (!formData.resortCategory) newErrors.resortCategory = 'Resort Category is required'
+      if (!formData.cuisineType) newErrors.cuisineType = 'Cuisine Type is required'
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      isValid = false
+    }
+
+    return isValid
+  }
+
   const goNext = () => {
-    if (stage < 3) setStage(stage + 1)
+    if (validateStage(stage)) {
+      if (stage < 3) setStage(stage + 1)
+    }
   }
 
   const goPrev = () => {
@@ -366,7 +676,10 @@ export default function AddLeadPage() {
     <div className="flex flex-1 flex-col min-h-screen bg-gray-50">
       {/* Header */}
       <div className="border-b bg-white px-6 py-4 flex items-center gap-4">
-        <Link href="/dashboard/leads" className="text-gray-400 hover:text-gray-700 text-sm transition-colors">
+        <Link
+          href="/dashboard/leads"
+          className="text-gray-400 hover:text-gray-700 text-sm transition-colors"
+        >
           ← Back to Leads
         </Link>
         <div className="h-4 w-px bg-gray-200" />
@@ -395,7 +708,9 @@ export default function AddLeadPage() {
                       {isCompleted ? '✓' : s.id}
                     </div>
                     <div className="text-center">
-                      <p className={`text-xs font-semibold ${isActive ? 'text-[#1a2744]' : 'text-gray-400'}`}>
+                      <p
+                        className={`text-xs font-semibold ${isActive ? 'text-[#1a2744]' : 'text-gray-400'}`}
+                      >
                         {s.label}
                       </p>
                       <p className="text-[10px] text-gray-400 hidden sm:block">{s.description}</p>
@@ -436,13 +751,36 @@ export default function AddLeadPage() {
 
               {/* Always render all 3 stages but only show the active one */}
               <div className={stage === 1 ? 'block' : 'hidden'}>
-                <Stage1 disabled={isPending} />
+                <Stage1
+                  disabled={isPending}
+                  formData={formData}
+                  onChange={handleInputChange}
+                  errors={errors}
+                />
               </div>
               <div className={stage === 2 ? 'block' : 'hidden'}>
-                <Stage2 disabled={isPending} />
+                <Stage2
+                  disabled={isPending}
+                  formData={formData}
+                  onChange={handleInputChange}
+                  setFormData={setFormData}
+                  errors={errors}
+                />
               </div>
               <div className={stage === 3 ? 'block' : 'hidden'}>
-                <Stage3 disabled={isPending} />
+                <Stage3
+                  disabled={isPending}
+                  servicesLookingFor={servicesLookingFor}
+                  setServicesLookingFor={setServicesLookingFor}
+                  ceremonies={ceremonies}
+                  setCeremonies={setCeremonies}
+                  entertainment={entertainment}
+                  setEntertainment={setEntertainment}
+                  hospitality={hospitality}
+                  setHospitality={setHospitality}
+                  additional={additional}
+                  setAdditional={setAdditional}
+                />
               </div>
             </div>
 
@@ -488,7 +826,14 @@ export default function AddLeadPage() {
                     {isPending ? (
                       <span className="flex items-center gap-2">
                         <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
                           <path
                             className="opacity-75"
                             fill="currentColor"
@@ -506,11 +851,6 @@ export default function AddLeadPage() {
             </div>
           </div>
         </form>
-
-        {/* Progress indicator */}
-        <p className="text-center text-xs text-gray-400 mt-4">
-          Step {stage} of {STAGES.length} — All data will be saved as raw JSON to the lead record.
-        </p>
       </div>
     </div>
   )
