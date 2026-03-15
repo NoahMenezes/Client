@@ -77,17 +77,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <form action={logout} className="w-full">
-                <button
-                  type="submit"
-                  className="flex w-full items-center gap-2 text-muted-foreground hover:text-foreground"
-                >
-                  <IconLogout className="h-4 w-4" />
-                  <span>Logout</span>
-                </button>
-              </form>
-            </SidebarMenuButton>
+            <form action={logout} className="w-full">
+              <SidebarMenuButton
+                type="submit"
+                className="flex w-full items-center gap-2 text-muted-foreground hover:text-foreground"
+              >
+                <IconLogout className="h-4 w-4" />
+                <span>Logout</span>
+              </SidebarMenuButton>
+            </form>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
