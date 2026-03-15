@@ -19,11 +19,9 @@ export default async function EmployeesPage() {
   return (
     <div className="flex flex-1 flex-col">
       <Suspense fallback={<div className="h-12 border-b bg-white" />}>
-        <SiteHeader title="Employees">
+        <SiteHeader title="Employees" showSearch>
           <Link href="/dashboard/employees/add">
-            <Button className="bg-blue-600 text-white hover:bg-blue-700">
-              + Add Employee
-            </Button>
+            <Button className="bg-blue-600 text-white hover:bg-blue-700">+ Add Employee</Button>
           </Link>
         </SiteHeader>
       </Suspense>

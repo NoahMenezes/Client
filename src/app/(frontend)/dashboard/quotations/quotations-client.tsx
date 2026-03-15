@@ -53,7 +53,6 @@ export default function QuotationsClient({
   initialQuotations: Quotation[]
   totalDocs: number
 }) {
-  const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const PAGE_LIMIT = 10
@@ -76,27 +75,14 @@ export default function QuotationsClient({
   }
 
   const filtered = initialQuotations.filter((q) => {
-    const matchesSearch =
-      !search ||
-      q.title.toLowerCase().includes(search.toLowerCase()) ||
-      (q.lead?.fullName ?? '').toLowerCase().includes(search.toLowerCase())
     const matchesStatus = !statusFilter || q.status === statusFilter
-    return matchesSearch && matchesStatus
+    return matchesStatus
   })
 
   return (
     <div className="flex flex-1 flex-col">
-      <SiteHeader title="Quotations">
+      <SiteHeader title="Quotations" showSearch>
         <div className="flex items-center gap-2">
-          <input
-            placeholder="Search quotations or leads..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value)
-              setCurrentPage(1)
-            }}
-            className="rounded-md border bg-background px-3 py-1.5 text-sm w-56 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
           <select
             value={statusFilter}
             onChange={(e) => {
@@ -124,7 +110,7 @@ export default function QuotationsClient({
         {filtered.length === 0 ? (
           <div className="rounded-xl border bg-white shadow-sm p-12 text-center">
             <p className="text-gray-400 text-sm mb-4">
-              {search || statusFilter ? 'No quotations match your filter.' : 'No quotations found.'}
+              {statusFilter ? 'No quotations match your filter.' : 'No quotations found.'}
             </p>
             <Link href="/dashboard/quotations/new">
               <Button className="bg-blue-600 text-white hover:bg-blue-700" size="sm">

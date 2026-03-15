@@ -22,37 +22,18 @@ interface EmployeesClientProps {
 }
 
 export function EmployeesClient({ employees, totalDocs }: EmployeesClientProps) {
-  const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
 
   const PAGE_LIMIT = 10
 
-  const filtered = employees.filter(
-    (e) =>
-      e.name.toLowerCase().includes(search.toLowerCase()) ||
-      e.email.toLowerCase().includes(search.toLowerCase()),
-  )
+  const filtered = employees
 
   return (
     <main className="flex-1 overflow-auto p-6">
-      <div className="mb-4">
-        <input
-          placeholder="Search by name or email"
-          className="rounded-md border bg-background px-3 py-1.5 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value)
-            setCurrentPage(1)
-          }}
-        />
-      </div>
-
       <div className="rounded-lg border bg-card shadow-sm overflow-hidden">
         {filtered.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground text-sm">
-            {search
-              ? 'No employees match your search.'
-              : 'No employees yet. Click "+ Add Employee" to create one.'}
+            No employees yet. Click &quot;+ Add Employee&quot; to create one.
           </div>
         ) : (
           <table className="w-full text-sm">
@@ -121,7 +102,7 @@ export function EmployeesClient({ employees, totalDocs }: EmployeesClientProps) 
           <span>
             Showing <strong>{Math.min(filtered.length, (currentPage - 1) * PAGE_LIMIT + 1)}</strong>
             –<strong>{Math.min(filtered.length, currentPage * PAGE_LIMIT)}</strong> of{' '}
-            <strong>{search ? filtered.length : totalDocs}</strong> results
+            <strong>{totalDocs}</strong> results
           </span>
           {Math.ceil(filtered.length / PAGE_LIMIT) > 1 && (
             <div className="flex gap-2">

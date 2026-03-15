@@ -64,11 +64,11 @@ const statusCategories = [
 ]
 
 interface Props {
-  searchParams: Promise<{ q?: string; status?: string; from?: string; to?: string; page?: string }>
+  searchParams: Promise<{ page?: string }>
 }
 
 export default async function LeadsPage({ searchParams }: Props) {
-  const { q = '', status = '', from = '', to = '', page = '1' } = await searchParams
+  const { page = '1' } = await searchParams
 
   const currentPage = Math.max(1, parseInt(page, 10) || 1)
 
@@ -86,26 +86,7 @@ export default async function LeadsPage({ searchParams }: Props) {
       where.createdBy = { equals: currentUser.id }
     }
 
-    if (q) {
-      where.or = [
-        { 'contact.name': { contains: q } },
-        { 'contact.email': { contains: q } },
-        { leadId: { contains: q } },
-      ]
-    }
-
-    if (status) {
-      where.status = { equals: status }
-    } else {
-      where.status = { in: ['new', 'contacted', 'proposal_sent', 'negotiation', 'confirmed'] }
-    }
-
-    if (from || to) {
-      const dateFilter: Record<string, string> = {}
-      if (from) dateFilter.greater_than_equal = from
-      if (to) dateFilter.less_than_equal = to
-      where.weddingDate = dateFilter
-    }
+    where.status = { in: ['new', 'contacted', 'proposal_sent', 'negotiation', 'confirmed'] }
 
     const res = await payload.find({
       collection: 'leads',
@@ -136,14 +117,8 @@ export default async function LeadsPage({ searchParams }: Props) {
     console.error('Leads fetch error:', e)
   }
 
-  const isFiltered = q || status || from || to
-
   function paginationHref(p: number) {
     const params = new URLSearchParams()
-    if (q) params.set('q', q)
-    if (status) params.set('status', status)
-    if (from) params.set('from', from)
-    if (to) params.set('to', to)
     params.set('page', String(p))
     return `/dashboard/leads?${params.toString()}`
   }
@@ -154,7 +129,7 @@ export default async function LeadsPage({ searchParams }: Props) {
   return (
     <div className="flex flex-1 flex-col">
       <Suspense fallback={<div className="h-12 border-b bg-white" />}>
-        <SiteHeader title="Leads">
+        <SiteHeader title="Leads" showSearch>
           <div className="flex items-center gap-2">
             <Link
               href="https://docs.google.com/forms/d/e/1FAIpQLSczDIpvtKCfNV1EfmIslmNezmP_Ysw60Lv5uMdbD_TRVx-nqA/viewform?fbzx=-4673714178861004412"
@@ -207,81 +182,10 @@ export default async function LeadsPage({ searchParams }: Props) {
           </div>
         </section>
 
-        {/* Filter */}
-        <section>
-          <h2 className="text-base font-semibold text-gray-800 mb-3">
-            Filter Active Leads by Date Range
-          </h2>
-          <form
-            method="get"
-            className="flex flex-wrap items-end gap-3 bg-white border rounded-xl p-4 shadow-sm"
-          >
-            <input type="hidden" name="page" value="1" />
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500 font-medium">Search</label>
-              <input
-                name="q"
-                defaultValue={q}
-                placeholder="Name, email, or Lead ID"
-                className="rounded-md border bg-background px-3 py-1.5 text-sm w-52 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500 font-medium">Status</label>
-              <select
-                name="status"
-                defaultValue={status}
-                className="rounded-md border bg-background px-3 py-1.5 text-sm focus:outline-none"
-              >
-                <option value="">All Active</option>
-                <option value="new">New</option>
-                <option value="contacted">Contacted</option>
-                <option value="proposal_sent">Proposal Sent</option>
-                <option value="negotiation">Negotiation</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="closed">Closed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500 font-medium">Wedding Date From</label>
-              <input
-                name="from"
-                type="date"
-                defaultValue={from}
-                className="rounded-md border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-500 font-medium">Wedding Date To</label>
-              <input
-                name="to"
-                type="date"
-                defaultValue={to}
-                className="rounded-md border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button type="submit" size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
-                Apply Filter
-              </Button>
-              {isFiltered && (
-                <Link href="/dashboard/leads">
-                  <Button type="button" variant="outline" size="sm">
-                    Clear
-                  </Button>
-                </Link>
-              )}
-            </div>
-          </form>
-        </section>
-
         {/* Leads Table */}
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold text-gray-800">
-              Active Leads{isFiltered ? ' (Based on Filter)' : ''}
-            </h2>
+            <h2 className="text-base font-semibold text-gray-800">Active Leads</h2>
             <span className="text-xs text-gray-400">
               {totalDocs} total lead{totalDocs !== 1 ? 's' : ''}
             </span>
