@@ -161,7 +161,11 @@ export default async function LeadsPage({ searchParams }: Props) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Button variant="outline" className="border-[#1a2744] text-[#1a2744] hover:bg-gray-100" size="sm">
+              <Button
+                variant="outline"
+                className="border-[#1a2744] text-[#1a2744] hover:bg-gray-100"
+                size="sm"
+              >
                 Wedding Enquiry Form
               </Button>
             </Link>
@@ -349,7 +353,7 @@ export default async function LeadsPage({ searchParams }: Props) {
                                 View
                               </Button>
                             </Link>
-                            <Link href={`/dashboard/leads/${lead.id}/edit`}>
+                            <Link href={`/dashboard/leads/${lead.id}`}>
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -399,10 +403,7 @@ export default async function LeadsPage({ searchParams }: Props) {
 
                       {pageNumbers.map((p) => {
                         // Show first, last, and pages near current
-                        const show =
-                          p === 1 ||
-                          p === totalPages ||
-                          Math.abs(p - currentPage) <= 1
+                        const show = p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1
                         const ellipsisBefore = p === currentPage - 2 && currentPage > 3
                         const ellipsisAfter = p === currentPage + 2 && currentPage < totalPages - 2
 

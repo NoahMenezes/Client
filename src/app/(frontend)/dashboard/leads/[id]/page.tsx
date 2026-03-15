@@ -1,7 +1,9 @@
 import React from 'react'
+import Link from 'next/link'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
+import { Button } from '@/components/ui/button'
 import { notFound } from 'next/navigation'
 import { IconPhone, IconMessage, IconCalendar, IconMail } from '@tabler/icons-react'
 import LeadProfileTabs from '@/components/lead-profile-tabs'
@@ -146,7 +148,9 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
     basicInformation: '',
     typesOfServiceRequired: lead.servicesLookedFor || null,
     artistsRequirement: lead.entertainmentOptions || null,
-    googleFormEnquiry: lead.googleFormRawData ? JSON.stringify(lead.googleFormRawData, null, 2) : '',
+    googleFormEnquiry: lead.googleFormRawData
+      ? JSON.stringify(lead.googleFormRawData, null, 2)
+      : '',
     firstCallDate: null,
     proposalSentDate: null,
     pocName: null,
@@ -200,11 +204,14 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
       <div className="flex-1 px-6 pt-3 pb-6">
         <div className="bg-white rounded-2xl border shadow-sm overflow-hidden flex flex-col h-full">
           {/* Card header with lead name & ID */}
-          <div className="px-8 pt-6 pb-0">
-            <h1 className="text-xl font-bold text-gray-900">
-              Lead Details – {fullName}
-            </h1>
-            <p className="text-xs text-gray-500 mt-0.5">Lead ID: {leadDisplayId}</p>
+          <div className="px-8 pt-6 pb-0 flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">Lead Details – {fullName}</h1>
+              <p className="text-xs text-gray-500 mt-0.5">Lead ID: {leadDisplayId}</p>
+            </div>
+            <Link href={`/dashboard/leads/${id}/edit`}>
+              <Button>Edit Lead</Button>
+            </Link>
           </div>
 
           {/* Content area: sidebar + tabs */}
@@ -255,16 +262,12 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
                 {phone && (
                   <div>
                     <p className="text-[11px] text-gray-400 font-medium">Mobile</p>
-                    <p className="text-gray-800 font-medium text-sm mt-0.5">
-                      {phone}
-                    </p>
+                    <p className="text-gray-800 font-medium text-sm mt-0.5">{phone}</p>
                   </div>
                 )}
                 <div>
                   <p className="text-[11px] text-gray-400 font-medium">Email</p>
-                  <p className="text-gray-800 font-medium text-sm mt-0.5 break-all">
-                    {email}
-                  </p>
+                  <p className="text-gray-800 font-medium text-sm mt-0.5 break-all">{email}</p>
                 </div>
                 <div>
                   <p className="text-[11px] text-gray-400 font-medium">Lead Status</p>

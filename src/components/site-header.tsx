@@ -1,11 +1,8 @@
 'use client'
 
-import { IconSearch } from '@tabler/icons-react'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
-import { Input } from '@/components/ui/input'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { AdvancedSearch } from '@/components/advanced-search'
 import React from 'react'
 import { ProfileBar } from '@/components/profile-bar'
 import { useDashboardUser } from '@/context/user-context'
@@ -17,17 +14,7 @@ interface SiteHeaderProps {
 }
 
 export function SiteHeader({ title = 'Dashboard', showSearch = false, children }: SiteHeaderProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [query, setQuery] = useState(searchParams.get('q') || '')
   const user = useDashboardUser()
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    const params = new URLSearchParams()
-    if (query.trim()) params.set('q', query.trim())
-    router.push(`/dashboard${params.toString() ? `?${params}` : ''}`)
-  }
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) bg-white">
@@ -37,17 +24,9 @@ export function SiteHeader({ title = 'Dashboard', showSearch = false, children }
         <h1 className="text-xl font-bold">{title}</h1>
 
         {showSearch && (
-          <form onSubmit={handleSearch} className="ml-4 flex items-center gap-2">
-            <div className="relative w-64">
-              <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search Leads"
-                className="pl-9"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </div>
-          </form>
+          <div className="ml-4 flex items-center gap-2">
+            <AdvancedSearch />
+          </div>
         )}
 
         {children && <div className="ml-4 flex items-center gap-2">{children}</div>}

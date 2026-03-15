@@ -6,6 +6,8 @@ import { updateLead, type ActionState } from '@/app/actions/leads'
 
 // ─── Constants (same as Add form) ─────────────────────────────────────────────
 
+import { DatePicker } from '@/components/date-picker'
+
 const STAGES = [
   { id: 1, label: 'Lead Metadata', description: 'Basic info & contact details' },
   { id: 2, label: 'Bride & Groom', description: 'Couple & wedding details' },
@@ -457,34 +459,40 @@ export default function EditLeadClient({ lead }: { lead: any }) {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>
                       <FieldLabel>Check-in Date</FieldLabel>
-                      <InputField
-                        id="checkInDate"
-                        name="checkInDate"
-                        type="date"
-                        value={formData.checkInDate}
-                        onChange={handleInputChange as any}
+                      <DatePicker
+                        date={formData.checkInDate ? new Date(formData.checkInDate) : undefined}
+                        setDate={(date) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            checkInDate: date ? date.toISOString() : '',
+                          }))
+                        }
                         disabled={isPending}
                       />
                     </div>
                     <div>
                       <FieldLabel>Check-out Date</FieldLabel>
-                      <InputField
-                        id="checkOutDate"
-                        name="checkOutDate"
-                        type="date"
-                        value={formData.checkOutDate}
-                        onChange={handleInputChange as any}
+                      <DatePicker
+                        date={formData.checkOutDate ? new Date(formData.checkOutDate) : undefined}
+                        setDate={(date) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            checkOutDate: date ? date.toISOString() : '',
+                          }))
+                        }
                         disabled={isPending}
                       />
                     </div>
                     <div>
                       <FieldLabel>Wedding Date</FieldLabel>
-                      <InputField
-                        id="weddingDate"
-                        name="weddingDate"
-                        type="date"
-                        value={formData.weddingDate}
-                        onChange={handleInputChange as any}
+                      <DatePicker
+                        date={formData.weddingDate ? new Date(formData.weddingDate) : undefined}
+                        setDate={(date) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            weddingDate: date ? date.toISOString() : '',
+                          }))
+                        }
                         disabled={isPending}
                       />
                     </div>
