@@ -695,7 +695,7 @@ export default function AddLeadPage() {
               const isActive = stage === s.id
               return (
                 <React.Fragment key={s.id}>
-                  <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                  <div className="flex flex-col items-center gap-1 shrink-0">
                     <div
                       className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${
                         isCompleted
@@ -718,7 +718,7 @@ export default function AddLeadPage() {
                   </div>
                   {i < STAGES.length - 1 && (
                     <div
-                      className={`flex-1 h-0.5 mx-3 mt-[-18px] transition-all ${
+                      className={`flex-1 h-0.5 mx-3 -mt-4.5 transition-all ${
                         stage > s.id ? 'bg-[#1a2744]' : 'bg-gray-200'
                       }`}
                     />
@@ -733,7 +733,7 @@ export default function AddLeadPage() {
         <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
           <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
             {/* Card Header */}
-            <div className="border-b px-6 py-4 bg-gradient-to-r from-[#1a2744]/5 to-transparent">
+            <div className="border-b px-6 py-4 bg-linear-to-r from-[#1a2744]/5 to-transparent">
               <h2 className="text-base font-bold text-[#1a2744]">
                 Stage {stage}: {STAGES[stage - 1].label}
               </h2>

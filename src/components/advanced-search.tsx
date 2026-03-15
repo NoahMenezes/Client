@@ -51,7 +51,7 @@ function Highlight({ text, query }: { text: string; query: string }) {
           </span>
         ) : (
           part
-        )
+        ),
       )}
     </span>
   )
@@ -106,7 +106,7 @@ export function AdvancedSearch() {
       <Button
         variant="outline"
         className={cn(
-          'relative h-9 w-full justify-start rounded-[0.5rem] bg-background text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-64 lg:w-64'
+          'relative h-9 w-full justify-start rounded-xl bg-background text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-64 lg:w-64',
         )}
         onClick={() => setOpen(true)}
       >
@@ -118,20 +118,19 @@ export function AdvancedSearch() {
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="overflow-hidden p-0 shadow-lg sm:max-w-2xl" showCloseButton={false}>
+        <DialogContent
+          className="overflow-hidden p-0 shadow-lg sm:max-w-2xl"
+          showCloseButton={false}
+        >
           <DialogHeader className="sr-only">
             <DialogTitle>Search</DialogTitle>
             <DialogDescription>Search for leads, employees, and quotations</DialogDescription>
           </DialogHeader>
           <Command
             shouldFilter={false}
-            className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5"
+            className="**:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group-heading]]:text-muted-foreground **:[[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 **:[[cmdk-input]]:h-12 **:[[cmdk-item]]:px-2 **:[[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5"
           >
-            <CommandInput
-              placeholder="Type to search..."
-              value={query}
-              onValueChange={setQuery}
-            />
+            <CommandInput placeholder="Type to search..." value={query} onValueChange={setQuery} />
             <CommandList>
               <CommandEmpty>{isPending ? 'Searching...' : 'No results found.'}</CommandEmpty>
 

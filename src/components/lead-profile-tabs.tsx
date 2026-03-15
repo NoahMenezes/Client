@@ -150,8 +150,8 @@ export default function LeadProfileTabs({
   quotations: Quotation[]
   initialTab?: string
 }) {
-  const [activeTab, setActiveTab] = useState<'info' | 'notes' | 'quotations'>(
-    (initialTab as 'info' | 'notes' | 'quotations') || 'info',
+  const [activeTab, setActiveTab] = useState<'info' | 'items' | 'notes' | 'quotations'>(
+    (initialTab as 'info' | 'items' | 'notes' | 'quotations') || 'info',
   )
   const [notes, setNotes] = useState<Note[]>(initialNotes)
   const [quotations] = useState<Quotation[]>(initialQuotations)

@@ -332,7 +332,7 @@ export default async function LeadsPage({ searchParams }: Props) {
                         <td className="px-5 py-3 text-gray-600 text-xs">
                           {lead.guestCount ?? '—'}
                         </td>
-                        <td className="px-5 py-3 text-gray-600 text-xs max-w-[120px] truncate">
+                        <td className="px-5 py-3 text-gray-600 text-xs max-w-30 truncate">
                           {lead.budget ?? '—'}
                         </td>
                         <td className="px-5 py-3">
