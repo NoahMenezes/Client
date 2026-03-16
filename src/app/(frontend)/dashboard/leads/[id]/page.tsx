@@ -6,6 +6,7 @@ import configPromise from '@payload-config'
 import { Button } from '@/components/ui/button'
 import { notFound } from 'next/navigation'
 import { IconPhone, IconMessage, IconCalendar, IconMail } from '@tabler/icons-react'
+import { DeleteLeadButton } from '@/components/delete-lead-button'
 import LeadProfileTabs from '@/components/lead-profile-tabs'
 
 const statusLabels: Record<string, string> = {
@@ -148,9 +149,6 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
     basicInformation: '',
     typesOfServiceRequired: lead.servicesLookedFor || null,
     artistsRequirement: lead.entertainmentOptions || null,
-    googleFormEnquiry: lead.googleFormRawData
-      ? JSON.stringify(lead.googleFormRawData, null, 2)
-      : '',
     firstCallDate: null,
     proposalSentDate: null,
     pocName: null,
@@ -209,9 +207,12 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
               <h1 className="text-xl font-bold text-gray-900">Lead Details – {fullName}</h1>
               <p className="text-xs text-gray-500 mt-0.5">Lead ID: {leadDisplayId}</p>
             </div>
-            <Link href={`/dashboard/leads/${id}/edit`}>
-              <Button>Edit Lead</Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href={`/dashboard/leads/${id}/edit`}>
+                <Button variant="outline">Edit Lead</Button>
+              </Link>
+              <DeleteLeadButton leadId={id} variant="destructive" size="default" />
+            </div>
           </div>
 
           {/* Content area: sidebar + tabs */}

@@ -80,7 +80,6 @@ interface Lead {
   basicInformation?: string
   typesOfServiceRequired?: string | null
   artistsRequirement?: string | null
-  googleFormEnquiry?: string
   firstCallDate?: string | null
   proposalSentDate?: string | null
   pocName?: string | null
@@ -278,11 +277,6 @@ export default function LeadProfileTabs({
                   ))}
                 </select>
               </div>
-              <Link href={`/dashboard/leads/${lead.id}/edit`}>
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-5">
-                  Edit
-                </Button>
-              </Link>
             </div>
 
             {/* Lead Information section */}
@@ -402,21 +396,6 @@ export default function LeadProfileTabs({
               </div>
             </div>
 
-            {/* Check-in Date / Google Form Enquiry */}
-            <div className="grid grid-cols-3 gap-x-6 gap-y-4 text-sm">
-              <div>
-                <p className="text-xs text-gray-400 mb-1">Check-in Date</p>
-                <div className="rounded-lg border bg-gray-50/50 px-3 py-2 text-sm text-gray-700">
-                  {lead.checkInDate || '—'}
-                </div>
-              </div>
-              <div className="col-span-2">
-                <p className="text-xs text-gray-400 mb-1">Google Form Enquiry</p>
-                <div className="rounded-lg border bg-gray-50/50 px-3 py-2 text-sm text-gray-700 min-h-15 whitespace-pre-wrap">
-                  {lead.googleFormEnquiry || '—'}
-                </div>
-              </div>
-            </div>
 
             {/* Wedding Details */}
             <div>
@@ -454,14 +433,6 @@ export default function LeadProfileTabs({
               </div>
             </div>
 
-            {/* Update Details button */}
-            <div className="flex justify-end pt-2">
-              <Link href={`/dashboard/leads/${lead.id}/edit`}>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8">
-                  Update Details
-                </Button>
-              </Link>
-            </div>
           </div>
         )}
 

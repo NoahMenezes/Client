@@ -5,7 +5,6 @@ import configPromise from '@payload-config'
 import { SiteHeader } from '@/components/site-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { deleteLead } from '@/app/actions/leads'
 import { getCurrentUser } from '@/app/actions/auth'
 import {
   Pagination,
@@ -16,6 +15,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
+import { DeleteLeadButton } from '@/components/delete-lead-button'
 
 const PAGE_LIMIT = 10
 
@@ -272,17 +272,7 @@ export default async function LeadsPage({ searchParams }: Props) {
                                 Edit
                               </Button>
                             </Link>
-                            <form action={deleteLead}>
-                              <input type="hidden" name="id" value={lead.id} />
-                              <Button
-                                type="submit"
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 px-3 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                Delete
-                              </Button>
-                            </form>
+                            <DeleteLeadButton leadId={lead.id} />
                           </div>
                         </td>
                       </tr>

@@ -57,10 +57,10 @@ function fmt(n: number, currency: string = 'INR') {
 
 export default function QuotationsClient({
   initialQuotations,
-  totalDocs,
+  _totalDocs,
 }: {
   initialQuotations: Quotation[]
-  totalDocs: number
+  _totalDocs: number
 }) {
   const [statusFilter, setStatusFilter] = useState('')
   const [currentPage, setCurrentPage] = useState(1)

@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useTransition } from 'react'
-import { deleteLead } from '@/app/actions/leads'
+import React from 'react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+import { DeleteLeadButton } from '@/components/delete-lead-button'
 
 interface Lead {
   id: number | string
@@ -39,17 +40,7 @@ const statusLabels: Record<string, string> = {
 }
 
 export function LeadsTable({ leads, totalDocs }: { leads: Lead[]; totalDocs: number }) {
-  const [isPending, startTransition] = useTransition()
 
-  const handleDelete = (id: number | string) => {
-    if (window.confirm('Are you sure you want to delete this lead? This cannot be undone.')) {
-      startTransition(async () => {
-        const fd = new FormData()
-        fd.append('id', String(id))
-        await deleteLead(fd)
-      })
-    }
-  }
 
   return (
     <Card>
@@ -115,15 +106,7 @@ export function LeadsTable({ leads, totalDocs }: { leads: Lead[]; totalDocs: num
                             Edit
                           </Button>
                         </Link>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="h-7 px-3 text-xs"
-                          onClick={() => handleDelete(lead.id)}
-                          disabled={isPending}
-                        >
-                          Delete
-                        </Button>
+                        <DeleteLeadButton leadId={lead.id} />
                       </div>
                     </td>
                   </tr>

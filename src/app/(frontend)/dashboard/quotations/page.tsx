@@ -40,7 +40,7 @@ export default async function QuotationsPage() {
   return (
     <QuotationsClient 
       initialQuotations={serializedQuotations as Quotation[]} 
-      totalDocs={res.totalDocs} 
+      _totalDocs={res.totalDocs} 
     />
   )
 }
