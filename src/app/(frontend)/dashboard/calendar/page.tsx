@@ -11,67 +11,40 @@ export default async function CalendarPage() {
   const payload = await getPayload({ config: configPromise })
   const currentUser = await getCurrentUser()
 
-  const res = await payload.find({
-    collection: 'leads',
-    limit: 1000,
-    depth: 1,
-    sort: '-createdAt',
-    overrideAccess: true,
-    where: currentUser ? { createdBy: { equals: currentUser.id } } : {},
-  })
+  let events: CalendarEvent[] = []
+  try {
+    const res = await payload.find({
+      collection: 'leads',
+      limit: 1000,
+      depth: 1,
+      sort: '-createdAt',
+      overrideAccess: true,
+      where: currentUser ? { createdBy: { equals: currentUser.id } } : {},
+    })
 
-  const events: CalendarEvent[] = res.docs.flatMap((lead: any) => {
-    const name = lead.contact?.name ?? 'Unknown'
-    const leadId = lead.leadId ?? null
-    const status = lead.status ?? 'new'
-    const id = lead.id
+    events = res.docs
+      .map((lead: any) => {
+        if (!lead.checkInDate || !lead.checkOutDate) return null
 
-    const evts: CalendarEvent[] = []
+        const name = lead.contact?.name ?? 'Unknown'
+        const leadId = lead.leadId ?? null
+        const status = lead.status ?? 'new'
+        const id = lead.id
 
-    if (lead.checkInDate) {
-      evts.push({
-        id,
-        leadId,
-        title: name,
-        date: lead.checkInDate,
-        type: 'checkIn',
-        checkInDate: lead.checkInDate,
-        checkOutDate: lead.checkOutDate ?? null,
-        weddingDate: lead.weddingDate ?? null,
-        status,
+        return {
+          id,
+          leadId,
+          title: name,
+          start: lead.checkInDate,
+          end: lead.checkOutDate,
+          weddingDate: lead.weddingDate ?? null,
+          status,
+        }
       })
-    }
-
-    if (lead.checkOutDate) {
-      evts.push({
-        id,
-        leadId,
-        title: name,
-        date: lead.checkOutDate,
-        type: 'checkOut',
-        checkInDate: lead.checkInDate ?? null,
-        checkOutDate: lead.checkOutDate,
-        weddingDate: lead.weddingDate ?? null,
-        status,
-      })
-    }
-
-    if (lead.weddingDate) {
-      evts.push({
-        id,
-        leadId,
-        title: name,
-        date: lead.weddingDate,
-        type: 'wedding',
-        checkInDate: lead.checkInDate ?? null,
-        checkOutDate: lead.checkOutDate ?? null,
-        weddingDate: lead.weddingDate,
-        status,
-      })
-    }
-
-    return evts
-  })
+      .filter(Boolean) as CalendarEvent[]
+  } catch (error) {
+    console.error('Error fetching leads for calendar:', error)
+  }
 
   return (
     <>
