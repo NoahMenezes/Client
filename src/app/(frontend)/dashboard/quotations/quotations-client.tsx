@@ -131,9 +131,8 @@ export default function QuotationsClient({
         ) : (
           <div className="space-y-12">
             {Object.values(
-              filtered
-                .slice((currentPage - 1) * PAGE_LIMIT, currentPage * PAGE_LIMIT)
-                .reduce((acc, q) => {
+              filtered.slice((currentPage - 1) * PAGE_LIMIT, currentPage * PAGE_LIMIT).reduce(
+                (acc, q) => {
                   const leadId = q.lead?.id || 'unassigned'
                   if (!acc[leadId]) {
                     acc[leadId] = {
@@ -144,71 +143,99 @@ export default function QuotationsClient({
                   }
                   acc[leadId].quotes.push(q)
                   return acc
-                }, {} as Record<string, { leadName: string; leadId: string | number | null; quotes: Quotation[] }>),
+                },
+                {} as Record<
+                  string,
+                  { leadName: string; leadId: string | number | null; quotes: Quotation[] }
+                >,
+              ),
             ).map((group, gIdx) => (
-              <div key={group.leadId || gIdx} className="relative">
+              <div key={group.leadId || gIdx} className="relative flex flex-col gap-2">
+                {/* Vertical line connecting header and items */}
+                <div className="absolute top-8 left-4 bottom-0 w-[2px] bg-gray-200 z-0" />
+
                 {/* Group Header (Lead Name) */}
-                <div className="flex items-center gap-3 mb-4 sticky top-14 bg-gray-50/95 backdrop-blur-sm py-2 z-10">
-                  <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center border-2 border-white shadow-sm">
-                    <svg className="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <div className="flex items-center gap-3 py-2 z-10 sticky top-0 bg-[#FAFAFA] rounded-md">
+                  <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center border-[3px] border-white shadow-sm z-10 shrink-0">
+                    <svg
+                      className="h-4 w-4 text-gray-400"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
                     </svg>
                   </div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-bold text-gray-400">
+                    <h3 className="text-sm font-semibold text-gray-500">
                       Quotations for {group.leadName}
                     </h3>
                     <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
-                      {group.quotes.length} {group.quotes.length === 1 ? 'Quotation' : 'Quotations'}
+                      {group.quotes.length} {group.quotes.length === 1 ? 'QUOTATION' : 'QUOTATIONS'}
                     </span>
                   </div>
                 </div>
 
                 {/* Timeline Items */}
-                <div className="ml-4 pl-8 border-l-2 border-gray-200 space-y-4">
+                <div className="pl-12 space-y-3 z-10">
                   {group.quotes.map((q) => {
                     const currency = q.currency || 'INR'
-                    const currencySymbol = CURRENCIES.find((c) => c.value === currency)?.symbol || '₹'
-                    
+                    const currencySymbol =
+                      CURRENCIES.find((c) => c.value === currency)?.symbol || '₹'
+
                     return (
-                      <div key={q.id} className="relative group">
+                      <div key={q.id} className="relative group flex items-center">
                         {/* Dot on the line */}
-                        <div className="absolute -left-[41px] top-4 h-4 w-4 rounded-full border-2 border-white bg-gray-300 group-hover:bg-blue-500 transition-colors z-10 shadow-sm" />
-                        
+                        <div className="absolute -left-[37px] top-1/2 -translate-y-1/2 h-[11px] w-[11px] rounded-full border-[2.5px] border-white bg-gray-300 group-hover:bg-blue-500 transition-colors z-10 shadow-sm" />
+
                         {/* Quote Card (Commit style) */}
-                        <div 
+                        <div
                           onClick={() => router.push(`/dashboard/quotations/${q.id}`)}
-                          className="bg-white border rounded-xl p-4 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer flex items-center justify-between group/card"
+                          className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-sm hover:shadow-md hover:border-gray-300 transition-all cursor-pointer flex items-center justify-between w-full group/card"
                         >
                           <div className="flex-1 min-w-0 pr-4">
                             <div className="flex items-center gap-3 mb-1">
-                              <span className="text-sm font-bold text-gray-900 group-hover/card:text-blue-600 transition-colors truncate">
+                              <span className="text-sm font-bold text-gray-800 group-hover/card:text-blue-600 transition-colors truncate">
                                 {q.title}
                               </span>
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tight ${STATUS_STYLES[q.status] || 'bg-gray-100 text-gray-500'}`}>
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tight ${STATUS_STYLES[q.status] || 'bg-gray-100 text-gray-500'}`}
+                              >
                                 {q.status}
                               </span>
                             </div>
-                            <div className="flex items-center gap-4 text-xs text-gray-500">
-                              <span className="flex items-center gap-1 font-mono">
-                                <span className="text-gray-400">Total:</span>
-                                <span className="font-bold text-gray-700">{currencySymbol}{fmt(q.grandTotal, currency)}</span>
+                            <div className="flex items-center gap-4 text-xs text-gray-400 font-medium">
+                              <span className="flex items-center gap-1 font-mono tracking-tight">
+                                <span>Total:</span>
+                                <span className="font-bold text-gray-600">
+                                  {currencySymbol}
+                                  {fmt(q.grandTotal, currency)}
+                                </span>
                               </span>
                               <span className="flex items-center gap-1">
-                                <IconEye className="h-3 w-3" />
+                                <IconEye className="h-3.5 w-3.5" />
                                 {q.categories?.length || 0} Categories
                               </span>
                               <span className="flex items-center gap-1">
                                 <IconPlus className="h-3 w-3" />
-                                {q.quotationDate ? new Date(q.quotationDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'No Date'}
+                                {q.quotationDate
+                                  ? new Date(q.quotationDate).toLocaleDateString('en-GB', {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      year: 'numeric',
+                                    })
+                                  : 'No Date'}
                               </span>
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center gap-2 shrink-0">
                             <div className="flex items-center border rounded-lg overflow-hidden bg-gray-50 opacity-0 group-hover/card:opacity-100 transition-opacity">
-                              <Link 
+                              <Link
                                 href={`/dashboard/quotations/${q.id}`}
                                 className="p-2 hover:bg-white text-gray-400 hover:text-blue-600 transition-colors border-r"
                                 onClick={(e) => e.stopPropagation()}
@@ -216,7 +243,7 @@ export default function QuotationsClient({
                               >
                                 <IconEye className="h-4 w-4" />
                               </Link>
-                              <Link 
+                              <Link
                                 href={`/dashboard/quotations/${q.id}`}
                                 className="p-2 hover:bg-white text-gray-400 hover:text-green-600 transition-colors border-r"
                                 onClick={(e) => e.stopPropagation()}
@@ -224,7 +251,7 @@ export default function QuotationsClient({
                               >
                                 <IconPencil className="h-4 w-4" />
                               </Link>
-                              <button 
+                              <button
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   handleDelete(q)
@@ -237,7 +264,7 @@ export default function QuotationsClient({
                               </button>
                             </div>
                             <div className="h-8 w-8 rounded-full border border-gray-100 bg-gray-50 flex items-center justify-center text-gray-400 group-hover/card:bg-blue-50 group-hover/card:text-blue-500 transition-colors">
-                               <IconPencil className="h-4 w-4" />
+                              <IconPencil className="h-3.5 w-3.5" />
                             </div>
                           </div>
                         </div>

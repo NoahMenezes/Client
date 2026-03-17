@@ -114,7 +114,9 @@ const MAX_SLOTS = 3 // max visible event rows per day cell
 
 function MonthEventBar({ event, day }: { event: CalendarEvent; day: Date }) {
   const color = getLeadColor(event.id)
-  const isFirst = isSameDay(day, parseISO(event.start))
+  const isTargetDay = event.weddingDate
+    ? isSameDay(day, parseISO(event.weddingDate))
+    : isSameDay(day, parseISO(event.start))
 
   return (
     <Link href={`/dashboard/leads/${event.id}`} onClick={(e) => e.stopPropagation()}>
@@ -129,7 +131,7 @@ function MonthEventBar({ event, day }: { event: CalendarEvent; day: Date }) {
         }}
         title={event.title}
       >
-        {isFirst ? (
+        {isTargetDay ? (
           <span className="truncate leading-none">{event.title}</span>
         ) : (
           <span className="opacity-0 select-none leading-none text-[1px]">·</span>
