@@ -61,7 +61,6 @@ export default buildConfig({
       url: process.env.DATABASE_URL || 'file:./payload.db',
       authToken: process.env.DATABASE_URL_TOKEN || '',
     },
-    migrateOnStart: true,
     push: false,
   }),
   sharp,
