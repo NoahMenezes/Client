@@ -2,6 +2,10 @@ import React from 'react'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import CreateQuotationForm from '@/components/create-quotation-form'
+import { getCurrentUser } from '@/app/actions/auth'
+import { redirect } from 'next/navigation'
+
+export const dynamic = 'force-dynamic'
 
 export default async function NewQuotationPage({
   searchParams,
@@ -10,12 +14,18 @@ export default async function NewQuotationPage({
 }) {
   const { leadId, leadName } = await searchParams
   const payload = await getPayload({ config: configPromise })
+  const currentUser = await getCurrentUser()
+
+  if (!currentUser) {
+    redirect('/login')
+  }
 
   const res = await payload.find({
     collection: 'leads',
     limit: 1000,
     depth: 1,
     overrideAccess: true,
+    where: { createdBy: { equals: currentUser.id } },
     select: {
       leadId: true,
       contact: true,

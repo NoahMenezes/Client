@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import React, { Suspense } from 'react'
 import Link from 'next/link'
 import { getPayload } from 'payload'
@@ -6,6 +7,7 @@ import { SiteHeader } from '@/components/site-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { getCurrentUser } from '@/app/actions/auth'
+import { redirect } from 'next/navigation'
 import {
   Pagination,
   PaginationContent,
@@ -89,13 +91,14 @@ export default async function LeadsPage({ searchParams }: Props) {
     const payload = await getPayload({ config: configPromise })
     const currentUser = await getCurrentUser()
 
-    const where: Record<string, any> = {}
-
-    if (currentUser) {
-      where.createdBy = { equals: currentUser.id }
+    if (!currentUser) {
+      redirect('/login')
     }
 
-    where.status = { in: ['new', 'contacted', 'proposal_sent', 'negotiation', 'confirmed'] }
+    const where: Record<string, any> = {
+      createdBy: { equals: currentUser.id },
+      status: { in: ['new', 'contacted', 'proposal_sent', 'negotiation', 'confirmed'] },
+    }
 
     const res = await payload.find({
       collection: 'leads',

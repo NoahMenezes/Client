@@ -3,16 +3,19 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import QuotationsClient, { type Quotation } from './quotations-client'
 import { getCurrentUser } from '@/app/actions/auth'
+import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
 export default async function QuotationsPage() {
   const payload = await getPayload({ config: configPromise })
   const currentUser = await getCurrentUser()
+  if (!currentUser) {
+    redirect('/login')
+  }
 
-  const where: Record<string, any> = {}
-  if (currentUser) {
-    where.createdBy = { equals: currentUser.id }
+  const where: Record<string, any> = {
+    createdBy: { equals: currentUser.id },
   }
 
   const res = await payload.find({

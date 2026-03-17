@@ -100,6 +100,7 @@ export async function createLead(prev: ActionState, fd: FormData): Promise<Actio
           name: fullName,
           phone: str(fd, 'phone'),
           source: str(fd, 'referralSource'),
+          createdBy: currentUser?.id,
         },
       })
     } else {
@@ -111,6 +112,7 @@ export async function createLead(prev: ActionState, fd: FormData): Promise<Actio
           email: email.toLowerCase().trim(),
           phone: str(fd, 'phone'),
           source: str(fd, 'referralSource'),
+          createdBy: currentUser?.id,
         },
       })
       contactId = contact.id as number
@@ -143,7 +145,7 @@ export async function createLead(prev: ActionState, fd: FormData): Promise<Actio
         referralSource: str(fd, 'referralSource'),
         isDestination: fd.get('isDestination') === 'on' || fd.get('isDestination') === 'Yes',
         googleFormRawData: rawPayload,
-        ...(currentUser ? { createdBy: currentUser.id } : {}),
+        createdBy: currentUser?.id,
       } as any,
     })
     newLeadId = lead.id

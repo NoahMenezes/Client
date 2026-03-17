@@ -116,7 +116,7 @@ export async function registerUser(prevState: AuthState, formData: FormData): Pr
         email: email.toLowerCase().trim(),
         password,
         name: name.trim(),
-        role: 'admin',
+        role: 'coordinator',
       },
       overrideAccess: true,
     })

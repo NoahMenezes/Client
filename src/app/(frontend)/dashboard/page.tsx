@@ -1,9 +1,12 @@
+export const dynamic = 'force-dynamic'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { SectionCards } from '@/components/section-cards'
 import { SiteHeader } from '@/components/site-header'
 import { LeadsTable } from '@/components/leads-table'
 import React, { Suspense } from 'react'
+import { getCurrentUser } from '@/app/actions/auth'
+import { redirect } from 'next/navigation'
 
 export interface Lead {
   id: string | number
@@ -24,38 +27,63 @@ export default async function DashboardPage({
   const search = await searchParams
   const q = typeof search.q === 'string' ? search.q : Array.isArray(search.q) ? search.q[0] : undefined
 
+  const currentUser = await getCurrentUser()
+  if (!currentUser) {
+    redirect('/login')
+  }
+
   const payload = await getPayload({ config: configPromise })
 
-  // Build search filter
+  // Build search filter with user isolation
+  const baseWhere: Record<string, any> = {
+    createdBy: { equals: currentUser.id },
+  }
+
   const where: Record<string, any> = q
     ? {
-        or: [
-          { 'contact.name': { contains: q } },
-          { 'contact.email': { contains: q } },
-          { leadId: { contains: q } },
+        and: [
+          baseWhere,
+          {
+            or: [
+              { 'contact.name': { contains: q } },
+              { 'contact.email': { contains: q } },
+              { leadId: { contains: q } },
+            ],
+          },
         ],
       }
-    : {}
+    : baseWhere
 
   // Get counts and recent leads
   const [allResult, newResult, contactedResult, confirmedResult, recentLeads] = await Promise.all([
-    payload.find({ collection: 'leads', limit: 0, overrideAccess: true }),
     payload.find({
       collection: 'leads',
       limit: 0,
-      where: { status: { equals: 'new' } },
+      where: baseWhere,
       overrideAccess: true,
     }),
     payload.find({
       collection: 'leads',
       limit: 0,
-      where: { status: { equals: 'contacted' } },
+      where: {
+        and: [{ status: { equals: 'new' } }, baseWhere],
+      },
       overrideAccess: true,
     }),
     payload.find({
       collection: 'leads',
       limit: 0,
-      where: { status: { equals: 'confirmed' } },
+      where: {
+        and: [{ status: { equals: 'contacted' } }, baseWhere],
+      },
+      overrideAccess: true,
+    }),
+    payload.find({
+      collection: 'leads',
+      limit: 0,
+      where: {
+        and: [{ status: { equals: 'confirmed' } }, baseWhere],
+      },
       overrideAccess: true,
     }),
     payload.find({

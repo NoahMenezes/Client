@@ -59,7 +59,7 @@ export async function createQuotation(prev: ActionState, fd: FormData): Promise<
         subTotal,
         agencyFees,
         grandTotal,
-        ...(currentUser ? { createdBy: currentUser.id } : {}),
+        createdBy: currentUser?.id,
       } as any,
     })
     newId = result.id
@@ -180,8 +180,19 @@ export async function duplicateQuotation(fd: FormData): Promise<ActionState> {
         subTotal: (original as any).subTotal ?? 0,
         agencyFees: (original as any).agencyFees ?? 0,
         grandTotal: (original as any).grandTotal ?? 0,
+        createdBy: (original as any).createdBy || undefined, // Fallback to current user if not in original
       } as any,
     })
+    // Ensure we fetch current user if original didn't have it
+    const currentUser = await getCurrentUser();
+    if (currentUser && !result.createdBy) {
+      await payload.update({
+        collection: 'quotations',
+        id: result.id,
+        data: { createdBy: currentUser.id },
+        overrideAccess: true,
+      })
+    }
     newId = result.id
   } catch (e: unknown) {
     return { success: false, message: e instanceof Error ? e.message : 'Failed to duplicate.' }

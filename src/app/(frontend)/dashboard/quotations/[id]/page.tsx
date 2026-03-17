@@ -1,8 +1,11 @@
 import React from 'react'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import QuotationViewContent from './quotation-view'
+import { getCurrentUser } from '@/app/actions/auth'
+
+export const dynamic = 'force-dynamic'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -11,6 +14,11 @@ interface PageProps {
 export default async function QuotationViewPage({ params }: PageProps) {
   const { id } = await params
   const payload = await getPayload({ config: configPromise })
+  const currentUser = await getCurrentUser()
+
+  if (!currentUser) {
+    redirect('/login')
+  }
 
   let quotation: any
   try {
@@ -33,8 +41,11 @@ export default async function QuotationViewPage({ params }: PageProps) {
 
   if (!quotation) notFound()
 
-  // Ensure the lead is properly passed to the client component
-  // Payload returns objects for related fields if depth > 0
-  
+  // Ownership check – ensure the quotation belongs to the current user
+  const qCreatedBy = typeof quotation.createdBy === 'object' ? quotation.createdBy?.id : quotation.createdBy
+  if (currentUser.role !== 'admin' && String(qCreatedBy) !== String(currentUser.id)) {
+    notFound()
+  }
+
   return <QuotationViewContent quotation={quotation as any} />
 }

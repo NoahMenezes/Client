@@ -6,14 +6,20 @@ import { getCurrentUser } from '@/app/actions/auth'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { EmployeesClient } from './employees-client'
+import { redirect } from 'next/navigation'
+
+export const dynamic = 'force-dynamic'
 
 export default async function EmployeesPage() {
   const payload = await getPayload({ config: configPromise })
   const currentUser = await getCurrentUser()
   
-  const where: any = {}
-  if (currentUser) {
-    where.createdBy = { equals: currentUser.id }
+  if (!currentUser) {
+    redirect('/login')
+  }
+
+  const where: any = {
+    createdBy: { equals: currentUser.id }
   }
 
   const { docs: employees, totalDocs } = await payload.find({

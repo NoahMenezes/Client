@@ -4,7 +4,8 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
 import { Button } from '@/components/ui/button'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
+import { getCurrentUser } from '@/app/actions/auth'
 import { IconPhone, IconMessage, IconCalendar, IconMail } from '@tabler/icons-react'
 import { DeleteLeadButton } from '@/components/delete-lead-button'
 import LeadProfileTabs from '@/components/lead-profile-tabs'
@@ -19,6 +20,8 @@ const statusLabels: Record<string, string> = {
   cancelled: 'Cancelled',
 }
 
+export const dynamic = 'force-dynamic'
+
 interface PageProps {
   params: Promise<{ id: string }>
   searchParams: Promise<{ tab?: string; quotePage?: string }>
@@ -28,6 +31,11 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
   const { id } = await params
   const { tab = 'info', quotePage = '1' } = await searchParams
   const payload = await getPayload({ config: configPromise })
+  const currentUser = await getCurrentUser()
+
+  if (!currentUser) {
+    redirect('/login')
+  }
 
   const currentQuotePage = Math.max(1, parseInt(quotePage, 10) || 1)
   const QUOTE_LIMIT = 10
@@ -39,34 +47,18 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
       id,
       overrideAccess: true,
       depth: 1,
-      select: {
-        leadId: true,
-        contact: true,
-        status: true,
-        assignedTo: true,
-        weddingDate: true,
-        checkInDate: true,
-        checkOutDate: true,
-        guestCount: true,
-        budget: true,
-        budgetText: true,
-        weddingStyle: true,
-        isDestination: true,
-        resortCategory: true,
-        cuisineType: true,
-        servicesLookedFor: true,
-        weddingCeremonies: true,
-        entertainmentOptions: true,
-        hospitalityServices: true,
-        additionalServices: true,
-        referralSource: true,
-        googleFormRawData: true,
-      },
     })
   } catch {
     notFound()
   }
+
   if (!lead) notFound()
+
+  // Ownership check
+  const leadCreatedBy = typeof lead.createdBy === 'object' ? lead.createdBy?.id : lead.createdBy
+  if (currentUser.role !== 'admin' && String(leadCreatedBy) !== String(currentUser.id)) {
+    notFound()
+  }
 
   // Resolve contact info from the relationship
   const contact = typeof lead.contact === 'object' && lead.contact ? lead.contact : null

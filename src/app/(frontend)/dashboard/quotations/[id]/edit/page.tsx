@@ -1,12 +1,20 @@
 import React from 'react'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import EditQuotationPage from './edit-view'
+import { getCurrentUser } from '@/app/actions/auth'
+
+export const dynamic = 'force-dynamic'
 
 export default async function EditQuotationRoute({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const payload = await getPayload({ config: configPromise })
+  const currentUser = await getCurrentUser()
+
+  if (!currentUser) {
+    redirect('/login')
+  }
 
   let quotation: any
   try {
@@ -22,11 +30,18 @@ export default async function EditQuotationRoute({ params }: { params: Promise<{
 
   if (!quotation) notFound()
 
-  // Fetch leads for the dropdown
+  // Ownership check
+  const qCreatedBy = typeof quotation.createdBy === 'object' ? quotation.createdBy?.id : quotation.createdBy
+  if (currentUser.role !== 'admin' && String(qCreatedBy) !== String(currentUser.id)) {
+    notFound()
+  }
+
+  // Fetch leads for the dropdown – scoped to the current user
   const leadsRes = await payload.find({
     collection: 'leads',
     limit: 1000,
     depth: 1,
+    where: { createdBy: { equals: currentUser.id } },
     select: {
       leadId: true,
       contact: true,
