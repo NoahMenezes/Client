@@ -248,7 +248,7 @@ export async function deleteLead(fd: FormData) {
   try {
     const payload = await getPayload({ config: configPromise })
 
-    // Delete all quotations linked to this lead first (FK constraint)
+    // 1. Delete all quotations (and their items) linked to this lead (FK constraint)
     const linkedQuotations = await payload.find({
       collection: 'quotations',
       where: { lead: { equals: Number(id) } },
@@ -257,9 +257,69 @@ export async function deleteLead(fd: FormData) {
       overrideAccess: true,
     })
     for (const q of linkedQuotations.docs) {
+      // Delete any quotation items pointing to this quotation
+      const linkedItems = await payload.find({
+        collection: 'quotation-items',
+        where: { quotation: { equals: q.id } },
+        limit: 1000,
+        pagination: false,
+        overrideAccess: true,
+      })
+      for (const item of linkedItems.docs) {
+        await payload.delete({ collection: 'quotation-items', id: String(item.id), overrideAccess: true })
+      }
       await payload.delete({ collection: 'quotations', id: String(q.id), overrideAccess: true })
     }
 
+    // 2. Delete all notes linked to this lead (FK constraint)
+    const linkedNotes = await payload.find({
+      collection: 'notes',
+      where: { lead: { equals: Number(id) } },
+      limit: 1000,
+      pagination: false,
+      overrideAccess: true,
+    })
+    for (const n of linkedNotes.docs) {
+      await payload.delete({ collection: 'notes', id: String(n.id), overrideAccess: true })
+    }
+
+    // 3. Delete all lead-assignments (FK constraint)
+    const linkedAssignments = await payload.find({
+      collection: 'lead-assignments',
+      where: { lead: { equals: Number(id) } },
+      limit: 1000,
+      pagination: false,
+      overrideAccess: true,
+    })
+    for (const a of linkedAssignments.docs) {
+      await payload.delete({ collection: 'lead-assignments', id: String(a.id), overrideAccess: true })
+    }
+
+    // 4. Delete all lead-services (FK constraint)
+    const linkedServices = await payload.find({
+      collection: 'lead-services',
+      where: { lead: { equals: Number(id) } },
+      limit: 1000,
+      pagination: false,
+      overrideAccess: true,
+    })
+    for (const s of linkedServices.docs) {
+      await payload.delete({ collection: 'lead-services', id: String(s.id), overrideAccess: true })
+    }
+
+    // 5. Delete all documents (FK constraint)
+    const linkedDocs = await payload.find({
+      collection: 'documents',
+      where: { lead: { equals: Number(id) } },
+      limit: 1000,
+      pagination: false,
+      overrideAccess: true,
+    })
+    for (const d of linkedDocs.docs) {
+      await payload.delete({ collection: 'documents', id: String(d.id), overrideAccess: true })
+    }
+
+    // Finally delete the lead
     await payload.delete({ collection: 'leads', id, overrideAccess: true })
   } catch (e) {
     console.error(e)

@@ -21,7 +21,9 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<{ q?: string }>
 }) {
-  const { q } = await searchParams
+  const search = await searchParams
+  const q = typeof search.q === 'string' ? search.q : Array.isArray(search.q) ? search.q[0] : undefined
+
   const payload = await getPayload({ config: configPromise })
 
   // Build search filter
@@ -37,27 +39,24 @@ export default async function DashboardPage({
 
   // Get counts and recent leads
   const [allResult, newResult, contactedResult, confirmedResult, recentLeads] = await Promise.all([
-    payload.find({ collection: 'leads', limit: 0, overrideAccess: true, select: { leadId: true } }),
+    payload.find({ collection: 'leads', limit: 0, overrideAccess: true }),
     payload.find({
       collection: 'leads',
       limit: 0,
       where: { status: { equals: 'new' } },
       overrideAccess: true,
-      select: { leadId: true },
     }),
     payload.find({
       collection: 'leads',
       limit: 0,
       where: { status: { equals: 'contacted' } },
       overrideAccess: true,
-      select: { leadId: true },
     }),
     payload.find({
       collection: 'leads',
       limit: 0,
       where: { status: { equals: 'confirmed' } },
       overrideAccess: true,
-      select: { leadId: true },
     }),
     payload.find({
       collection: 'leads',
@@ -67,6 +66,7 @@ export default async function DashboardPage({
       depth: 1,
       where,
       select: {
+        id: true,
         leadId: true,
         contact: true,
         status: true,
@@ -78,24 +78,24 @@ export default async function DashboardPage({
     }),
   ])
 
-  const totalLeads = allResult.totalDocs
-  const opportunityCount = newResult.totalDocs
-  const prospectCount = contactedResult.totalDocs
-  const wonCount = confirmedResult.totalDocs
+  const totalLeads = allResult?.totalDocs ?? 0
+  const opportunityCount = newResult?.totalDocs ?? 0
+  const prospectCount = contactedResult?.totalDocs ?? 0
+  const wonCount = confirmedResult?.totalDocs ?? 0
 
   // Map leads for the table, pulling contact info from the relationship
-  const leads: Lead[] = recentLeads.docs.map((d: any) => ({
+  const leads: Lead[] = (recentLeads?.docs || []).map((d: any) => ({
     id: d.id,
     leadId: d.leadId ?? null,
-    fullName: typeof d.contact === 'object' && d.contact ? d.contact.name : 'Unknown',
-    email: typeof d.contact === 'object' && d.contact ? d.contact.email : '',
-    phone: typeof d.contact === 'object' && d.contact ? d.contact.phone : null,
+    fullName: typeof d.contact === 'object' && d.contact ? (d.contact as any).name : 'Unknown',
+    email: typeof d.contact === 'object' && d.contact ? (d.contact as any).email : '',
+    phone: typeof d.contact === 'object' && d.contact ? (d.contact as any).phone : null,
     status: d.status ?? 'new',
     checkInDate: d.checkInDate ?? null,
     checkOutDate: d.checkOutDate ?? null,
   }))
 
-  const totalDocs = recentLeads.totalDocs
+  const totalDocs = recentLeads?.totalDocs ?? 0
 
   return (
     <>

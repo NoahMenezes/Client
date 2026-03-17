@@ -2,6 +2,7 @@ import React, { Suspense } from 'react'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { SiteHeader } from '@/components/site-header'
+import { getCurrentUser } from '@/app/actions/auth'
 import { Folder } from 'lucide-react'
 import { StorageGrid } from '@/components/storage-grid'
 
@@ -11,7 +12,13 @@ export default async function StoragePage() {
 
   try {
     const payload = await getPayload({ config: configPromise })
+    const currentUser = await getCurrentUser()
     
+    const where: any = {}
+    if (currentUser) {
+      where.createdBy = { equals: currentUser.id }
+    }
+
     // Fetch leads and quotations in parallel
     const [leadsRes, quotesRes] = await Promise.all([
       payload.find({
@@ -20,6 +27,7 @@ export default async function StoragePage() {
         sort: '-createdAt',
         overrideAccess: true,
         depth: 1,
+        where,
       }),
       payload.find({
         collection: 'quotations',
@@ -27,18 +35,34 @@ export default async function StoragePage() {
         overrideAccess: true,
         depth: 0,
         sort: '-createdAt',
+        where,
       })
     ])
 
-    leads = leadsRes.docs
+    leads = leadsRes.docs.map((d: any) => ({
+      id: d.id,
+      leadId: d.leadId || null,
+      fullName: typeof d.contact === 'object' ? d.contact?.name : d.fullName || 'Unknown',
+      contact: typeof d.contact === 'object' ? { id: d.contact?.id, name: d.contact?.name } : d.contact,
+      status: d.status || 'new',
+      createdAt: d.createdAt,
+    }))
     
     // Group quotations by lead ID
     quotesRes.docs.forEach((q: any) => {
-      const leadId = typeof q.lead === 'object' ? q.lead.id : q.lead
+      const leadId = q.lead && typeof q.lead === 'object' ? q.lead.id : q.lead
+      if (!leadId) return
+      
       if (!quotesByLead[leadId]) {
         quotesByLead[leadId] = []
       }
-      quotesByLead[leadId].push(q)
+      quotesByLead[leadId].push({
+        id: q.id,
+        title: q.title,
+        status: q.status,
+        grandTotal: q.grandTotal,
+        createdAt: q.createdAt,
+      })
     })
   } catch (e) {
     console.error('Storage fetch error:', e)
@@ -47,7 +71,7 @@ export default async function StoragePage() {
   return (
     <div className="flex flex-1 flex-col bg-gray-50/30">
       <Suspense fallback={<div className="h-12 border-b bg-white" />}>
-        <SiteHeader title="Archive Storage" />
+        <SiteHeader title="Lead Archive" />
       </Suspense>
 
       <main className="flex-1 overflow-auto p-6 md:p-8">
@@ -55,7 +79,7 @@ export default async function StoragePage() {
           {/* Page Header Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Project Archive</h1>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Lead Archive</h1>
               <p className="text-gray-500 mt-1">Manage and explore all leads and their associated quotations in a structured directory.</p>
             </div>
           </div>

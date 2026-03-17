@@ -13,8 +13,17 @@ import {
   IconPencil,
   IconPinnedFilled,
   IconFileText,
-  IconDownload,
+  IconEye,
 } from '@tabler/icons-react'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination'
 
 interface Employee {
   id: number | string
@@ -142,18 +151,25 @@ export default function LeadProfileTabs({
   notes: initialNotes,
   quotations: initialQuotations,
   initialTab = 'info',
+  quoteCurrentPage = 1,
+  quoteTotalDocs = 0,
+  quoteTotalPages = 1,
 }: {
   lead: Lead
   employees: Employee[]
   notes: Note[]
   quotations: Quotation[]
   initialTab?: string
+  quoteCurrentPage?: number
+  quoteTotalDocs?: number
+  quoteTotalPages?: number
 }) {
   const [activeTab, setActiveTab] = useState<'info' | 'items' | 'notes' | 'quotations'>(
     (initialTab as 'info' | 'items' | 'notes' | 'quotations') || 'info',
   )
   const [notes, setNotes] = useState<Note[]>(initialNotes)
   const [quotations] = useState<Quotation[]>(initialQuotations)
+  const PAGE_LIMIT = 10
   const [noteText, setNoteText] = useState('')
   const [noteAuthor, setNoteAuthor] = useState('Admin')
   const [addingNote, startAddingNote] = useTransition()
@@ -712,83 +728,148 @@ export default function LeadProfileTabs({
                 </p>
               </div>
             ) : (
-              <div className="rounded-xl border overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b bg-gray-50/50">
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">ID</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">
-                        Amount
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">
-                        Services Summary
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 w-36">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {quotations.map((q, idx) => {
-                      const servicesSummary =
-                        q.title ||
-                        q.categories
-                          .map((c) => c.categoryName)
-                          .slice(0, 3)
-                          .join(', ')
+              <>
+                <div className="rounded-xl border overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-gray-50/50">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">ID</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">
+                          Amount
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">
+                          Services Summary
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 w-36">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {quotations.map((q, idx) => {
+                        const servicesSummary =
+                          q.title ||
+                          q.categories
+                            .map((c) => c.categoryName)
+                            .slice(0, 3)
+                            .join(', ')
 
-                      return (
-                        <tr
-                          key={q.id}
-                          className="border-b last:border-0 hover:bg-gray-50/50 transition-colors"
-                        >
-                          <td className="px-4 py-3 font-medium text-gray-600">
-                            Q{String(idx + 1).padStart(3, '0')}
-                          </td>
-                          <td className="px-4 py-3 font-semibold text-blue-600">
-                            {CURRENCIES.find((c) => c.value === q.currency)?.symbol || '₹'}
-                            {fmt(q.grandTotal, q.currency)}
-                          </td>
-                          <td className="px-4 py-3 text-gray-600 max-w-50 truncate">
-                            {servicesSummary || '—'}
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <Link href={`/dashboard/quotations/${q.id}/print`} target="_blank">
+                        return (
+                          <tr
+                            key={q.id}
+                            onClick={(e) => {
+                              if (e.target instanceof HTMLElement && (e.target.closest('a') || e.target.closest('button'))) return
+                              window.location.href = `/dashboard/quotations/${q.id}`
+                            }}
+                            className="border-b last:border-0 hover:bg-gray-50/50 transition-colors cursor-pointer"
+                          >
+                            <td className="px-4 py-3 font-medium text-gray-600">
+                              Q{String(idx + 1).padStart(3, '0')}
+                            </td>
+                            <td className="px-4 py-3 font-semibold text-blue-600">
+                              {CURRENCIES.find((c) => c.value === q.currency)?.symbol || '₹'}
+                              {fmt(q.grandTotal, q.currency)}
+                            </td>
+                            <td className="px-4 py-3 text-gray-600 max-w-50 truncate">
+                              {servicesSummary || '—'}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <Link href={`/dashboard/quotations/${q.id}`}>
+                                  <button
+                                    type="button"
+                                    title="View"
+                                    className="p-1.5 rounded-md text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                  >
+                                    <IconEye className="h-4 w-4" />
+                                  </button>
+                                </Link>
+                                <Link href={`/dashboard/quotations/${q.id}`}>
+                                  <button
+                                    type="button"
+                                    title="Edit"
+                                    className="p-1.5 rounded-md text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors"
+                                  >
+                                    <IconPencil className="h-4 w-4" />
+                                  </button>
+                                </Link>
                                 <button
                                   type="button"
-                                  title="Download"
-                                  className="p-1.5 rounded-md text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                  title="Delete"
+                                  disabled={deletingQuotationId === String(q.id)}
+                                  onClick={() => handleDeleteQuotation(q.id)}
+                                  className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
                                 >
-                                  <IconDownload className="h-4 w-4" />
+                                  <IconTrash className="h-4 w-4" />
                                 </button>
-                              </Link>
-                              <Link href={`/dashboard/quotations/${q.id}/edit`}>
-                                <button
-                                  type="button"
-                                  title="Edit"
-                                  className="p-1.5 rounded-md text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors"
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Quotation Pagination */}
+                {quoteTotalPages > 1 && (
+                  <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t pt-6 px-4">
+                    <span className="text-xs text-gray-400">
+                      Showing{' '}
+                      <strong>
+                        {(quoteCurrentPage - 1) * PAGE_LIMIT + 1}–
+                        {Math.min(quoteCurrentPage * PAGE_LIMIT, quoteTotalDocs)}
+                      </strong>{' '}
+                      of <strong>{quoteTotalDocs}</strong> quotations
+                    </span>
+
+                    <Pagination className="w-auto mx-0">
+                      <PaginationContent>
+                        {quoteCurrentPage > 1 && (
+                          <PaginationItem>
+                            <PaginationPrevious href={`/dashboard/leads/${lead.id}?tab=quotations&quotePage=${quoteCurrentPage - 1}`} />
+                          </PaginationItem>
+                        )}
+
+                        {Array.from({ length: quoteTotalPages }, (_, i) => i + 1).map((p) => {
+                          const isFirst = p === 1
+                          const isLast = p === quoteTotalPages
+                          const isWithinRange = Math.abs(p - quoteCurrentPage) <= 1
+
+                          if (isFirst || isLast || isWithinRange) {
+                            return (
+                              <PaginationItem key={p}>
+                                <PaginationLink 
+                                  href={`/dashboard/leads/${lead.id}?tab=quotations&quotePage=${p}`} 
+                                  isActive={p === quoteCurrentPage}
                                 >
-                                  <IconPencil className="h-4 w-4" />
-                                </button>
-                              </Link>
-                              <button
-                                type="button"
-                                title="Delete"
-                                disabled={deletingQuotationId === String(q.id)}
-                                onClick={() => handleDeleteQuotation(q.id)}
-                                className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
-                              >
-                                <IconTrash className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                                  {p}
+                                </PaginationLink>
+                              </PaginationItem>
+                            )
+                          }
+
+                          if (p === quoteCurrentPage - 2 || p === quoteCurrentPage + 2) {
+                            return (
+                              <PaginationItem key={p}>
+                                <PaginationEllipsis />
+                              </PaginationItem>
+                            )
+                          }
+
+                          return null
+                        })}
+
+                        {quoteCurrentPage < quoteTotalPages && (
+                          <PaginationItem>
+                            <PaginationNext href={`/dashboard/leads/${lead.id}?tab=quotations&quotePage=${quoteCurrentPage + 1}`} />
+                          </PaginationItem>
+                        )}
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}

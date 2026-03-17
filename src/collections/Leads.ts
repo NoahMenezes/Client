@@ -6,6 +6,29 @@ export const Leads: CollectionConfig = {
     useAsTitle: 'leadId',
     defaultColumns: ['leadId', 'contact', 'status', 'weddingDate', 'createdAt'],
   },
+  access: {
+    read: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return {
+        createdBy: { equals: user.id },
+      }
+    },
+    update: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return {
+        createdBy: { equals: user.id },
+      }
+    },
+    delete: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return {
+        createdBy: { equals: user.id },
+      }
+    },
+  },
   fields: [
     {
       name: 'leadId',
@@ -48,6 +71,15 @@ export const Leads: CollectionConfig = {
       admin: {
         description: 'The user account that created this lead',
         readOnly: true,
+      },
+      hooks: {
+        beforeValidate: [
+          ({ req, operation }) => {
+            if (operation === 'create' && req.user) {
+              return req.user.id
+            }
+          },
+        ],
       },
     },
     {

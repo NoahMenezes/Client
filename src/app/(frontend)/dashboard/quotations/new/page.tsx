@@ -21,6 +21,11 @@ export default async function NewQuotationPage({
       contact: true,
       weddingDate: true,
       status: true,
+      servicesLookedFor: true,
+      weddingCeremonies: true,
+      entertainmentOptions: true,
+      hospitalityServices: true,
+      additionalServices: true,
     },
   })
 
@@ -30,6 +35,11 @@ export default async function NewQuotationPage({
     leadId: d.leadId || null,
     weddingDate: d.weddingDate || null,
     status: d.status || null,
+    servicesLookedFor: d.servicesLookedFor,
+    weddingCeremonies: d.weddingCeremonies,
+    entertainmentOptions: d.entertainmentOptions,
+    hospitalityServices: d.hospitalityServices,
+    additionalServices: d.additionalServices,
   }))
 
   return (

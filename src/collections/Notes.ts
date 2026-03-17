@@ -6,6 +6,29 @@ export const Notes: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'lead', 'user', 'createdAt'],
   },
+  access: {
+    read: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return {
+        user: { equals: user.id },
+      }
+    },
+    update: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return {
+        user: { equals: user.id },
+      }
+    },
+    delete: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return {
+        user: { equals: user.id },
+      }
+    },
+  },
   fields: [
     {
       name: 'lead',
@@ -18,6 +41,15 @@ export const Notes: CollectionConfig = {
       type: 'relationship',
       relationTo: 'users',
       required: true,
+      hooks: {
+        beforeValidate: [
+          ({ req, operation }) => {
+            if (operation === 'create' && req.user) {
+              return req.user.id
+            }
+          },
+        ],
+      },
     },
     {
       name: 'title',

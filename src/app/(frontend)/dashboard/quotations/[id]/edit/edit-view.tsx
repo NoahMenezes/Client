@@ -27,6 +27,11 @@ interface Lead {
   leadId?: string | null
   weddingDate?: string | null
   status?: string | null
+  servicesLookedFor?: string | null
+  weddingCeremonies?: string | null
+  entertainmentOptions?: string | null
+  hospitalityServices?: string | null
+  additionalServices?: string | null
 }
 
 export interface QuotationEditData {
@@ -56,6 +61,13 @@ const CURRENCIES = [
   { label: 'EUR (€)', value: 'EUR', symbol: '€' },
   { label: 'GBP (£)', value: 'GBP', symbol: '£' },
 ]
+function csvToArray(csv: string | null | undefined): string[] {
+  if (!csv) return []
+  return csv
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+}
 
 const DEFAULT_QUOTATION: QuotationEditData = {
   id: '',
@@ -372,7 +384,42 @@ export default function EditQuotationPage({ quotation = DEFAULT_QUOTATION, leads
                       onChange={(e) => {
                         setLeadId(e.target.value)
                         const l = leads.find((l) => String(l.id) === e.target.value)
-                        if (l) setLeadSearch(l.fullName)
+                        if (l) {
+                          setLeadSearch(l.fullName)
+
+                          // Auto-populate categories based on Lead Stage 3 (services)
+                          const newCats: Category[] = []
+
+                          const fieldMap: { field: keyof Lead; label: string }[] = [
+                            { field: 'servicesLookedFor', label: 'Services Looking For' },
+                            { field: 'weddingCeremonies', label: 'Ceremonies & Rituals' },
+                            { field: 'entertainmentOptions', label: 'Entertainment & Artists' },
+                            { field: 'hospitalityServices', label: 'Hospitality Services' },
+                            { field: 'additionalServices', label: 'Additional Services' },
+                          ]
+
+                          fieldMap.forEach((m) => {
+                            const val = l[m.field]
+                            if (typeof val === 'string' && val.trim()) {
+                              const items = csvToArray(val)
+                              if (items.length > 0) {
+                                newCats.push({
+                                  categoryName: m.label,
+                                  items: items.map((item) => ({
+                                    particulars: item,
+                                    amount: 0,
+                                    quantity: 1,
+                                    remarks: '',
+                                  })),
+                                })
+                              }
+                            }
+                          })
+
+                          if (newCats.length > 0) {
+                            setCategories(newCats)
+                          }
+                        }
                       }}
                       className="w-1/2 rounded-lg border border-gray-200 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                       disabled={isPending}

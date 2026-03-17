@@ -129,118 +129,127 @@ export default function QuotationsClient({
             </Link>
           </div>
         ) : (
-          <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b bg-gray-50 text-xs uppercase text-gray-400">
-                  <th className="px-5 py-3 text-left font-medium">Sr.</th>
-                  <th className="px-5 py-3 text-left font-medium">Title</th>
-                  <th className="px-5 py-3 text-left font-medium">Client</th>
-                  <th className="px-5 py-3 text-left font-medium">Amount</th>
-                  <th className="px-5 py-3 text-left font-medium">Services</th>
-                  <th className="px-5 py-3 text-left font-medium">Status</th>
-                  <th className="px-5 py-3 text-left font-medium">Date</th>
-                  <th className="px-5 py-3 text-right font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered
-                  .slice((currentPage - 1) * PAGE_LIMIT, currentPage * PAGE_LIMIT)
-                  .map((q, rawIdx) => {
-                    const idx = (currentPage - 1) * PAGE_LIMIT + rawIdx
-                    const servicesSummary = (q.categories ?? [])
-                      .map((c) => c.categoryName)
-                      .slice(0, 3)
-                      .join(', ')
-                    const currency = q.currency || 'INR'
-                    const currencySymbol =
-                      CURRENCIES.find((c) => c.value === currency)?.symbol || '₹'
+          <div className="space-y-12">
+            {Object.values(
+              filtered
+                .slice((currentPage - 1) * PAGE_LIMIT, currentPage * PAGE_LIMIT)
+                .reduce((acc, q) => {
+                  const leadId = q.lead?.id || 'unassigned'
+                  if (!acc[leadId]) {
+                    acc[leadId] = {
+                      leadName: q.lead?.fullName || 'Unassigned',
+                      leadId: q.lead?.id || null,
+                      quotes: [],
+                    }
+                  }
+                  acc[leadId].quotes.push(q)
+                  return acc
+                }, {} as Record<string, { leadName: string; leadId: string | number | null; quotes: Quotation[] }>),
+            ).map((group, gIdx) => (
+              <div key={group.leadId || gIdx} className="relative">
+                {/* Group Header (Lead Name) */}
+                <div className="flex items-center gap-3 mb-4 sticky top-14 bg-gray-50/95 backdrop-blur-sm py-2 z-10">
+                  <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center border-2 border-white shadow-sm">
+                    <svg className="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-gray-400">
+                      Quotations for {group.leadName}
+                    </h3>
+                    <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                      {group.quotes.length} {group.quotes.length === 1 ? 'Quotation' : 'Quotations'}
+                    </span>
+                  </div>
+                </div>
 
+                {/* Timeline Items */}
+                <div className="ml-4 pl-8 border-l-2 border-gray-200 space-y-4">
+                  {group.quotes.map((q) => {
+                    const currency = q.currency || 'INR'
+                    const currencySymbol = CURRENCIES.find((c) => c.value === currency)?.symbol || '₹'
+                    
                     return (
-                      <tr
-                        key={q.id}
-                        className="border-b last:border-0 hover:bg-gray-50/50 transition-colors"
-                      >
-                        <td className="px-5 py-3 font-medium text-gray-400 text-xs">
-                          {String(idx + 1).padStart(3, '0')}
-                        </td>
-                        <td className="px-5 py-3 font-medium text-gray-800 max-w-45">
-                          <p className="truncate">{q.title}</p>
-                        </td>
-                        <td className="px-5 py-3 text-gray-600">
-                          {q.lead ? (
-                            <Link
-                              href={`/dashboard/leads/${q.lead.id}`}
-                              className="hover:text-blue-600 hover:underline"
-                            >
-                              {q.lead.fullName}
-                            </Link>
-                          ) : (
-                            '—'
-                          )}
-                        </td>
-                        <td className="px-5 py-3 font-semibold text-gray-900">
-                          {currencySymbol}
-                          {fmt(q.grandTotal, currency)}
-                        </td>
-                        <td className="px-5 py-3 text-gray-500 max-w-50">
-                          <p className="truncate">{servicesSummary || '—'}</p>
-                        </td>
-                        <td className="px-5 py-3">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                              STATUS_STYLES[q.status] || 'bg-gray-100 text-gray-500'
-                            }`}
-                          >
-                            {q.status.charAt(0).toUpperCase() + q.status.slice(1)}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3 text-gray-500 text-xs">
-                          {q.quotationDate
-                            ? new Date(q.quotationDate).toLocaleDateString('en-IN', {
-                                day: '2-digit',
-                                month: 'short',
-                                year: 'numeric',
-                              })
-                            : '—'}
-                        </td>
-                        <td className="px-5 py-3">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <Link href={`/dashboard/quotations/${q.id}`}>
-                              <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1">
-                                <IconEye className="h-3.5 w-3.5" />
-                                View
-                              </Button>
-                            </Link>
-                            <Link href={`/dashboard/quotations/${q.id}/edit`}>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 px-2 text-xs gap-1 text-blue-600 hover:text-blue-700"
-                              >
-                                <IconPencil className="h-3.5 w-3.5" />
-                                Edit
-                              </Button>
-                            </Link>
-                            <button
-                              type="button"
-                              title="Delete"
-                              disabled={deletingId === String(q.id)}
-                              onClick={() => handleDelete(q)}
-                              className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
-                            >
-                              <IconTrash className="h-3.5 w-3.5" />
-                            </button>
+                      <div key={q.id} className="relative group">
+                        {/* Dot on the line */}
+                        <div className="absolute -left-[41px] top-4 h-4 w-4 rounded-full border-2 border-white bg-gray-300 group-hover:bg-blue-500 transition-colors z-10 shadow-sm" />
+                        
+                        {/* Quote Card (Commit style) */}
+                        <div 
+                          onClick={() => router.push(`/dashboard/quotations/${q.id}`)}
+                          className="bg-white border rounded-xl p-4 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer flex items-center justify-between group/card"
+                        >
+                          <div className="flex-1 min-w-0 pr-4">
+                            <div className="flex items-center gap-3 mb-1">
+                              <span className="text-sm font-bold text-gray-900 group-hover/card:text-blue-600 transition-colors truncate">
+                                {q.title}
+                              </span>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tight ${STATUS_STYLES[q.status] || 'bg-gray-100 text-gray-500'}`}>
+                                {q.status}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <span className="flex items-center gap-1 font-mono">
+                                <span className="text-gray-400">Total:</span>
+                                <span className="font-bold text-gray-700">{currencySymbol}{fmt(q.grandTotal, currency)}</span>
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <IconEye className="h-3 w-3" />
+                                {q.categories?.length || 0} Categories
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <IconPlus className="h-3 w-3" />
+                                {q.quotationDate ? new Date(q.quotationDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'No Date'}
+                              </span>
+                            </div>
                           </div>
-                        </td>
-                      </tr>
+                          
+                          <div className="flex items-center gap-2 shrink-0">
+                            <div className="flex items-center border rounded-lg overflow-hidden bg-gray-50 opacity-0 group-hover/card:opacity-100 transition-opacity">
+                              <Link 
+                                href={`/dashboard/quotations/${q.id}`}
+                                className="p-2 hover:bg-white text-gray-400 hover:text-blue-600 transition-colors border-r"
+                                onClick={(e) => e.stopPropagation()}
+                                title="View"
+                              >
+                                <IconEye className="h-4 w-4" />
+                              </Link>
+                              <Link 
+                                href={`/dashboard/quotations/${q.id}`}
+                                className="p-2 hover:bg-white text-gray-400 hover:text-green-600 transition-colors border-r"
+                                onClick={(e) => e.stopPropagation()}
+                                title="Edit"
+                              >
+                                <IconPencil className="h-4 w-4" />
+                              </Link>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDelete(q)
+                                }}
+                                disabled={deletingId === String(q.id)}
+                                className="p-2 hover:bg-white text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                                title="Delete"
+                              >
+                                <IconTrash className="h-4 w-4" />
+                              </button>
+                            </div>
+                            <div className="h-8 w-8 rounded-full border border-gray-100 bg-gray-50 flex items-center justify-center text-gray-400 group-hover/card:bg-blue-50 group-hover/card:text-blue-500 transition-colors">
+                               <IconPencil className="h-4 w-4" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     )
                   })}
-              </tbody>
-            </table>
+                </div>
+              </div>
+            ))}
 
             {/* Pagination */}
-            <div className="px-5 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="px-5 py-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 mt-8">
               <span className="text-xs text-gray-400 order-2 sm:order-1">
                 Showing{' '}
                 <strong>{Math.min(filtered.length, (currentPage - 1) * PAGE_LIMIT + 1)}</strong>–
@@ -256,6 +265,7 @@ export default function QuotationsClient({
                         onClick={(e) => {
                           e.preventDefault()
                           setCurrentPage((p) => p - 1)
+                          window.scrollTo({ top: 0, behavior: 'smooth' })
                         }}
                       />
                     </PaginationItem>
@@ -284,6 +294,7 @@ export default function QuotationsClient({
                             onClick={(e) => {
                               e.preventDefault()
                               setCurrentPage(p)
+                              window.scrollTo({ top: 0, behavior: 'smooth' })
                             }}
                           >
                             {p}
@@ -310,6 +321,7 @@ export default function QuotationsClient({
                         onClick={(e) => {
                           e.preventDefault()
                           setCurrentPage((p) => p + 1)
+                          window.scrollTo({ top: 0, behavior: 'smooth' })
                         }}
                       />
                     </PaginationItem>

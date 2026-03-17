@@ -21,13 +21,16 @@ const statusLabels: Record<string, string> = {
 
 interface PageProps {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ tab?: string }>
+  searchParams: Promise<{ tab?: string; quotePage?: string }>
 }
 
 export default async function LeadDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params
-  const { tab = 'info' } = await searchParams
+  const { tab = 'info', quotePage = '1' } = await searchParams
   const payload = await getPayload({ config: configPromise })
+
+  const currentQuotePage = Math.max(1, parseInt(quotePage, 10) || 1)
+  const QUOTE_LIMIT = 10
 
   let lead: any
   try {
@@ -96,12 +99,15 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
   } catch {}
 
   let quotations: any[] = []
+  let quotesTotalDocs = 0
+  let quotesTotalPages = 1
   try {
     const res = await payload.find({
       collection: 'quotations',
       where: { lead: { equals: id } },
       sort: '-createdAt',
-      limit: 100,
+      limit: QUOTE_LIMIT,
+      page: currentQuotePage,
       overrideAccess: true,
     })
     quotations = res.docs.map((q: any) => ({
@@ -113,6 +119,8 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
       quotationDate: q.quotationDate || null,
       categories: q.categories || [],
     }))
+    quotesTotalDocs = res.totalDocs
+    quotesTotalPages = Math.min(50, res.totalPages || 1)
   } catch {}
 
   const serializedLead = {
@@ -208,7 +216,7 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
               <p className="text-xs text-gray-500 mt-0.5">Lead ID: {leadDisplayId}</p>
             </div>
             <div className="flex items-center gap-2">
-              <Link href={`/dashboard/leads/${id}/edit`}>
+              <Link href={`/dashboard/leads/${id}`}>
                 <Button variant="outline">Edit Lead</Button>
               </Link>
               <DeleteLeadButton leadId={id} variant="destructive" size="default" />
@@ -330,6 +338,9 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
                 notes={notes}
                 quotations={quotations}
                 initialTab={tab}
+                quoteCurrentPage={currentQuotePage}
+                quoteTotalDocs={quotesTotalDocs}
+                quoteTotalPages={quotesTotalPages}
               />
             </main>
           </div>

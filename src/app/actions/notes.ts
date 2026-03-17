@@ -3,6 +3,7 @@
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { revalidatePath } from 'next/cache'
+import { getCurrentUser } from '@/app/actions/auth'
 
 export type ActionState = { success: boolean; message: string } | null
 
@@ -16,12 +17,8 @@ export async function createNote(prev: ActionState, fd: FormData): Promise<Actio
   try {
     const payload = await getPayload({ config: configPromise })
 
-    // Get or find user to link
-    let userId: number = 1
-    try {
-      const users = await payload.find({ collection: 'users', limit: 1, overrideAccess: true })
-      if (users.docs.length > 0) userId = users.docs[0].id
-    } catch {}
+    const currentUser = await getCurrentUser()
+    const userId = currentUser?.id || 1
 
     await payload.create({
       collection: 'notes',

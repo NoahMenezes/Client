@@ -284,6 +284,7 @@ export interface Contact {
    * Lead source (e.g. Google Form, Instagram)
    */
   source?: string | null;
+  createdBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -300,6 +301,7 @@ export interface Employee {
   status?: ('active' | 'inactive') | null;
   department?: string | null;
   notes?: string | null;
+  createdBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -321,6 +323,7 @@ export interface Service {
    */
   religion_type?: string | null;
   is_active?: boolean | null;
+  createdBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -331,6 +334,7 @@ export interface Service {
 export interface ServiceCategory {
   id: number;
   name: string;
+  createdBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -490,6 +494,7 @@ export interface Storage {
       }[]
     | null;
   notes?: string | null;
+  createdBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -700,6 +705,7 @@ export interface ContactsSelect<T extends boolean = true> {
   email?: T;
   phone?: T;
   source?: T;
+  createdBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -715,6 +721,7 @@ export interface EmployeesSelect<T extends boolean = true> {
   status?: T;
   department?: T;
   notes?: T;
+  createdBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -729,6 +736,7 @@ export interface ServicesSelect<T extends boolean = true> {
   base_price?: T;
   religion_type?: T;
   is_active?: T;
+  createdBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -738,6 +746,7 @@ export interface ServicesSelect<T extends boolean = true> {
  */
 export interface ServiceCategoriesSelect<T extends boolean = true> {
   name?: T;
+  createdBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -860,6 +869,7 @@ export interface StorageSelect<T extends boolean = true> {
         id?: T;
       };
   notes?: T;
+  createdBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }

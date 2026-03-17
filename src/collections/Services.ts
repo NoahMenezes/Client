@@ -6,6 +6,29 @@ export const Services: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'category', 'base_price', 'is_active', 'createdAt'],
   },
+  access: {
+    read: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return {
+        createdBy: { equals: user.id },
+      }
+    },
+    update: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return {
+        createdBy: { equals: user.id },
+      }
+    },
+    delete: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return {
+        createdBy: { equals: user.id },
+      }
+    },
+  },
   fields: [
     {
       name: 'name',
@@ -41,6 +64,23 @@ export const Services: CollectionConfig = {
       name: 'is_active',
       type: 'checkbox',
       defaultValue: true,
+    },
+    {
+      name: 'createdBy',
+      type: 'relationship',
+      relationTo: 'users',
+      admin: {
+        readOnly: true,
+      },
+      hooks: {
+        beforeValidate: [
+          ({ req, operation }) => {
+            if (operation === 'create' && req.user) {
+              return req.user.id
+            }
+          },
+        ],
+      },
     },
   ],
   timestamps: true,

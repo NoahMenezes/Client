@@ -215,11 +215,11 @@ export default function LeadDetailContent({
           <div className="p-6">
             {/* Lead Info */}
             {activeTab === 'info' && (
-              <div className="space-y-4 max-w-2xl">
+              <div className="space-y-4 max-w-5xl">
                 <div className="bg-white rounded-xl border shadow-sm p-5">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-gray-900">Lead Details</h3>
-                    <Link href={`/dashboard/leads/${lead.id}/edit`}>
+                    <Link href={`/dashboard/leads/${lead.id}`}>
                       <Button size="sm" variant="outline">Edit Lead</Button>
                     </Link>
                   </div>
@@ -261,7 +261,7 @@ export default function LeadDetailContent({
 
             {/* Notes */}
             {activeTab === 'notes' && (
-              <div className="space-y-4 max-w-2xl">
+              <div className="space-y-4 max-w-5xl">
                 <div className="bg-white rounded-xl border shadow-sm p-4">
                   <textarea
                     rows={3}
@@ -304,9 +304,9 @@ export default function LeadDetailContent({
 
             {/* Quotations */}
             {activeTab === 'quotations' && (
-              <div className="space-y-4 max-w-3xl">
+              <div className="space-y-4 max-w-5xl">
                 <div className="flex justify-end">
-                  <Link href="/dashboard/quotations/new">
+                  <Link href={`/dashboard/quotations/new?leadId=${lead.id}`}>
                     <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
                       + New Quotation
                     </Button>
@@ -329,7 +329,11 @@ export default function LeadDetailContent({
                       <tbody>
                         {quotations.map((q) => (
                           <tr key={q.id} className="border-b last:border-0 hover:bg-gray-50/50">
-                            <td className="px-5 py-3 font-medium text-gray-800">{q.title}</td>
+                            <td className="px-5 py-3 font-medium text-gray-800">
+                              <Link href={`/dashboard/quotations/${q.id}`} className="hover:text-blue-600 hover:underline">
+                                {q.title}
+                              </Link>
+                            </td>
                             <td className="px-5 py-3 font-semibold text-gray-900">
                               ₹{fmt(q.grandTotal)}
                             </td>
@@ -358,11 +362,11 @@ export default function LeadDetailContent({
                                     View
                                   </Button>
                                 </Link>
-                                <Link href={`/dashboard/quotations/${q.id}/edit`}>
+                                <Link href={`/dashboard/quotations/${q.id}`}>
                                   <Button
-                                    variant="ghost"
+                                    variant="outline"
                                     size="sm"
-                                    className="h-7 px-2 text-xs text-blue-600"
+                                    className="h-7 px-2 text-xs"
                                   >
                                     Edit
                                   </Button>

@@ -27,6 +27,17 @@ export default async function EditQuotationRoute({ params }: { params: Promise<{
     collection: 'leads',
     limit: 1000,
     depth: 1,
+    select: {
+      leadId: true,
+      contact: true,
+      weddingDate: true,
+      status: true,
+      servicesLookedFor: true,
+      weddingCeremonies: true,
+      entertainmentOptions: true,
+      hospitalityServices: true,
+      additionalServices: true,
+    },
     overrideAccess: true,
   })
 
@@ -36,6 +47,11 @@ export default async function EditQuotationRoute({ params }: { params: Promise<{
     leadId: d.leadId || null,
     weddingDate: d.weddingDate || null,
     status: d.status || null,
+    servicesLookedFor: d.servicesLookedFor,
+    weddingCeremonies: d.weddingCeremonies,
+    entertainmentOptions: d.entertainmentOptions,
+    hospitalityServices: d.hospitalityServices,
+    additionalServices: d.additionalServices,
   }))
 
   const serializedQuotation = {

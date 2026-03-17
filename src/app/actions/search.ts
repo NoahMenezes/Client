@@ -2,6 +2,7 @@
 
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
+import { getCurrentUser } from '@/app/actions/auth'
 
 export type SearchResult = {
   id: string
@@ -19,24 +20,29 @@ export async function searchGlobal(query: string): Promise<{
   quotations: SearchResult[]
 }> {
   const payload = await getPayload({ config: configPromise })
+  const currentUser = await getCurrentUser()
 
-  if (!query) {
+  if (!query || !currentUser) {
     return { leads: [], employees: [], quotations: [] }
   }
 
   // Execute searches in parallel
-  // We use try-catch blocks individually to prevent one failure from blocking others
   const searchLeads = async () => {
     try {
       const res = await payload.find({
         collection: 'leads',
         where: {
-          or: [
-            { leadId: { like: query } },
-            { 'contact.name': { like: query } },
-            { 'contact.email': { like: query } },
-            { 'contact.phone': { like: query } },
-            { status: { like: query } },
+          and: [
+            { createdBy: { equals: currentUser.id } },
+            {
+              or: [
+                { leadId: { like: query } },
+                { 'contact.name': { like: query } },
+                { 'contact.email': { like: query } },
+                { 'contact.phone': { like: query } },
+                { status: { like: query } },
+              ],
+            },
           ],
         },
         sort: '-createdAt',
@@ -67,7 +73,16 @@ export async function searchGlobal(query: string): Promise<{
       const res = await payload.find({
         collection: 'employees',
         where: {
-          or: [{ name: { like: query } }, { email: { like: query } }, { phone: { like: query } }],
+          and: [
+            { createdBy: { equals: currentUser.id } },
+            {
+              or: [
+                { name: { like: query } },
+                { email: { like: query } },
+                { phone: { like: query } },
+              ],
+            },
+          ],
         },
         sort: '-createdAt',
         limit: 5,
@@ -77,7 +92,7 @@ export async function searchGlobal(query: string): Promise<{
         type: 'employee' as const,
         title: doc.name,
         subtitle: doc.email,
-        link: `/dashboard/employees`, // Assuming list view for now, as detail view might not exist
+        link: `/dashboard/employees`,
       }))
     } catch (e) {
       console.error('Error searching employees:', e)
@@ -90,7 +105,12 @@ export async function searchGlobal(query: string): Promise<{
       const res = await payload.find({
         collection: 'quotations',
         where: {
-          or: [{ title: { like: query } }, { status: { like: query } }],
+          and: [
+            { createdBy: { equals: currentUser.id } },
+            {
+              or: [{ title: { like: query } }, { status: { like: query } }],
+            },
+          ],
         },
         sort: '-createdAt',
         limit: 5,
@@ -101,7 +121,7 @@ export async function searchGlobal(query: string): Promise<{
         title: doc.title || 'Untitled Quotation',
         subtitle: doc.grandTotal ? `Total: ${doc.grandTotal}` : undefined,
         status: doc.status,
-        link: `/dashboard/quotations`, // Assuming list view
+        link: `/dashboard/quotations`,
       }))
     } catch (e) {
       console.error('Error searching quotations:', e)

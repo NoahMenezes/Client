@@ -4,6 +4,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { getCurrentUser } from '@/app/actions/auth'
 
 export type ActionState = { success: boolean; message: string } | null
 
@@ -55,6 +56,9 @@ export async function createEmployee(prev: ActionState, fd: FormData): Promise<A
       })
     }
 
+    const currentUser = await getCurrentUser()
+    if (!currentUser) return { success: false, message: 'Unauthorized.' }
+
     await payload.create({
       collection: 'employees',
       overrideAccess: true,
@@ -66,6 +70,7 @@ export async function createEmployee(prev: ActionState, fd: FormData): Promise<A
         department: (fd.get('department') as string) || undefined,
         status: ((fd.get('status') as string) || 'active') as 'active' | 'inactive',
         notes: (fd.get('notes') as string) || undefined,
+        createdBy: currentUser.id,
       },
     })
     ok = true

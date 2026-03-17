@@ -18,7 +18,7 @@ export default async function QuotationsPage() {
   const res = await payload.find({
     collection: 'quotations',
     limit: 1000,
-    depth: 1,
+    depth: 2,
     sort: '-createdAt',
     overrideAccess: true,
     where,
@@ -28,7 +28,10 @@ export default async function QuotationsPage() {
     id: q.id,
     title: q.title,
     lead: q.lead && typeof q.lead === 'object' 
-      ? { id: q.lead.id, fullName: q.lead.contact?.name || 'Unknown' } 
+      ? { 
+          id: q.lead.id, 
+          fullName: (q.lead.contact && typeof q.lead.contact === 'object' ? q.lead.contact.name : null) || q.lead.leadId || 'Unknown' 
+        } 
       : null,
     grandTotal: q.grandTotal || 0,
     status: q.status || 'draft',

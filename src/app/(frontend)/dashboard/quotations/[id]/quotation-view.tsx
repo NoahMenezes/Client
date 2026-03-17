@@ -176,12 +176,9 @@ export default function QuotationViewContent({ quotation = DEFAULT_QUOTATION }: 
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Client</p>
-                  <Link
-                    href={`/dashboard/leads/${lead.id}`}
-                    className="font-semibold text-gray-900 hover:text-blue-600 hover:underline"
-                  >
+                  <p className="font-semibold text-gray-400">
                     {lead.fullName}
-                  </Link>
+                  </p>
                   {lead.email && (
                     <p className="text-xs text-gray-500 mt-0.5">{lead.email}</p>
                   )}
@@ -195,91 +192,112 @@ export default function QuotationViewContent({ quotation = DEFAULT_QUOTATION }: 
           )}
 
           {/* Quotation table */}
-          {categories.length === 0 ? (
-            <div className="bg-white rounded-xl border shadow-sm p-10 text-center text-gray-400">
-              <p>No line items added to this quotation yet.</p>
-              <Link href={`/dashboard/quotations/${quotation.id}/edit`} className="mt-3 inline-block">
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white mt-3">
-                  Edit Quotation
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="bg-white rounded-xl border shadow-sm overflow-hidden mb-5">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-gray-50">
-                    <th className="px-5 py-3 text-left font-semibold text-gray-600">Sr.</th>
-                    <th className="px-5 py-3 text-left font-semibold text-gray-600">Particulars</th>
-                    <th className="px-5 py-3 text-right font-semibold text-gray-600 w-32">Cost ({currencySymbol})</th>
-                    <th className="px-5 py-3 text-right font-semibold text-gray-600 w-24">Qty</th>
-                    <th className="px-5 py-3 text-right font-semibold text-gray-600 w-36">Total ({currencySymbol})</th>
-                    <th className="px-5 py-3 text-left font-semibold text-gray-600 w-40">Remarks</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {categories.map((cat, ci) => (
-                    <React.Fragment key={ci}>
-                      <tr className="bg-gray-50 border-b border-t">
-                        <td colSpan={6} className="px-5 py-2.5 font-bold text-gray-800 text-sm">
-                          {cat.categoryName}
-                        </td>
-                      </tr>
-                      {cat.items.map((item, ii) => {
-                        rowCounter += 1
-                        const itemTotal = (item.amount || 0) * (item.quantity || 1)
-                        return (
-                          <tr
-                            key={ii}
-                            className="border-b last:border-0 hover:bg-gray-50/30 transition-colors"
-                          >
-                            <td className="px-5 py-3 text-gray-400 text-xs">{rowCounter}</td>
-                            <td className="px-5 py-3 text-gray-700">{item.particulars}</td>
-                            <td className="px-5 py-3 text-right text-gray-700">
-                              {item.amount ? `${currencySymbol}${fmt(item.amount, currency)}` : '—'}
-                            </td>
-                            <td className="px-5 py-3 text-right text-gray-700">
-                              {item.quantity ?? 1}
-                            </td>
-                            <td className="px-5 py-3 text-right font-semibold text-gray-800">
-                              {currencySymbol}{fmt(itemTotal, currency)}
-                            </td>
-                            <td className="px-5 py-3 text-gray-500 text-xs">
-                              {item.remarks || '—'}
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
+          {(() => {
+            const filteredCategories = categories
+              .map((cat) => ({
+                ...cat,
+                items: cat.items.filter((item) => (item.amount || 0) !== 0),
+              }))
+              .filter((cat) => cat.items.length > 0)
 
-              {/* Totals */}
-              <div className="border-t bg-gray-50 px-5 py-4">
-                <div className="flex flex-col items-end gap-1.5 text-sm">
-                  <div className="flex items-center gap-8 w-72">
-                    <span className="text-gray-500 flex-1">Sub-Total</span>
-                    <span className="font-semibold text-gray-800 text-right">{currencySymbol}{fmt(subTotal, currency)}</span>
-                  </div>
-                  <div className="flex items-center gap-8 w-72">
-                    <span className="text-gray-500 flex-1">
-                      Agency Fees ({agencyFeePercent}%)
-                    </span>
-                    <span className="font-semibold text-gray-800 text-right">
-                      {currencySymbol}{fmt(agencyFees, currency)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-8 w-72 pt-2 border-t mt-1">
-                    <span className="font-bold text-gray-900 text-base flex-1">Grand Total</span>
-                    <span className="font-bold text-gray-900 text-xl text-right">
-                      {currencySymbol}{fmt(grandTotal, currency)}
-                    </span>
+            if (filteredCategories.length === 0) {
+              return (
+                <div className="bg-white rounded-xl border shadow-sm p-10 text-center text-gray-400">
+                  <p>No line items with a set amount in this quotation.</p>
+                  <Link href={`/dashboard/quotations/${quotation.id}/edit`} className="mt-3 inline-block">
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white mt-3">
+                      Edit Quotation
+                    </Button>
+                  </Link>
+                </div>
+              )
+            }
+
+            return (
+              <div className="bg-white rounded-xl border shadow-sm overflow-hidden mb-5">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-gray-50">
+                      <th className="px-5 py-3 text-left font-semibold text-gray-600">Sr.</th>
+                      <th className="px-5 py-3 text-left font-semibold text-gray-600">Particulars</th>
+                      <th className="px-5 py-3 text-right font-semibold text-gray-600 w-32">
+                        Cost ({currencySymbol})
+                      </th>
+                      <th className="px-5 py-3 text-right font-semibold text-gray-600 w-24">Qty</th>
+                      <th className="px-5 py-3 text-right font-semibold text-gray-600 w-36">
+                        Total ({currencySymbol})
+                      </th>
+                      <th className="px-5 py-3 text-left font-semibold text-gray-600 w-40">Remarks</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredCategories.map((cat, ci) => (
+                      <React.Fragment key={ci}>
+                        <tr className="bg-gray-50 border-b border-t">
+                          <td colSpan={6} className="px-5 py-2.5 font-bold text-gray-800 text-sm">
+                            {cat.categoryName}
+                          </td>
+                        </tr>
+                        {cat.items.map((item, ii) => {
+                          rowCounter += 1
+                          const itemTotal = (item.amount || 0) * (item.quantity || 1)
+                          return (
+                            <tr
+                              key={ii}
+                              className="border-b last:border-0 hover:bg-gray-50/30 transition-colors"
+                            >
+                              <td className="px-5 py-3 text-gray-400 text-xs">{rowCounter}</td>
+                              <td className="px-5 py-3 text-gray-700">{item.particulars}</td>
+                              <td className="px-5 py-3 text-right text-gray-700">
+                                {item.amount
+                                  ? `${currencySymbol}${fmt(item.amount, currency)}`
+                                  : '—'}
+                              </td>
+                              <td className="px-5 py-3 text-right text-gray-700">
+                                {item.quantity ?? 1}
+                              </td>
+                              <td className="px-5 py-3 text-right font-semibold text-gray-800">
+                                {currencySymbol}
+                                {fmt(itemTotal, currency)}
+                              </td>
+                              <td className="px-5 py-3 text-gray-500 text-xs">{item.remarks || '—'}</td>
+                            </tr>
+                          )
+                        })}
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+
+                {/* Totals */}
+                <div className="border-t bg-gray-50 px-5 py-4">
+                  <div className="flex flex-col items-end gap-1.5 text-sm">
+                    <div className="flex items-center gap-8 w-72">
+                      <span className="text-gray-500 flex-1">Sub-Total</span>
+                      <span className="font-semibold text-gray-800 text-right">
+                        {currencySymbol}
+                        {fmt(subTotal, currency)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-8 w-72">
+                      <span className="text-gray-500 flex-1">Agency Fees ({agencyFeePercent}%)</span>
+                      <span className="font-semibold text-gray-800 text-right">
+                        {currencySymbol}
+                        {fmt(agencyFees, currency)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-8 w-72 pt-2 border-t mt-1">
+                      <span className="font-bold text-gray-900 text-base flex-1">Grand Total</span>
+                      <span className="font-bold text-gray-900 text-xl text-right">
+                        {currencySymbol}
+                        {fmt(grandTotal, currency)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )
+          })()}
 
           {/* Notes */}
           {quotation.notes && (

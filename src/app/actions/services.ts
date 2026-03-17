@@ -4,6 +4,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { getCurrentUser } from '@/app/actions/auth'
 
 export type ActionState = { success: boolean; message: string } | null
 
@@ -18,6 +19,8 @@ export async function createService(prev: ActionState, fd: FormData): Promise<Ac
   let ok = false
   try {
     const payload = await getPayload({ config: configPromise })
+    const currentUser = await getCurrentUser()
+    if (!currentUser) return { success: false, message: 'Unauthorized' }
 
     // category field is a relationship to 'service-categories'
     // If a numeric ID is provided, use it directly; otherwise try to find or create the category
@@ -27,21 +30,29 @@ export async function createService(prev: ActionState, fd: FormData): Promise<Ac
       if (!isNaN(parsed) && parsed > 0) {
         categoryId = parsed
       } else {
-        // Try to find by name
+        // Try to find by name for THIS user
         const found = await payload.find({
           collection: 'service-categories',
-          where: { name: { equals: category.trim() } },
+          where: { 
+            and: [
+              { name: { equals: category.trim() } },
+              { createdBy: { equals: currentUser.id } }
+            ]
+          },
           limit: 1,
           overrideAccess: true,
         })
         if (found.totalDocs > 0) {
           categoryId = found.docs[0].id
         } else {
-          // Create the category
+          // Create the category for this user
           const created = await payload.create({
             collection: 'service-categories',
             overrideAccess: true,
-            data: { name: category.trim() },
+            data: { 
+              name: category.trim(),
+              createdBy: currentUser.id
+            },
           })
           categoryId = created.id
         }
@@ -57,6 +68,7 @@ export async function createService(prev: ActionState, fd: FormData): Promise<Ac
         base_price: price,
         description: (fd.get('description') as string) || undefined,
         is_active: true,
+        createdBy: currentUser.id,
       } as any,
     })
     ok = true
@@ -84,6 +96,8 @@ export async function updateService(prev: ActionState, fd: FormData): Promise<Ac
   let ok = false
   try {
     const payload = await getPayload({ config: configPromise })
+    const currentUser = await getCurrentUser()
+    if (!currentUser) return { success: false, message: 'Unauthorized' }
 
     // Resolve category relationship
     let categoryId: number | undefined
@@ -94,7 +108,12 @@ export async function updateService(prev: ActionState, fd: FormData): Promise<Ac
       } else {
         const found = await payload.find({
           collection: 'service-categories',
-          where: { name: { equals: category.trim() } },
+          where: { 
+            and: [
+              { name: { equals: category.trim() } },
+              { createdBy: { equals: currentUser.id } }
+            ]
+          },
           limit: 1,
           overrideAccess: true,
         })
@@ -104,7 +123,10 @@ export async function updateService(prev: ActionState, fd: FormData): Promise<Ac
           const created = await payload.create({
             collection: 'service-categories',
             overrideAccess: true,
-            data: { name: category.trim() },
+            data: { 
+              name: category.trim(),
+              createdBy: currentUser.id
+            },
           })
           categoryId = created.id
         }

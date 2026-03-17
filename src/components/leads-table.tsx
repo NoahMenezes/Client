@@ -101,7 +101,7 @@ export function LeadsTable({ leads, totalDocs }: { leads: Lead[]; totalDocs: num
                             View
                           </Button>
                         </Link>
-                        <Link href={`/dashboard/leads/${lead.id}/edit`}>
+                        <Link href={`/dashboard/leads/${lead.id}`}>
                           <Button variant="outline" size="sm" className="h-7 px-3 text-xs">
                             Edit
                           </Button>

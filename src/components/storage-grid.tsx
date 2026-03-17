@@ -7,7 +7,6 @@ import {
   FileText, 
   Search, 
   ChevronRight,
-  ExternalLink,
   History,
   FileBadge
 } from 'lucide-react'
@@ -118,7 +117,7 @@ export function StorageGrid({
                   <span className="text-[11px] font-semibold">{quotes.length} Items</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-blue-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-[11px]">Open Folder</span>
+                  <span className="text-[11px]">Open Lead</span>
                   <ChevronRight className="size-3.5" />
                 </div>
               </CardFooter>
@@ -143,13 +142,13 @@ export function StorageGrid({
 
       {/* Folder Detail Dialog */}
       <Dialog open={selectedLeadId !== null} onOpenChange={() => setSelectedLeadId(null)}>
-        <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-2xl sm:rounded-2xl border-none shadow-2xl">
+        <DialogContent className="max-w-6xl p-0 overflow-hidden rounded-2xl sm:rounded-2xl border-none shadow-2xl">
           <div className="bg-blue-600 p-6 text-white relative">
              <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 bg-white/20 backdrop-blur-md rounded-lg">
                   <Folder className="size-5 text-white" />
                 </div>
-                <Badge className="bg-white/20 text-white border-none hover:bg-white/30 text-[10px]">Project Directory</Badge>
+                <Badge className="bg-white/20 text-white border-none hover:bg-white/30 text-[10px] uppercase font-bold tracking-wider">Lead</Badge>
              </div>
              <DialogTitle className="text-2xl font-black tracking-tight leading-none mb-1">
                {selectedLead ? (typeof selectedLead.contact === 'object' ? selectedLead.contact.name : selectedLead.fullName) : ''}
@@ -170,10 +169,9 @@ export function StorageGrid({
                   <History className="size-3.5" />
                   Files Overview
                 </h4>
-                <Link href={`/dashboard/leads/${selectedLead?.id}`} className="text-blue-600 text-[11px] font-bold hover:underline flex items-center gap-1">
-                  View Full Profile
-                  <ExternalLink className="size-3" />
-                </Link>
+                <span className="text-gray-300 text-[11px] font-bold flex items-center gap-1 uppercase tracking-widest cursor-default">
+                  Lead Profile Locked
+                </span>
              </div>
 
              {selectedQuotes.length > 0 ? (
@@ -212,9 +210,9 @@ export function StorageGrid({
                   </div>
                   <h5 className="text-sm font-bold text-gray-900">Initial Folder</h5>
                   <p className="text-gray-400 text-xs mt-1 max-w-[200px]">No quotations have been generated for this lead yet.</p>
-                  <Link href={`/dashboard/leads/${selectedLead?.id}/quotation`}>
+                  <Link href={`/dashboard/quotations/new?leadId=${selectedLead?.id}`}>
                     <Button variant="outline" size="sm" className="mt-6 text-[10px] uppercase font-black tracking-widest border-gray-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all">
-                      Create Project File
+                      Create Lead File
                     </Button>
                   </Link>
                </div>
@@ -223,7 +221,7 @@ export function StorageGrid({
           
           <div className="p-4 bg-gray-50 border-t flex justify-end">
             <Button variant="ghost" size="sm" onClick={() => setSelectedLeadId(null)} className="text-[11px] font-black text-gray-400 uppercase hover:text-gray-900 tracking-widest">
-              Close Directory
+              Close Lead
             </Button>
           </div>
         </DialogContent>

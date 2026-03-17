@@ -17,9 +17,16 @@ export default async function QuotationViewPage({ params }: PageProps) {
     quotation = await payload.findByID({
       collection: 'quotations',
       id,
-      depth: 1,
+      depth: 2,
       overrideAccess: true,
     })
+
+    if (quotation && quotation.lead && typeof quotation.lead === 'object') {
+      const l = quotation.lead as any
+      const contactName = (l.contact && typeof l.contact === 'object') ? l.contact.name : null
+      l.fullName = contactName || l.fullName || l.leadId || 'Unknown'
+      l.email = (l.contact && typeof l.contact === 'object' ? l.contact.email : l.email) || ''
+    }
   } catch {
     notFound()
   }
