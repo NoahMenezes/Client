@@ -110,13 +110,9 @@ function getEventsForDay(events: CalendarEvent[], day: Date) {
 // ─── Month Event Bar ──────────────────────────────────────────────────────────
 // Shows name only on the FIRST day of the range, coloured bar on subsequent days
 
-function MonthEventBar({
-  event,
-  day,
-}: {
-  event: CalendarEvent
-  day: Date
-}) {
+const MAX_SLOTS = 3 // max visible event rows per day cell
+
+function MonthEventBar({ event, day }: { event: CalendarEvent; day: Date }) {
   const color = getLeadColor(event.id)
   const isFirst = isSameDay(day, parseISO(event.start))
 
@@ -161,6 +157,45 @@ function MonthView({
   const days = eachDayOfInterval({ start: calStart, end: calEnd })
   const weekHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
+  const visibleEvents = events
+    .filter((e) => {
+      try {
+        const start = parseISO(e.start)
+        const end = parseISO(e.end)
+        return !isAfter(start, calEnd) && !isBefore(end, calStart)
+      } catch {
+        return false
+      }
+    })
+    .sort((a, b) => {
+      const aStart = parseISO(a.start).getTime()
+      const bStart = parseISO(b.start).getTime()
+      if (aStart !== bStart) return aStart - bStart
+      const aLen = parseISO(a.end).getTime() - aStart
+      const bLen = parseISO(b.end).getTime() - bStart
+      return bLen - aLen
+    })
+
+  const slotMap = new Map<string | number, number>()
+  const slotEnds = new Map<number, number>()
+  visibleEvents.forEach((ev) => {
+    const start = parseISO(ev.start).getTime()
+    const end = parseISO(ev.end).getTime()
+    let slot = 0
+    while (true) {
+      const currentEnd = slotEnds.get(slot)
+      if (currentEnd === undefined || currentEnd < start) {
+        break
+      }
+      slot++
+    }
+    slotMap.set(ev.id, slot)
+    slotEnds.set(slot, end)
+  })
+
+  const maxSlot = Math.max(-1, ...Array.from(slotMap.values()))
+  const renderSlots = Math.min(maxSlot + 1, MAX_SLOTS)
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <div className="grid grid-cols-7 border-b border-gray-200">
@@ -175,11 +210,32 @@ function MonthView({
       </div>
       <div className="grid grid-cols-7 flex-1 auto-rows-fr divide-x divide-y divide-gray-100">
         {days.map((day) => {
-          const dayEvents = getEventsForDay(events, day)
           const isCurrentMonth = isSameMonth(day, current)
           const todayDay = isToday(day)
-          const visibleEvents = dayEvents.slice(0, 3)
-          const overflow = dayEvents.length - 3
+
+          // The events active on this day, keyed by their fixed slot
+          const activeBySlot = new Map<number, CalendarEvent>()
+          visibleEvents.forEach((ev) => {
+            try {
+              const start = parseISO(ev.start)
+              const end = parseISO(ev.end)
+              if (!isBefore(day, start) && !isAfter(day, end)) {
+                const slot = slotMap.get(ev.id)!
+                activeBySlot.set(slot, ev)
+              }
+            } catch {}
+          })
+
+          // Count overflow events (slot >= MAX_SLOTS and active today)
+          const overflow = visibleEvents.filter((ev) => {
+            const slot = slotMap.get(ev.id)!
+            if (slot < MAX_SLOTS) return false
+            try {
+              return !isBefore(day, parseISO(ev.start)) && !isAfter(day, parseISO(ev.end))
+            } catch {
+              return false
+            }
+          }).length
 
           return (
             <div
@@ -201,9 +257,15 @@ function MonthView({
                 {format(day, 'd')}
               </span>
               <div className="mt-0.5 flex flex-col gap-0.5">
-                {visibleEvents.map((ev) => (
-                  <MonthEventBar key={ev.id} event={ev} day={day} />
-                ))}
+                {Array.from({ length: renderSlots }, (_, slot) => {
+                  const ev = activeBySlot.get(slot)
+                  return ev ? (
+                    <MonthEventBar key={ev.id} event={ev} day={day} />
+                  ) : (
+                    // Transparent spacer — keeps the slot row reserved
+                    <div key={`empty-${slot}`} className="h-[18px] shrink-0 pointer-events-none" />
+                  )
+                })}
                 {overflow > 0 && (
                   <span className="text-[10px] text-gray-400 pl-1">+{overflow} more</span>
                 )}
@@ -231,11 +293,44 @@ function WeekView({
   const weekEnd = endOfWeek(current, { weekStartsOn: 0 })
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
 
-  const weekEvents = events.filter((e) => {
-    const start = parseISO(e.start)
-    const end = parseISO(e.end)
-    return !isBefore(end, weekStart) && !isAfter(start, weekEnd)
+  const weekEvents = events
+    .filter((e) => {
+      try {
+        const start = parseISO(e.start)
+        const end = parseISO(e.end)
+        return !isBefore(end, weekStart) && !isAfter(start, weekEnd)
+      } catch {
+        return false
+      }
+    })
+    .sort((a, b) => {
+      const aStart = parseISO(a.start).getTime()
+      const bStart = parseISO(b.start).getTime()
+      if (aStart !== bStart) return aStart - bStart
+      const aLen = parseISO(a.end).getTime() - aStart
+      const bLen = parseISO(b.end).getTime() - bStart
+      return bLen - aLen
+    })
+
+  const slotMap = new Map<string | number, number>()
+  const slotEnds = new Map<number, number>()
+  weekEvents.forEach((ev) => {
+    const start = parseISO(ev.start).getTime()
+    const end = parseISO(ev.end).getTime()
+    let slot = 0
+    while (true) {
+      const currentEnd = slotEnds.get(slot)
+      if (currentEnd === undefined || currentEnd < start) {
+        break
+      }
+      slot++
+    }
+    slotMap.set(ev.id, slot)
+    slotEnds.set(slot, end)
   })
+
+  const maxSlot = Math.max(-1, ...Array.from(slotMap.values()))
+  const totalSlots = maxSlot + 1
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
@@ -260,8 +355,12 @@ function WeekView({
         ))}
       </div>
       {/* Spanning event bars */}
-      <div className="relative border-b border-gray-200" style={{ minHeight: `${weekEvents.length * 26 + 12}px` }}>
-        {weekEvents.map((event, i) => {
+      <div
+        className="relative border-b border-gray-200"
+        style={{ minHeight: `${totalSlots * 26 + 12}px` }}
+      >
+        {weekEvents.map((event) => {
+          const slot = slotMap.get(event.id)!
           const start = parseISO(event.start)
           const end = parseISO(event.end)
           const eventStart = max([start, weekStart])
@@ -280,7 +379,7 @@ function WeekView({
                 style={{
                   left,
                   width,
-                  top: `${i * 24 + 8}px`,
+                  top: `${slot * 26 + 8}px`,
                   height: '20px',
                   backgroundColor: color.bg,
                   color: color.text,
@@ -360,7 +459,9 @@ function DayView({ current, events }: { current: Date; events: CalendarEvent[] }
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <p className="font-semibold text-sm text-gray-900">{ev.title}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">{ev.leadId ?? `Lead #${ev.id}`}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {ev.leadId ?? `Lead #${ev.id}`}
+                        </p>
                         <div className="flex flex-wrap gap-x-3 mt-1.5 text-xs text-gray-500">
                           <span>Check-in: {format(checkIn, 'dd MMM yyyy')}</span>
                           <span>Check-out: {format(checkOut, 'dd MMM yyyy')}</span>
