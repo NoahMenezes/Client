@@ -28,7 +28,7 @@ export default function AddEmployeeForm() {
                 {state.message}
               </div>
             )}
-            <form action={action} className="space-y-5">
+            <form action={action} className="space-y-5" autoComplete="off">
               {/* Full Name */}
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-blue-600 font-medium">
@@ -41,6 +41,7 @@ export default function AddEmployeeForm() {
                   required
                   disabled={isPending}
                   className="bg-gray-50/50"
+                  autoComplete="off"
                 />
               </div>
 
@@ -58,6 +59,7 @@ export default function AddEmployeeForm() {
                     required
                     disabled={isPending}
                     className="bg-gray-50/50"
+                    autoComplete="off"
                   />
                 </div>
                 <div className="space-y-2">
@@ -74,21 +76,8 @@ export default function AddEmployeeForm() {
                 </div>
               </div>
 
-              {/* Password */}
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-blue-600 font-medium">
-                  Password <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  required
-                  disabled={isPending}
-                  className="bg-gray-50/50"
-                />
-              </div>
+              {/* Hidden password to satisfy backend requirement */}
+              <input type="hidden" name="password" value="Employee@123!" />
 
               {/* Role + Department */}
               <div className="grid grid-cols-2 gap-4">
