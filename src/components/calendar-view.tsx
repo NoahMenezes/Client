@@ -263,7 +263,7 @@ function MonthView({
                     <MonthEventBar key={ev.id} event={ev} day={day} />
                   ) : (
                     // Transparent spacer — keeps the slot row reserved
-                    <div key={`empty-${slot}`} className="h-[18px] shrink-0 pointer-events-none" />
+                    <div key={`empty-${slot}`} className="h-4.5 shrink-0 pointer-events-none" />
                   )
                 })}
                 {overflow > 0 && (
@@ -635,7 +635,7 @@ export default function CalendarView({ events }: { events: CalendarEvent[] }) {
           return (
             <div key={ev.id} className="flex items-center gap-1.5 text-xs text-gray-600">
               <span
-                className="h-2.5 w-2.5 rounded-sm flex-shrink-0"
+                className="h-2.5 w-2.5 rounded-sm shrink-0"
                 style={{ backgroundColor: color.bg }}
               />
               <span className="truncate max-w-28">{ev.title}</span>
