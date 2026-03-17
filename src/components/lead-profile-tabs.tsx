@@ -810,7 +810,6 @@ export default function LeadProfileTabs({
                     </tbody>
                   </table>
                 </div>
-
                 {/* Quotation Pagination */}
                 {quoteTotalPages > 1 && (
                   <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t pt-6 px-4">
@@ -831,11 +830,11 @@ export default function LeadProfileTabs({
                           </PaginationItem>
                         )}
 
-                        {Array.from({ length: quoteTotalPages }, (_, i) => i + 1).map((p) => {
+                        {[...Array(quoteTotalPages)].map((_, i) => i + 1).map((p) => {
                           const isFirst = p === 1
                           const isLast = p === quoteTotalPages
                           const isWithinRange = Math.abs(p - quoteCurrentPage) <= 1
-
+ 
                           if (isFirst || isLast || isWithinRange) {
                             return (
                               <PaginationItem key={p}>
@@ -848,7 +847,7 @@ export default function LeadProfileTabs({
                               </PaginationItem>
                             )
                           }
-
+ 
                           if (p === quoteCurrentPage - 2 || p === quoteCurrentPage + 2) {
                             return (
                               <PaginationItem key={p}>
@@ -856,7 +855,7 @@ export default function LeadProfileTabs({
                               </PaginationItem>
                             )
                           }
-
+ 
                           return null
                         })}
 
