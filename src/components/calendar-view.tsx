@@ -44,51 +44,37 @@ export interface CalendarEvent {
 
 // ─── Per-lead color palette (rich, distinct colors like image 2) ──────────────
 
-const LEAD_COLORS = [
-  { bg: '#3b5bdb', text: '#ffffff' }, // indigo
-  { bg: '#1098ad', text: '#ffffff' }, // teal
-  { bg: '#7048e8', text: '#ffffff' }, // violet
-  { bg: '#c2255c', text: '#ffffff' }, // pink
-  { bg: '#2f9e44', text: '#ffffff' }, // green
-  { bg: '#e8590c', text: '#ffffff' }, // orange
-  { bg: '#5c7cfa', text: '#ffffff' }, // blue
-  { bg: '#a61e4d', text: '#ffffff' }, // dark pink
-  { bg: '#0c8599', text: '#ffffff' }, // cyan
-  { bg: '#862e9c', text: '#ffffff' }, // purple
-  { bg: '#5f3dc4', text: '#ffffff' }, // deep violet
-  { bg: '#087f5b', text: '#ffffff' }, // dark teal
-]
-
-/** Assign a stable color to each event by its id. */
-function getLeadColor(eventId: string | number): { bg: string; text: string } {
-  const ids = String(eventId)
-  let hash = 0
-  for (let i = 0; i < ids.length; i++) {
-    hash = (hash * 31 + ids.charCodeAt(i)) & 0xffffffff
+function getLeadColor(status: string): { bg: string; text: string } {
+  switch (status) {
+    case 'opportunity':
+      return { bg: '#4169E1', text: '#ffffff' } // Royal Blue
+    case 'prospect':
+      return { bg: '#F28500', text: '#ffffff' } // Tangerine Orange
+    case 'won':
+      return { bg: '#50C878', text: '#ffffff' } // Emerald Green
+    default:
+      return { bg: '#6b7280', text: '#ffffff' } // Gray
   }
-  return LEAD_COLORS[Math.abs(hash) % LEAD_COLORS.length]
 }
 
 // ─── Status info (for legend + detail badges only) ────────────────────────────
 
 const statusBadge: Record<string, string> = {
-  new: 'bg-blue-100 text-blue-700',
-  contacted: 'bg-yellow-100 text-yellow-700',
-  proposal_sent: 'bg-orange-100 text-orange-700',
-  negotiation: 'bg-purple-100 text-purple-700',
-  confirmed: 'bg-green-100 text-green-700',
-  closed: 'bg-gray-100 text-gray-700',
-  cancelled: 'bg-red-100 text-red-700',
+  opportunity: 'bg-blue-100 text-blue-700',
+  prospect: 'bg-orange-100 text-orange-700',
+  won: 'bg-green-100 text-green-700',
+  no_response: 'bg-red-100 text-red-700',
+  disqualified: 'bg-red-100 text-red-700',
+  lost_prospect: 'bg-red-100 text-red-700',
 }
 
 const statusLabels: Record<string, string> = {
-  new: 'New',
-  contacted: 'Contacted',
-  proposal_sent: 'Proposal Sent',
-  negotiation: 'Negotiation',
-  confirmed: 'Confirmed',
-  closed: 'Closed',
-  cancelled: 'Cancelled',
+  opportunity: 'Opportunity',
+  prospect: 'Prospect',
+  won: 'Won',
+  no_response: 'No Response',
+  disqualified: 'Disqualified',
+  lost_prospect: 'Lost Prospect',
 }
 
 type ViewMode = 'month' | 'week' | 'day'
@@ -113,7 +99,7 @@ function getEventsForDay(events: CalendarEvent[], day: Date) {
 const MAX_SLOTS = 3 // max visible event rows per day cell
 
 function MonthEventBar({ event, day }: { event: CalendarEvent; day: Date }) {
-  const color = getLeadColor(event.id)
+          const color = getLeadColor(event.status)
   const isTargetDay = event.weddingDate
     ? isSameDay(day, parseISO(event.weddingDate))
     : isSameDay(day, parseISO(event.start))
@@ -371,7 +357,7 @@ function WeekView({
           const span = differenceInDays(eventEnd, eventStart) + 1
           const left = (startCol / 7) * 100 + '%'
           const width = (span / 7) * 100 + '%'
-          const color = getLeadColor(event.id)
+                  const color = getLeadColor(event.status)
           const isFirst = isSameDay(eventStart, start)
 
           return (
@@ -450,7 +436,7 @@ function DayView({ current, events }: { current: Date; events: CalendarEvent[] }
             const checkIn = parseISO(ev.start)
             const checkOut = parseISO(ev.end)
             const wedding = ev.weddingDate ? parseISO(ev.weddingDate) : null
-            const color = getLeadColor(ev.id)
+          const color = getLeadColor(ev.status)
             return (
               <Link key={ev.id} href={`/dashboard/leads/${ev.id}`}>
                 <Card
@@ -511,7 +497,7 @@ function DaySummary({ day, events }: { day: Date; events: CalendarEvent[] }) {
             const checkIn = parseISO(ev.start)
             const checkOut = parseISO(ev.end)
             const wedding = ev.weddingDate ? parseISO(ev.weddingDate) : null
-            const color = getLeadColor(ev.id)
+          const color = getLeadColor(ev.status)
             return (
               <Link key={ev.id} href={`/dashboard/leads/${ev.id}`}>
                 <div
@@ -629,24 +615,22 @@ export default function CalendarView({ events }: { events: CalendarEvent[] }) {
         {view !== 'day' && <DaySummary day={selectedDay} events={events} />}
       </div>
 
-      {/* Legend – show unique leads with their colors */}
+      {/* Legend – show colors by status */}
       <div className="flex items-center gap-4 px-4 py-2.5 border-t border-gray-100 bg-gray-50/60 shrink-0 flex-wrap">
-        <span className="text-xs text-gray-400 font-medium mr-1">Leads:</span>
-        {events.slice(0, 8).map((ev) => {
-          const color = getLeadColor(ev.id)
-          return (
-            <div key={ev.id} className="flex items-center gap-1.5 text-xs text-gray-600">
-              <span
-                className="h-2.5 w-2.5 rounded-sm shrink-0"
-                style={{ backgroundColor: color.bg }}
-              />
-              <span className="truncate max-w-28">{ev.title}</span>
-            </div>
-          )
-        })}
-        {events.length > 8 && (
-          <span className="text-xs text-gray-400">+{events.length - 8} more</span>
-        )}
+        <span className="text-xs text-gray-400 font-medium mr-1">Status:</span>
+        {[
+          { label: 'Opportunity', bg: '#4169E1' },
+          { label: 'Prospect', bg: '#F28500' },
+          { label: 'Won', bg: '#50C878' }
+        ].map((status) => (
+          <div key={status.label} className="flex items-center gap-1.5 text-xs text-gray-600">
+            <span
+              className="h-2.5 w-2.5 rounded-sm shrink-0"
+              style={{ backgroundColor: status.bg }}
+            />
+            <span className="truncate max-w-28">{status.label}</span>
+          </div>
+        ))}
       </div>
     </div>
   )

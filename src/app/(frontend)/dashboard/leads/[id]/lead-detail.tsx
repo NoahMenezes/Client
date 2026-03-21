@@ -48,19 +48,21 @@ interface Props {
 // ─── Status config ───────────────────────────────────────────────────────────
 
 const STATUS_STYLES: Record<string, string> = {
-  opportunity: 'bg-orange-100 text-orange-700',
-  prospect: 'bg-yellow-100 text-yellow-700',
+  opportunity: 'bg-blue-100 text-blue-700',
+  prospect: 'bg-orange-100 text-orange-700',
   won: 'bg-green-100 text-green-700',
-  lost: 'bg-red-100 text-red-700',
-  'in-progress': 'bg-blue-100 text-blue-700',
+  no_response: 'bg-red-100 text-red-700',
+  disqualified: 'bg-red-100 text-red-700',
+  lost_prospect: 'bg-red-100 text-red-700',
 }
 
 const STATUS_LABELS: Record<string, string> = {
   opportunity: 'Opportunity',
   prospect: 'Prospect',
   won: 'Won',
-  lost: 'Lost',
-  'in-progress': 'In Progress',
+  no_response: 'No Response',
+  disqualified: 'Disqualified',
+  lost_prospect: 'Lost Prospect',
 }
 
 const QUOTATION_STATUS_STYLES: Record<string, string> = {

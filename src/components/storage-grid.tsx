@@ -27,23 +27,21 @@ import {
 } from "@/components/ui/dialog"
 
 const statusStyles: Record<string, string> = {
-  new: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
-  contacted: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100',
-  proposal_sent: 'bg-orange-100 text-orange-700 hover:bg-orange-100',
-  negotiation: 'bg-purple-100 text-purple-700 hover:bg-purple-100',
-  confirmed: 'bg-green-100 text-green-700 hover:bg-green-100',
-  closed: 'bg-gray-100 text-gray-700 hover:bg-gray-100',
-  cancelled: 'bg-red-100 text-red-700 hover:bg-red-100',
+  opportunity: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
+  prospect: 'bg-orange-100 text-orange-700 hover:bg-orange-100',
+  won: 'bg-green-100 text-green-700 hover:bg-green-100',
+  no_response: 'bg-red-100 text-red-700 hover:bg-red-100',
+  disqualified: 'bg-red-100 text-red-700 hover:bg-red-100',
+  lost_prospect: 'bg-red-100 text-red-700 hover:bg-red-100',
 }
 
 const statusLabels: Record<string, string> = {
-  new: 'New',
-  contacted: 'Contacted',
-  proposal_sent: 'Proposal Sent',
-  negotiation: 'Negotiation',
-  confirmed: 'Confirmed',
-  closed: 'Closed',
-  cancelled: 'Cancelled',
+  opportunity: 'Opportunity',
+  prospect: 'Prospect',
+  won: 'Won',
+  no_response: 'No Response',
+  disqualified: 'Disqualified',
+  lost_prospect: 'Lost Prospect',
 }
 
 
@@ -163,7 +161,7 @@ export function StorageGrid({
              <Folder className="absolute -bottom-6 -right-6 size-32 text-white opacity-5 rotate-12 pointer-events-none" />
           </div>
 
-          <div className="p-6 bg-white min-h-[400px]">
+          <div className="p-6 bg-white min-h-100">
              <div className="flex items-center justify-between mb-6">
                 <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
                   <History className="size-3.5" />
@@ -209,7 +207,7 @@ export function StorageGrid({
                     <FileBadge className="size-8 text-gray-300" />
                   </div>
                   <h5 className="text-sm font-bold text-gray-900">Initial Folder</h5>
-                  <p className="text-gray-400 text-xs mt-1 max-w-[200px]">No quotations have been generated for this lead yet.</p>
+                  <p className="text-gray-400 text-xs mt-1 max-w-50">No quotations have been generated for this lead yet.</p>
                   <Link href={`/dashboard/quotations/new?leadId=${selectedLead?.id}`}>
                     <Button variant="outline" size="sm" className="mt-6 text-[10px] uppercase font-black tracking-widest border-gray-200 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all">
                       Create Lead File

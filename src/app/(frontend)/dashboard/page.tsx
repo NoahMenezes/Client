@@ -59,14 +59,8 @@ export default async function DashboardPage({
     payload.find({
       collection: 'leads',
       limit: 0,
-      where: baseWhere,
-      overrideAccess: true,
-    }),
-    payload.find({
-      collection: 'leads',
-      limit: 0,
       where: {
-        and: [{ status: { equals: 'new' } }, baseWhere],
+        and: [{ status: { in: ['opportunity', 'prospect'] } }, baseWhere],
       },
       overrideAccess: true,
     }),
@@ -74,7 +68,7 @@ export default async function DashboardPage({
       collection: 'leads',
       limit: 0,
       where: {
-        and: [{ status: { equals: 'contacted' } }, baseWhere],
+        and: [{ status: { equals: 'opportunity' } }, baseWhere],
       },
       overrideAccess: true,
     }),
@@ -82,7 +76,15 @@ export default async function DashboardPage({
       collection: 'leads',
       limit: 0,
       where: {
-        and: [{ status: { equals: 'confirmed' } }, baseWhere],
+        and: [{ status: { equals: 'prospect' } }, baseWhere],
+      },
+      overrideAccess: true,
+    }),
+    payload.find({
+      collection: 'leads',
+      limit: 0,
+      where: {
+        and: [{ status: { equals: 'won' } }, baseWhere],
       },
       overrideAccess: true,
     }),
@@ -118,7 +120,7 @@ export default async function DashboardPage({
     fullName: typeof d.contact === 'object' && d.contact ? (d.contact as any).name : 'Unknown',
     email: typeof d.contact === 'object' && d.contact ? (d.contact as any).email : '',
     phone: typeof d.contact === 'object' && d.contact ? (d.contact as any).phone : null,
-    status: d.status ?? 'new',
+    status: d.status ?? 'opportunity',
     checkInDate: d.checkInDate ?? null,
     checkOutDate: d.checkOutDate ?? null,
   }))
@@ -137,7 +139,6 @@ export default async function DashboardPage({
               totalLeads={totalLeads}
               opportunityCount={opportunityCount}
               prospectCount={prospectCount}
-              wonCount={wonCount}
             />
             <div className="px-4 lg:px-6">
               <LeadsTable leads={leads} totalDocs={totalDocs} />

@@ -11,13 +11,12 @@ import { DeleteLeadButton } from '@/components/delete-lead-button'
 import LeadProfileTabs from '@/components/lead-profile-tabs'
 
 const statusLabels: Record<string, string> = {
-  new: 'New',
-  contacted: 'Contacted',
-  proposal_sent: 'Proposal Sent',
-  negotiation: 'Negotiation',
-  confirmed: 'Confirmed',
-  closed: 'Closed',
-  cancelled: 'Cancelled',
+  opportunity: 'Opportunity',
+  prospect: 'Prospect',
+  won: 'Won',
+  no_response: 'No Response',
+  disqualified: 'Disqualified',
+  lost_prospect: 'Lost Prospect',
 }
 
 export const dynamic = 'force-dynamic'
@@ -121,7 +120,7 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
     fullName,
     email,
     phone,
-    status: lead.status || 'new',
+    status: lead.status || 'opportunity',
     checkInDate: lead.checkInDate || null,
     checkOutDate: lead.checkOutDate || null,
     weddingDate: lead.weddingDate || null,
@@ -276,29 +275,25 @@ export default async function LeadDetailPage({ params, searchParams }: PageProps
                     <div className="flex items-center gap-2">
                       <div
                         className={`h-1.5 w-full rounded-full ${
-                          serializedLead.status === 'confirmed'
+                          serializedLead.status === 'won'
                             ? 'bg-green-400'
-                            : serializedLead.status === 'closed' ||
-                                serializedLead.status === 'cancelled'
+                            : ['no_response', 'disqualified', 'lost_prospect'].includes(serializedLead.status)
                               ? 'bg-red-400'
-                              : serializedLead.status === 'new' ||
-                                  serializedLead.status === 'contacted'
+                              : serializedLead.status === 'opportunity'
                                 ? 'bg-blue-400'
-                                : 'bg-yellow-400'
+                                : 'bg-orange-400'
                         }`}
                       />
                     </div>
                     <p
                       className={`text-xs font-semibold mt-1 ${
-                        serializedLead.status === 'confirmed'
+                        serializedLead.status === 'won'
                           ? 'text-green-600'
-                          : serializedLead.status === 'closed' ||
-                              serializedLead.status === 'cancelled'
+                          : ['no_response', 'disqualified', 'lost_prospect'].includes(serializedLead.status)
                             ? 'text-red-500'
-                            : serializedLead.status === 'new' ||
-                                serializedLead.status === 'contacted'
+                            : serializedLead.status === 'opportunity'
                               ? 'text-blue-600'
-                              : 'text-yellow-600'
+                              : 'text-orange-600'
                       }`}
                     >
                       {statusLabels[serializedLead.status] || serializedLead.status}

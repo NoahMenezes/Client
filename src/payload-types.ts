@@ -201,7 +201,7 @@ export interface Lead {
    */
   leadId?: string | null;
   contact: number | Contact;
-  status: 'new' | 'contacted' | 'proposal_sent' | 'negotiation' | 'confirmed' | 'closed' | 'cancelled';
+  status: 'opportunity' | 'prospect' | 'won' | 'no_response' | 'disqualified' | 'lost_prospect';
   assignedTo?: (number | null) | User;
   /**
    * The user account that created this lead

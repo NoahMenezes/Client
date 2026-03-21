@@ -22,51 +22,49 @@ import { DeleteLeadButton } from '@/components/delete-lead-button'
 const PAGE_LIMIT = 10
 
 const statusStyles: Record<string, string> = {
-  new: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
-  contacted: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100',
-  proposal_sent: 'bg-orange-100 text-orange-700 hover:bg-orange-100',
-  negotiation: 'bg-purple-100 text-purple-700 hover:bg-purple-100',
-  confirmed: 'bg-green-100 text-green-700 hover:bg-green-100',
-  closed: 'bg-gray-100 text-gray-700 hover:bg-gray-100',
-  cancelled: 'bg-red-100 text-red-700 hover:bg-red-100',
+  opportunity: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
+  prospect: 'bg-orange-100 text-orange-700 hover:bg-orange-100',
+  won: 'bg-green-100 text-green-700 hover:bg-green-100',
+  no_response: 'bg-red-100 text-red-700 hover:bg-red-100',
+  disqualified: 'bg-red-100 text-red-700 hover:bg-red-100',
+  lost_prospect: 'bg-red-100 text-red-700 hover:bg-red-100',
 }
 
 const statusLabels: Record<string, string> = {
-  new: 'New',
-  contacted: 'Contacted',
-  proposal_sent: 'Proposal Sent',
-  negotiation: 'Negotiation',
-  confirmed: 'Confirmed',
-  closed: 'Closed',
-  cancelled: 'Cancelled',
+  opportunity: 'Opportunity',
+  prospect: 'Prospect',
+  won: 'Won',
+  no_response: 'No Response',
+  disqualified: 'Disqualified',
+  lost_prospect: 'Lost Prospect',
 }
 
 const statusCategories = [
   {
-    value: 'new',
-    label: 'New',
-    description: 'Fresh leads from Google Form or manual entry.',
-    visibility: 'Visible in Pipeline',
+    value: 'opportunity',
+    label: 'Opportunity',
+    description: 'Active lead opportunity.',
+    visibility: 'Visible in Pipeline & Calendar',
     visibilityClass: 'text-blue-600',
     iconBg: 'bg-blue-100',
     iconColor: 'text-blue-600',
     icon: '★',
   },
   {
-    value: 'contacted',
-    label: 'Contacted',
-    description: 'Initial contact made with the lead.',
-    visibility: 'Visible in Pipeline',
-    visibilityClass: 'text-yellow-600',
-    iconBg: 'bg-yellow-100',
-    iconColor: 'text-yellow-600',
+    value: 'prospect',
+    label: 'Prospect',
+    description: 'Advanced prospect.',
+    visibility: 'Visible in Pipeline & Calendar',
+    visibilityClass: 'text-orange-600',
+    iconBg: 'bg-orange-100',
+    iconColor: 'text-orange-600',
     icon: '📞',
   },
   {
-    value: 'confirmed',
-    label: 'Confirmed',
+    value: 'won',
+    label: 'Won',
     description: 'Wedding confirmed and booked.',
-    visibility: 'Visible in Pipeline & Calendar',
+    visibility: 'Visible in Calendar',
     visibilityClass: 'text-green-600',
     iconBg: 'bg-green-100',
     iconColor: 'text-green-600',
@@ -75,11 +73,13 @@ const statusCategories = [
 ]
 
 interface Props {
-  searchParams: Promise<{ page?: string }>
+  searchParams: Promise<{ page?: string; section?: string }>
 }
 
 export default async function LeadsPage({ searchParams }: Props) {
-  const { page = '1' } = await searchParams
+  const search = await searchParams
+  const page = search.page || '1'
+  const section = search.section || 'active'
 
   const currentPage = Math.max(1, parseInt(page, 10) || 1)
 
@@ -95,9 +95,14 @@ export default async function LeadsPage({ searchParams }: Props) {
       redirect('/login')
     }
 
+    const statusFilter =
+      section === 'won' ? ['won']
+      : section === 'closed' ? ['no_response', 'disqualified', 'lost_prospect']
+      : ['opportunity', 'prospect']
+
     const where: Record<string, any> = {
       createdBy: { equals: currentUser.id },
-      status: { in: ['new', 'contacted', 'proposal_sent', 'negotiation', 'confirmed'] },
+      status: { in: statusFilter },
     }
 
     const res = await payload.find({
@@ -116,7 +121,7 @@ export default async function LeadsPage({ searchParams }: Props) {
       fullName: d.contact?.name ?? 'Unknown',
       email: d.contact?.email ?? '',
       phone: d.contact?.phone ?? null,
-      status: d.status ?? 'new',
+      status: d.status ?? 'opportunity',
       checkInDate: d.checkInDate ?? null,
       checkOutDate: d.checkOutDate ?? null,
       weddingDate: d.weddingDate ?? null,
@@ -132,6 +137,7 @@ export default async function LeadsPage({ searchParams }: Props) {
   function paginationHref(p: number) {
     const params = new URLSearchParams()
     params.set('page', String(p))
+    params.set('section', section)
     return `/dashboard/leads?${params.toString()}`
   }
 
@@ -193,8 +199,27 @@ export default async function LeadsPage({ searchParams }: Props) {
 
         {/* Leads Table */}
         <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold text-gray-800">Active Leads</h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 border-b border-gray-100 pb-3">
+            <div className="flex gap-6">
+              <Link 
+                href="/dashboard/leads?section=active" 
+                className={`text-base font-semibold pb-3 -mb-3.5 transition-colors ${section === 'active' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-400 hover:text-gray-700'}`}
+              >
+                Active Leads
+              </Link>
+              <Link 
+                href="/dashboard/leads?section=won" 
+                className={`text-base font-semibold pb-3 -mb-3.5 transition-colors ${section === 'won' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-400 hover:text-gray-700'}`}
+              >
+                Won Leads
+              </Link>
+              <Link 
+                href="/dashboard/leads?section=closed" 
+                className={`text-base font-semibold pb-3 -mb-3.5 transition-colors ${section === 'closed' ? 'text-gray-800 border-b-2 border-gray-800' : 'text-gray-400 hover:text-gray-700'}`}
+              >
+                Closed Leads
+              </Link>
+            </div>
             <span className="text-xs text-gray-400">
               {totalDocs} total lead{totalDocs !== 1 ? 's' : ''}
             </span>

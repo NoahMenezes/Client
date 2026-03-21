@@ -268,8 +268,12 @@ function Stage1({
             onChange={onChange}
             error={!!errors.status}
           >
-            <option value="confirmed">Confirmed</option>
-            <option value="closed">Closed</option>
+            <option value="opportunity">Opportunity</option>
+            <option value="prospect">Prospect</option>
+            <option value="won">Won</option>
+            <option value="no_response">No Response</option>
+            <option value="disqualified">Disqualified</option>
+            <option value="lost_prospect">Lost Prospect</option>
           </SelectField>
         </div>
       </div>
@@ -576,7 +580,7 @@ export default function AddLeadPage() {
     fullName: '',
     email: '',
     phone: '',
-    status: 'confirmed',
+    status: 'opportunity',
     referralSource: '',
     budget: '',
     budgetText: '',

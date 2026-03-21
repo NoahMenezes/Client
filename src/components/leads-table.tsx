@@ -20,23 +20,21 @@ interface Lead {
 }
 
 const statusStyles: Record<string, string> = {
-  new: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
-  contacted: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100',
-  proposal_sent: 'bg-orange-100 text-orange-700 hover:bg-orange-100',
-  negotiation: 'bg-purple-100 text-purple-700 hover:bg-purple-100',
-  confirmed: 'bg-green-100 text-green-700 hover:bg-green-100',
-  closed: 'bg-gray-100 text-gray-700 hover:bg-gray-100',
-  cancelled: 'bg-red-100 text-red-700 hover:bg-red-100',
+  opportunity: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
+  prospect: 'bg-orange-100 text-orange-700 hover:bg-orange-100',
+  won: 'bg-green-100 text-green-700 hover:bg-green-100',
+  no_response: 'bg-red-100 text-red-700 hover:bg-red-100',
+  disqualified: 'bg-red-100 text-red-700 hover:bg-red-100',
+  lost_prospect: 'bg-red-100 text-red-700 hover:bg-red-100',
 }
 
 const statusLabels: Record<string, string> = {
-  new: 'New',
-  contacted: 'Contacted',
-  proposal_sent: 'Proposal Sent',
-  negotiation: 'Negotiation',
-  confirmed: 'Confirmed',
-  closed: 'Closed',
-  cancelled: 'Cancelled',
+  opportunity: 'Opportunity',
+  prospect: 'Prospect',
+  won: 'Won',
+  no_response: 'No Response',
+  disqualified: 'Disqualified',
+  lost_prospect: 'Lost Prospect',
 }
 
 export function LeadsTable({ leads, totalDocs }: { leads: Lead[]; totalDocs: number }) {

@@ -28,8 +28,12 @@ export default async function CalendarPage() {
 
         const name = lead.contact?.name ?? 'Unknown'
         const leadId = lead.leadId ?? null
-        const status = lead.status ?? 'new'
+        const status = lead.status ?? 'opportunity'
         const id = lead.id
+
+        if (['no_response', 'disqualified', 'lost_prospect'].includes(status)) {
+           return null
+        }
 
         return {
           id,
