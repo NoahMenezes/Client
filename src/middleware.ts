@@ -19,10 +19,13 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // If already authenticated and visiting /login or /signup, redirect to dashboard
+  // If already authenticated and visiting /login or /signup, continue to the requested page
+  // (Disabled automatic redirect to dashboard to ensure app opens on /login as requested)
+  /*
   if ((pathname === '/login' || pathname === '/signup') && token) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
+  */
 
   return NextResponse.next()
 }

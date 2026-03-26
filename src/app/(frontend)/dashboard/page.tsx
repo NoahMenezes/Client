@@ -139,6 +139,7 @@ export default async function DashboardPage({
               totalLeads={totalLeads}
               opportunityCount={opportunityCount}
               prospectCount={prospectCount}
+              wonCount={wonCount}
             />
             <div className="px-4 lg:px-6">
               <LeadsTable leads={leads} totalDocs={totalDocs} />
