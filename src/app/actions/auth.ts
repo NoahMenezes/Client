@@ -39,6 +39,9 @@ export async function loginUser(prevState: AuthState, formData: FormData): Promi
   }
 
   try {
+    // Diagnostic log (safely check for env presence, don't log the actual secret)
+    console.log('[loginUser] Starting login. PAYLOAD_SECRET present:', !!process.env.PAYLOAD_SECRET, 'DATABASE_URL present:', !!process.env.DATABASE_URL)
+    
     const payload = await getPayload({ config: configPromise })
 
     const result = await payload.login({
@@ -54,7 +57,7 @@ export async function loginUser(prevState: AuthState, formData: FormData): Promi
       return { success: false, message: 'Login failed. Please try again.' }
     }
   } catch (error: unknown) {
-    console.error('[loginUser] error:', error)
+    console.error('[loginUser] Detailed error:', error)
     const msg = error instanceof Error ? error.message : String(error)
 
     if (
@@ -65,7 +68,13 @@ export async function loginUser(prevState: AuthState, formData: FormData): Promi
       return { success: false, message: 'Incorrect email or password. Please try again.' }
     }
 
-    return { success: false, message: 'Something went wrong. Please try again.' }
+    // Return the actual error message in development or if it's a database connection error
+    return { 
+      success: false, 
+      message: msg.includes('database') || msg.includes('connect') 
+        ? `Database error: ${msg}` 
+        : 'Something went wrong. Please try again.' 
+    }
   }
 
   redirect('/dashboard')
@@ -135,14 +144,19 @@ export async function registerUser(prevState: AuthState, formData: FormData): Pr
       return { success: false, message: 'Registration failed. Please try again.' }
     }
   } catch (error: unknown) {
-    console.error('[registerUser] error:', error)
+    console.error('[registerUser] Detailed error:', error)
     const msg = error instanceof Error ? error.message : String(error)
 
     if (msg.toLowerCase().includes('duplicate') || msg.toLowerCase().includes('unique')) {
       return { success: false, message: 'An account with this email already exists.' }
     }
 
-    return { success: false, message: 'Something went wrong. Please try again.' }
+    return { 
+      success: false, 
+      message: msg.includes('database') || msg.includes('connect') 
+        ? `Database error: ${msg}` 
+        : 'Something went wrong. Please try again.' 
+    }
   }
 
   redirect('/dashboard')
